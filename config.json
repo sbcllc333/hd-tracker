@@ -1,0 +1,15 @@
+{
+  "searches": ["power tools"],
+  "pages_per_search": 1,
+  "double_check_limit": 3,
+  "stores": [
+    {"id": "6318", "name": "San Jose Blvd",        "on": true},
+    {"id": "0226", "name": "Southside Blvd",       "on": true},
+    {"id": "0272", "name": "Regency Square",       "on": true},
+    {"id": "6365", "name": "Atlantic & Girvin",    "on": true},
+    {"id": "6346", "name": "Lane Ave",             "on": true},
+    {"id": "6351", "name": "North Jax (Lem Turner)", "on": true},
+    {"id": "6890", "name": "Oakleaf (Crosshill)",  "on": true},
+    {"id": "6974", "name": "Jacksonville Beach",   "on": true}
+  ]
+}
