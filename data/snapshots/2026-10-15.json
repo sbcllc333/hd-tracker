@@ -43,17 +43,6 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-40-Gal-Medium-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE40M06ST45U1/326434008",
   "search": "plumbing"
  },
- "0275:326590448": {
-  "pid": "326590448",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "Performance 50 Gal. Tall 4500-Watt Double Element Electric Water Heater with  6-Year Warranty",
-  "brand": "Rheem",
-  "model": "XE50T06ST45U1",
-  "price": 599.0,
-  "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Tall-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50T06ST45U1/326590448",
-  "search": "plumbing"
- },
  "0275:326434092": {
   "pid": "326434092",
   "store": "Orange Park (Wells Rd)",
@@ -65,6 +54,17 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Medium-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50M06ST45U1/326434092",
   "search": "plumbing"
  },
+ "0275:326590448": {
+  "pid": "326590448",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Performance 50 Gal. Tall 4500-Watt Double Element Electric Water Heater with  6-Year Warranty",
+  "brand": "Rheem",
+  "model": "XE50T06ST45U1",
+  "price": 599.0,
+  "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Tall-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50T06ST45U1/326590448",
+  "search": "plumbing"
+ },
  "0275:342866227": {
   "pid": "342866227",
   "store": "Orange Park (Wells Rd)",
@@ -72,7 +72,7 @@
   "title": "Instant Hot/Cold Water Dispenser with Filtration, Invite HOT150 Faucet, Badger 500 Garbage Disposal",
   "brand": "InSinkErator",
   "model": "",
-  "price": 501.62,
+  "price": 575.99,
   "link": "https://apionline.homedepot.com/p/sets/InSinkErator-Instant-Hot-Cold-Water-Dispenser-with-Filtration-Invite-HOT150-Faucet-Badger-500-Garbage-Disposal/342866227",
   "search": "plumbing"
  },
@@ -87,17 +87,6 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-38-Gal-Short-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE38S06ST45U1/326590457",
   "search": "plumbing"
  },
- "0275:320557771": {
-  "pid": "320557771",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "M12 12-Volt Lithium-Ion FORCE LOGIC Press Tool Kit w/ CTS Copper Jaws w/ ONE-KEY",
-  "brand": "Milwaukee",
-  "model": "2573-22",
-  "price": 2449.0,
-  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-12-Volt-Lithium-Ion-FORCE-LOGIC-Press-Tool-Kit-w-CTS-Copper-Jaws-w-ONE-KEY-2573-22/320557771",
-  "search": "plumbing"
- },
  "0275:330317316": {
   "pid": "330317316",
   "store": "Orange Park (Wells Rd)",
@@ -107,6 +96,17 @@
   "model": "XE50T10H45U1",
   "price": 1699.0,
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-Platinum-50-Gal-Smart-High-Efficiency-Hybrid-Heat-Pump-Water-Heater-with-10-Year-Warranty-XE50T10H45U1/330317316",
+  "search": "plumbing"
+ },
+ "0275:320557771": {
+  "pid": "320557771",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "M12 12-Volt Lithium-Ion FORCE LOGIC Press Tool Kit w/ CTS Copper Jaws w/ ONE-KEY",
+  "brand": "Milwaukee",
+  "model": "2573-22",
+  "price": 2449.0,
+  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-12-Volt-Lithium-Ion-FORCE-LOGIC-Press-Tool-Kit-w-CTS-Copper-Jaws-w-ONE-KEY-2573-22/320557771",
   "search": "plumbing"
  },
  "0275:326590441": {
@@ -127,7 +127,7 @@
   "title": "250 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
   "brand": "Southwire",
   "model": "28828269",
-  "price": 179.0,
+  "price": 182.0,
   "link": "https://apionline.homedepot.com/p/Southwire-250-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828269/202019375",
   "search": "electrical"
  },
@@ -175,26 +175,15 @@
   "link": "https://apionline.homedepot.com/p/Leviton-15-Amp-125-V-Duplex-Outlet-Receptacle-White-1-Pack-5320-W-R52-05320-00W/202066670",
   "search": "electrical"
  },
- "0275:316913518": {
-  "pid": "316913518",
+ "0275:202316379": {
+  "pid": "202316379",
   "store": "Orange Park (Wells Rd)",
   "store_id": "0275",
-  "title": "Multimeter, Voltage Tester and Outlet Tester Premium Electrical Tool Set",
-  "brand": "Klein Tools",
-  "model": "69355",
-  "price": 59.97,
-  "link": "https://apionline.homedepot.com/p/Klein-Tools-Multimeter-Voltage-Tester-and-Outlet-Tester-Premium-Electrical-Tool-Set-69355/316913518",
-  "search": "electrical"
- },
- "0275:315849553": {
-  "pid": "315849553",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "Standard Wire Connector, Assortment (30-Pack)",
-  "brand": "Commercial Electric",
-  "model": "ESA-30",
-  "price": 5.42,
-  "link": "https://apionline.homedepot.com/p/Commercial-Electric-Standard-Wire-Connector-Assortment-30-Pack-ESA-30/315849553",
+  "title": "100 ft. 14/2 Solid Romex SIMpull CU NM-B W/G Wire",
+  "brand": "Southwire",
+  "model": "28827428",
+  "price": 84.0,
+  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
   "search": "electrical"
  },
  "0275:202316375": {
@@ -204,8 +193,19 @@
   "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
   "brand": "Southwire",
   "model": "28828228",
-  "price": 109.0,
+  "price": 116.0,
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
+  "search": "electrical"
+ },
+ "0275:316913518": {
+  "pid": "316913518",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Multimeter, Voltage Tester and Outlet Tester Premium Electrical Tool Set",
+  "brand": "Klein Tools",
+  "model": "69355",
+  "price": 59.97,
+  "link": "https://apionline.homedepot.com/p/Klein-Tools-Multimeter-Voltage-Tester-and-Outlet-Tester-Premium-Electrical-Tool-Set-69355/316913518",
   "search": "electrical"
  },
  "0275:202065285": {
@@ -219,17 +219,6 @@
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
   "search": "electrical"
  },
- "0275:202316379": {
-  "pid": "202316379",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "100 ft. 14/2 Solid Romex SIMpull CU NM-B W/G Wire",
-  "brand": "Southwire",
-  "model": "28827428",
-  "price": 84.0,
-  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
-  "search": "electrical"
- },
  "0275:100404072": {
   "pid": "100404072",
   "store": "Orange Park (Wells Rd)",
@@ -239,6 +228,28 @@
   "model": "B618RR",
   "price": 4.11,
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-18-cu-in-Electrical-PVC-Round-Old-Work-Electrical-Box-B618RR-B618RR/100404072",
+  "search": "electrical"
+ },
+ "0275:100404169": {
+  "pid": "100404169",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
+  "brand": "Carlon",
+  "model": "B225R-UPC",
+  "price": 5.32,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
+  "search": "electrical"
+ },
+ "0275:328610673": {
+  "pid": "328610673",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "3/4 in. x 30 ft. Commercial Carded Electrical Tape, Black",
+  "brand": "Commercial Electric",
+  "model": "1004501535",
+  "price": 2.68,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
   "search": "electrical"
  },
  "0275:305110268": {
@@ -263,15 +274,15 @@
   "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
   "search": "electrical"
  },
- "0275:328610673": {
-  "pid": "328610673",
+ "0275:100315472": {
+  "pid": "100315472",
   "store": "Orange Park (Wells Rd)",
   "store_id": "0275",
-  "title": "3/4 in. x 30 ft. Commercial Carded Electrical Tape, Black",
-  "brand": "Commercial Electric",
-  "model": "1004501535",
-  "price": 2.68,
-  "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
+  "title": "2-Gang 34 cu. in. Electrical PVC New Work Electrical Box with Adjustable Bracket (B234ADJC)",
+  "brand": "Carlon",
+  "model": "B234ADJC",
+  "price": 9.61,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
   "search": "electrical"
  },
  "0275:202077339": {
@@ -285,26 +296,15 @@
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-21-cu-in-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-with-Adjustable-Bracket-B121ADJ-40R-B121ADJ-40R/202077339",
   "search": "electrical"
  },
- "0275:100315472": {
-  "pid": "100315472",
+ "0275:202077343": {
+  "pid": "202077343",
   "store": "Orange Park (Wells Rd)",
   "store_id": "0275",
-  "title": "2-Gang 34 cu. in. Electrical PVC New Work Electrical Box with Adjustable Bracket (B234ADJC)",
+  "title": "1-Gang 22 cu. in. Electrical PVC New Work ENT Electrical Box (A122-CAR)",
   "brand": "Carlon",
-  "model": "B234ADJC",
-  "price": 9.61,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
-  "search": "electrical"
- },
- "0275:100404169": {
-  "pid": "100404169",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
-  "brand": "Carlon",
-  "model": "B225R-UPC",
-  "price": 5.32,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
+  "model": "A122-CAR",
+  "price": 5.93,
+  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-22-cu-in-Electrical-PVC-New-Work-ENT-Electrical-Box-A122-CAR-A122-CAR/202077343",
   "search": "electrical"
  },
  "0275:315337606": {
@@ -329,16 +329,148 @@
   "link": "https://apionline.homedepot.com/p/Carlon-18-cu-in-Electrical-PVC-New-Work-Electrical-Ceiling-Box-B518AR-UPC-B518AR-UPC/100128777",
   "search": "electrical"
  },
- "0275:202077343": {
-  "pid": "202077343",
+ "0275:206553445": {
+  "pid": "206553445",
   "store": "Orange Park (Wells Rd)",
   "store_id": "0275",
-  "title": "1-Gang 22 cu. in. Electrical PVC New Work ENT Electrical Box (A122-CAR)",
-  "brand": "Carlon",
-  "model": "A122-CAR",
-  "price": 5.93,
-  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-22-cu-in-Electrical-PVC-New-Work-ENT-Electrical-Box-A122-CAR-A122-CAR/202077343",
-  "search": "electrical"
+  "title": "Garden Soil All Purpose 0.75 cu. ft. for In-Ground Use, Gardens and Raised Beds, Flowers, Vegetables, Trees, Shrubs",
+  "brand": "Miracle-Gro",
+  "model": "75030430",
+  "price": 4.57,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Garden-Soil-All-Purpose-0-75-cu-ft-for-In-Ground-Use-Gardens-and-Raised-Beds-Flowers-Vegetables-Trees-Shrubs-75030430/206553445",
+  "search": "garden"
+ },
+ "0275:314619265": {
+  "pid": "314619265",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Garden Soil All Purpose 1.5 cu. ft. for In-Ground Use, Gardens and Raised Beds, Flowers, Vegetables, Trees, Shrubs",
+  "brand": "Miracle-Gro",
+  "model": "70359500",
+  "price": 8.47,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Garden-Soil-All-Purpose-1-5-cu-ft-for-In-Ground-Use-Gardens-and-Raised-Beds-Flowers-Vegetables-Trees-Shrubs-70359500/314619265",
+  "search": "garden"
+ },
+ "0275:205617903": {
+  "pid": "205617903",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Organic Raised Bed and Potting Mix, All Natural Premium Soil 2 cu. ft., OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6490",
+  "price": 9.97,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-Organic-Raised-Bed-and-Potting-Mix-All-Natural-Premium-Soil-2-cu-ft-OMRI-Listed-6490/205617903",
+  "search": "garden"
+ },
+ "0275:206501693": {
+  "pid": "206501693",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "7.5 in. x 7.5 in. x 5.5 in. Tan Brown Concrete Planter Wall Block",
+  "brand": "Oldcastle",
+  "model": "16202336",
+  "price": 3.97,
+  "link": "https://apionline.homedepot.com/p/Oldcastle-7-5-in-x-7-5-in-x-5-5-in-Tan-Brown-Concrete-Planter-Wall-Block-16202336/206501693",
+  "search": "garden"
+ },
+ "0275:205617876": {
+  "pid": "205617876",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "All Natural Garden Soil, Organic Soil For Flowers and Vegetables 2 cf. ft, OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6850",
+  "price": 8.47,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-All-Natural-Garden-Soil-Organic-Soil-For-Flowers-and-Vegetables-2-cf-ft-OMRI-Listed-6850/205617876",
+  "search": "garden"
+ },
+ "0275:300457596": {
+  "pid": "300457596",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "1 cu. ft. All Purpose Garden Soil for In-Ground Use for Fruits, Flowers, Vegetables and Herbs",
+  "brand": "Vigoro",
+  "model": "72171920",
+  "price": 3.97,
+  "link": "https://apionline.homedepot.com/p/Vigoro-1-cu-ft-All-Purpose-Garden-Soil-for-In-Ground-Use-for-Fruits-Flowers-Vegetables-and-Herbs-72171920/300457596",
+  "search": "garden"
+ },
+ "0275:100619053": {
+  "pid": "100619053",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Premium Topsoil 0.75 cu. ft., Lawn and Garden Top Soil, Soil Conditioner with Peat Moss",
+  "brand": "Scotts",
+  "model": "71130756",
+  "price": 3.27,
+  "link": "https://apionline.homedepot.com/p/Scotts-Premium-Topsoil-0-75-cu-ft-Lawn-and-Garden-Top-Soil-Soil-Conditioner-with-Peat-Moss-71130756/100619053",
+  "search": "garden"
+ },
+ "0275:206457033": {
+  "pid": "206457033",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Potting Mix Soil 25 qt. For Container Plants, Flowers, Vegetables, Shrubs, Feeds up to 6-Months",
+  "brand": "Miracle-Gro",
+  "model": "72781431",
+  "price": 8.0,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Potting-Mix-Soil-25-qt-For-Container-Plants-Flowers-Vegetables-Shrubs-Feeds-up-to-6-Months-72781431/206457033",
+  "search": "garden"
+ },
+ "0275:206553441": {
+  "pid": "206553441",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Potting Soil Mix 50 qt. For Container Plants, Flowers, Vegetables, Shrubs, Feeds up to 6 Months",
+  "brand": "Miracle-Gro",
+  "model": "72790430",
+  "price": 16.37,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Potting-Soil-Mix-50-qt-For-Container-Plants-Flowers-Vegetables-Shrubs-Feeds-up-to-6-Months-72790430/206553441",
+  "search": "garden"
+ },
+ "0275:317444284": {
+  "pid": "317444284",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "3-Piece Wood Handle Garden Tool Set (Trowel, Transplanter and Cultivator)",
+  "brand": "Anvil",
+  "model": "GD210308",
+  "price": 12.98,
+  "link": "https://apionline.homedepot.com/p/Anvil-3-Piece-Wood-Handle-Garden-Tool-Set-Trowel-Transplanter-and-Cultivator-GD210308/317444284",
+  "search": "garden"
+ },
+ "0275:307415467": {
+  "pid": "307415467",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Organic Premium Outdoor Potting Mix, All Natural Premium Soil 40 qt., OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6830",
+  "price": 8.97,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-Organic-Premium-Outdoor-Potting-Mix-All-Natural-Premium-Soil-40-qt-OMRI-Listed-6830/307415467",
+  "search": "garden"
+ },
+ "0275:328039967": {
+  "pid": "328039967",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Maybell 49 in. Single Sink White Freestanding Bath Vanity with White Cultured Marble Top (Assembled)",
+  "brand": "Glacier Bay",
+  "model": "MB48P2-WH",
+  "price": 499.5,
+  "link": "https://apionline.homedepot.com/p/Glacier-Bay-Maybell-49-in-Single-Sink-White-Freestanding-Bath-Vanity-with-White-Cultured-Marble-Top-Assembled-MB48P2-WH/328039967",
+  "search": "clearance"
+ },
+ "0275:339421307": {
+  "pid": "339421307",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Lancaster 73 in. W Double Sink Vanity in White and 20 in. White Mirror and 21 in. White Storage Cabinet Combo",
+  "brand": "Glacier Bay",
+  "model": "",
+  "price": 1123.65,
+  "link": "https://apionline.homedepot.com/p/sets/Glacier-Bay-Lancaster-73-in-W-Double-Sink-Vanity-in-White-and-20-in-White-Mirror-and-21-in-White-Storage-Cabinet-Combo/339421307",
+  "search": "clearance"
  },
  "0275:343267831": {
   "pid": "343267831",
@@ -549,17 +681,6 @@
   "link": "https://apionline.homedepot.com/p/GE-27-cu-ft-French-Door-Refrigerator-in-Fingerprint-resistant-stainless-with-Internal-Dispenser-Energy-Star-GNE27JYMFS/320243591",
   "search": "appliances"
  },
- "0275:328425540": {
-  "pid": "328425540",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "7.2 cu. ft. vented Electric Dryer in White with Auto Dry and Extended Tumble",
-  "brand": "GE",
-  "model": "GTD48EASWWB",
-  "price": 599.0,
-  "link": "https://apionline.homedepot.com/p/GE-7-2-cu-ft-vented-Electric-Dryer-in-White-with-Auto-Dry-and-Extended-Tumble-GTD48EASWWB/328425540",
-  "search": "appliances"
- },
  "0275:342364683": {
   "pid": "342364683",
   "store": "Orange Park (Wells Rd)",
@@ -602,6 +723,17 @@
   "model": "GRF40HSVSS",
   "price": 649.0,
   "link": "https://apionline.homedepot.com/p/GE-30-in-4-Burner-Element-Free-Standing-Electric-Range-in-Stainless-Steel-w-Stainless-Knobs-GRF40HSVSS/329011820",
+  "search": "appliances"
+ },
+ "0275:328425540": {
+  "pid": "328425540",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "7.2 cu. ft. vented Electric Dryer in White with Auto Dry and Extended Tumble",
+  "brand": "GE",
+  "model": "GTD48EASWWB",
+  "price": 599.0,
+  "link": "https://apionline.homedepot.com/p/GE-7-2-cu-ft-vented-Electric-Dryer-in-White-with-Auto-Dry-and-Extended-Tumble-GTD48EASWWB/328425540",
   "search": "appliances"
  },
  "0275:337198460": {
@@ -688,7 +820,7 @@
   "title": "250 ft. 12/2 Solid Romex SIMpull Wire and HL 6 in. Canless Recessed Fixture Mounting Frame Combo (6-Pack)",
   "brand": "",
   "model": "",
-  "price": 203.27,
+  "price": 206.12,
   "link": "https://apionline.homedepot.com/p/sets/250-ft-12-2-Solid-Romex-SIMpull-Wire-and-HL-6-in-Canless-Recessed-Fixture-Mounting-Frame-Combo-6-Pack/340327796",
   "search": "lighting"
  },
@@ -699,7 +831,7 @@
   "title": "Pro Value 6 in. LED Recessed Light 12-Pk and 250 ft. 14/2 Romex SIMpull Wire Combo",
   "brand": "",
   "model": "",
-  "price": 295.15,
+  "price": 296.1,
   "link": "https://apionline.homedepot.com/p/sets/Pro-Value-6-in-LED-Recessed-Light-12-Pk-and-250-ft-14-2-Romex-SIMpull-Wire-Combo/340327783",
   "search": "lighting"
  },
@@ -769,17 +901,6 @@
   "link": "https://apionline.homedepot.com/p/Govee-RGBICW-Permanent-72-bulbs-100-ft-White-Outdoor-Plug-In-Integrated-LED-Puck-String-Light-H805AA01/341892324",
   "search": "lighting"
  },
- "0275:332492272": {
-  "pid": "332492272",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "Universal Select 65/75/90-Watt Equivalent BR30 Dimmable LED Flood Light Bulb with Selectable Color Temperature (6-Pack)",
-  "brand": "EcoSmart",
-  "model": "14BR303WS6CCT01",
-  "price": 22.48,
-  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-65-75-90-Watt-Equivalent-BR30-Dimmable-LED-Flood-Light-Bulb-with-Selectable-Color-Temperature-6-Pack-14BR303WS6CCT01/332492272",
-  "search": "lighting"
- },
  "0275:316405255": {
   "pid": "316405255",
   "store": "Orange Park (Wells Rd)",
@@ -791,15 +912,26 @@
   "link": "https://apionline.homedepot.com/p/Ring-Floodlight-Cam-Plus-Wired-Outdoor-Smart-Security-Camera-with-2-LED-Lights-2-Way-Talk-Color-Night-Vision-White-B08F6GPQQ7/316405255",
   "search": "lighting"
  },
+ "0275:332492272": {
+  "pid": "332492272",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Universal Select 65/75/90-Watt Equivalent BR30 Dimmable LED Flood Light Bulb with Selectable Color Temperature (6-Pack)",
+  "brand": "EcoSmart",
+  "model": "14BR303WS6CCT01",
+  "price": 22.48,
+  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-65-75-90-Watt-Equivalent-BR30-Dimmable-LED-Flood-Light-Bulb-with-Selectable-Color-Temperature-6-Pack-14BR303WS6CCT01/332492272",
+  "search": "lighting"
+ },
  "0275:332712141": {
   "pid": "332712141",
   "store": "Orange Park (Wells Rd)",
   "store_id": "0275",
-  "title": "12-Pack HLBSL 6 in. Adjustable CCT Canless Integrated LED Recessed Light, 900 Lumens, 5CCT, White",
+  "title": "HLBSL 6 in. Adjustable CCT Dimmable Canless Integrated LED Recessed Light, 900 Lumens, 5CCT, White (12-Pack)",
   "brand": "HALO",
   "model": "HLBSL609FS5-12PK",
   "price": 164.0,
-  "link": "https://apionline.homedepot.com/p/HALO-12-Pack-HLBSL-6-in-Adjustable-CCT-Canless-Integrated-LED-Recessed-Light-900-Lumens-5CCT-White-HLBSL609FS5-12PK/332712141",
+  "link": "https://apionline.homedepot.com/p/HALO-HLBSL-6-in-Adjustable-CCT-Dimmable-Canless-Integrated-LED-Recessed-Light-900-Lumens-5CCT-White-12-Pack-HLBSL609FS5-12PK/332712141",
   "search": "lighting"
  },
  "0275:334462061": {
@@ -813,17 +945,6 @@
   "link": "https://apionline.homedepot.com/p/Hampton-Bay-24-Light-48-ft-Indoor-Outdoor-Plug-In-Filament-LED-S14-Edison-Bulb-String-Light-SL48-182-FILG2-HD-24/334462061",
   "search": "lighting"
  },
- "0275:340521984": {
-  "pid": "340521984",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "Universal Select 100-Watt Equivalent A19 Dimmable LED Light Bulb with Selectable Color Temperature (4-Pack)",
-  "brand": "EcoSmart",
-  "model": "15A19100W6CCT01",
-  "price": 15.98,
-  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-100-Watt-Equivalent-A19-Dimmable-LED-Light-Bulb-with-Selectable-Color-Temperature-4-Pack-15A19100W6CCT01/340521984",
-  "search": "lighting"
- },
  "0275:322984459": {
   "pid": "322984459",
   "store": "Orange Park (Wells Rd)",
@@ -833,6 +954,17 @@
   "model": "N608-MBK",
   "price": 299.0,
   "link": "https://apionline.homedepot.com/p/Home-Decorators-Collection-Kensgrove-II-72-in-Smart-Indoor-Outdoor-Matte-Black-Ceiling-Fan-with-Remote-Included-Powered-by-Hubspace-N608-MBK/322984459",
+  "search": "lighting"
+ },
+ "0275:340521984": {
+  "pid": "340521984",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Universal Select 100-Watt Equivalent A19 Dimmable LED Light Bulb with Selectable Color Temperature (4-Pack)",
+  "brand": "EcoSmart",
+  "model": "15A19100W6CCT01",
+  "price": 15.98,
+  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-100-Watt-Equivalent-A19-Dimmable-LED-Light-Bulb-with-Selectable-Color-Temperature-4-Pack-15A19100W6CCT01/340521984",
   "search": "lighting"
  },
  "0275:301162049": {
@@ -901,17 +1033,6 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-40-Gal-Medium-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE40M06ST45U1/326434008",
   "search": "plumbing"
  },
- "6346:326590448": {
-  "pid": "326590448",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "Performance 50 Gal. Tall 4500-Watt Double Element Electric Water Heater with  6-Year Warranty",
-  "brand": "Rheem",
-  "model": "XE50T06ST45U1",
-  "price": 599.0,
-  "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Tall-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50T06ST45U1/326590448",
-  "search": "plumbing"
- },
  "6346:326434092": {
   "pid": "326434092",
   "store": "Lane Ave / Normandy",
@@ -923,6 +1044,17 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Medium-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50M06ST45U1/326434092",
   "search": "plumbing"
  },
+ "6346:326590448": {
+  "pid": "326590448",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Performance 50 Gal. Tall 4500-Watt Double Element Electric Water Heater with  6-Year Warranty",
+  "brand": "Rheem",
+  "model": "XE50T06ST45U1",
+  "price": 599.0,
+  "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Tall-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50T06ST45U1/326590448",
+  "search": "plumbing"
+ },
  "6346:342866227": {
   "pid": "342866227",
   "store": "Lane Ave / Normandy",
@@ -930,7 +1062,7 @@
   "title": "Instant Hot/Cold Water Dispenser with Filtration, Invite HOT150 Faucet, Badger 500 Garbage Disposal",
   "brand": "InSinkErator",
   "model": "",
-  "price": 501.62,
+  "price": 575.99,
   "link": "https://apionline.homedepot.com/p/sets/InSinkErator-Instant-Hot-Cold-Water-Dispenser-with-Filtration-Invite-HOT150-Faucet-Badger-500-Garbage-Disposal/342866227",
   "search": "plumbing"
  },
@@ -945,17 +1077,6 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-38-Gal-Short-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE38S06ST45U1/326590457",
   "search": "plumbing"
  },
- "6346:320557771": {
-  "pid": "320557771",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "M12 12-Volt Lithium-Ion FORCE LOGIC Press Tool Kit w/ CTS Copper Jaws w/ ONE-KEY",
-  "brand": "Milwaukee",
-  "model": "2573-22",
-  "price": 2449.0,
-  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-12-Volt-Lithium-Ion-FORCE-LOGIC-Press-Tool-Kit-w-CTS-Copper-Jaws-w-ONE-KEY-2573-22/320557771",
-  "search": "plumbing"
- },
  "6346:330317316": {
   "pid": "330317316",
   "store": "Lane Ave / Normandy",
@@ -965,6 +1086,17 @@
   "model": "XE50T10H45U1",
   "price": 1699.0,
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-Platinum-50-Gal-Smart-High-Efficiency-Hybrid-Heat-Pump-Water-Heater-with-10-Year-Warranty-XE50T10H45U1/330317316",
+  "search": "plumbing"
+ },
+ "6346:320557771": {
+  "pid": "320557771",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "M12 12-Volt Lithium-Ion FORCE LOGIC Press Tool Kit w/ CTS Copper Jaws w/ ONE-KEY",
+  "brand": "Milwaukee",
+  "model": "2573-22",
+  "price": 2449.0,
+  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-12-Volt-Lithium-Ion-FORCE-LOGIC-Press-Tool-Kit-w-CTS-Copper-Jaws-w-ONE-KEY-2573-22/320557771",
   "search": "plumbing"
  },
  "6346:326590441": {
@@ -1055,17 +1187,6 @@
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
   "search": "electrical"
  },
- "6346:202316375": {
-  "pid": "202316375",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
-  "brand": "Southwire",
-  "model": "28828228",
-  "price": 109.0,
-  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
-  "search": "electrical"
- },
  "6346:202065285": {
   "pid": "202065285",
   "store": "Lane Ave / Normandy",
@@ -1075,6 +1196,17 @@
   "model": "B232ACP",
   "price": 2.35,
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
+  "search": "electrical"
+ },
+ "6346:202316375": {
+  "pid": "202316375",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
+  "brand": "Southwire",
+  "model": "28828228",
+  "price": 109.0,
+  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
   "search": "electrical"
  },
  "6346:100404072": {
@@ -1088,17 +1220,6 @@
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-18-cu-in-Electrical-PVC-Round-Old-Work-Electrical-Box-B618RR-B618RR/100404072",
   "search": "electrical"
  },
- "6346:328610673": {
-  "pid": "328610673",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "3/4 in. x 30 ft. Commercial Carded Electrical Tape, Black",
-  "brand": "Commercial Electric",
-  "model": "1004501535",
-  "price": 2.68,
-  "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
-  "search": "electrical"
- },
  "6346:305110268": {
   "pid": "305110268",
   "store": "Lane Ave / Normandy",
@@ -1110,26 +1231,15 @@
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-47-cu-in-Electrical-PVC-New-Old-Work-Electrical-Box-B249B-B249B/305110268",
   "search": "electrical"
  },
- "6346:300832220": {
-  "pid": "300832220",
+ "6346:328610673": {
+  "pid": "328610673",
   "store": "Lane Ave / Normandy",
   "store_id": "6346",
-  "title": "1-Gang Metallic Weatherproof Outlet Box with (3) 1/2 in. Holes, Gray",
+  "title": "3/4 in. x 30 ft. Commercial Carded Electrical Tape, Black",
   "brand": "Commercial Electric",
-  "model": "WSB350G",
-  "price": 5.95,
-  "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
-  "search": "electrical"
- },
- "6346:100404169": {
-  "pid": "100404169",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
-  "brand": "Carlon",
-  "model": "B225R-UPC",
-  "price": 5.32,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
+  "model": "1004501535",
+  "price": 2.68,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
   "search": "electrical"
  },
  "6346:202077339": {
@@ -1143,15 +1253,15 @@
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-21-cu-in-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-with-Adjustable-Bracket-B121ADJ-40R-B121ADJ-40R/202077339",
   "search": "electrical"
  },
- "6346:315337606": {
-  "pid": "315337606",
+ "6346:300832220": {
+  "pid": "300832220",
   "store": "Lane Ave / Normandy",
   "store_id": "6346",
-  "title": "Electrical Test Kit with Voltage and Receptacle Tester",
-  "brand": "Klein Tools",
-  "model": "ET45VP",
-  "price": 19.97,
-  "link": "https://apionline.homedepot.com/p/Klein-Tools-Electrical-Test-Kit-with-Voltage-and-Receptacle-Tester-ET45VP/315337606",
+  "title": "1-Gang Metallic Weatherproof Outlet Box with (3) 1/2 in. Holes, Gray",
+  "brand": "Commercial Electric",
+  "model": "WSB350G",
+  "price": 5.95,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
   "search": "electrical"
  },
  "6346:100315472": {
@@ -1175,6 +1285,182 @@
   "price": 5.93,
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-22-cu-in-Electrical-PVC-New-Work-ENT-Electrical-Box-A122-CAR-A122-CAR/202077343",
   "search": "electrical"
+ },
+ "6346:100404169": {
+  "pid": "100404169",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
+  "brand": "Carlon",
+  "model": "B225R-UPC",
+  "price": 5.32,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
+  "search": "electrical"
+ },
+ "6346:315337606": {
+  "pid": "315337606",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Electrical Test Kit with Voltage and Receptacle Tester",
+  "brand": "Klein Tools",
+  "model": "ET45VP",
+  "price": 19.97,
+  "link": "https://apionline.homedepot.com/p/Klein-Tools-Electrical-Test-Kit-with-Voltage-and-Receptacle-Tester-ET45VP/315337606",
+  "search": "electrical"
+ },
+ "6346:206553445": {
+  "pid": "206553445",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Garden Soil All Purpose 0.75 cu. ft. for In-Ground Use, Gardens and Raised Beds, Flowers, Vegetables, Trees, Shrubs",
+  "brand": "Miracle-Gro",
+  "model": "75030430",
+  "price": 4.57,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Garden-Soil-All-Purpose-0-75-cu-ft-for-In-Ground-Use-Gardens-and-Raised-Beds-Flowers-Vegetables-Trees-Shrubs-75030430/206553445",
+  "search": "garden"
+ },
+ "6346:314619265": {
+  "pid": "314619265",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Garden Soil All Purpose 1.5 cu. ft. for In-Ground Use, Gardens and Raised Beds, Flowers, Vegetables, Trees, Shrubs",
+  "brand": "Miracle-Gro",
+  "model": "70359500",
+  "price": 8.47,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Garden-Soil-All-Purpose-1-5-cu-ft-for-In-Ground-Use-Gardens-and-Raised-Beds-Flowers-Vegetables-Trees-Shrubs-70359500/314619265",
+  "search": "garden"
+ },
+ "6346:205617903": {
+  "pid": "205617903",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Organic Raised Bed and Potting Mix, All Natural Premium Soil 2 cu. ft., OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6490",
+  "price": 9.97,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-Organic-Raised-Bed-and-Potting-Mix-All-Natural-Premium-Soil-2-cu-ft-OMRI-Listed-6490/205617903",
+  "search": "garden"
+ },
+ "6346:206501693": {
+  "pid": "206501693",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "7.5 in. x 7.5 in. x 5.5 in. Tan Brown Concrete Planter Wall Block",
+  "brand": "Oldcastle",
+  "model": "16202336",
+  "price": 3.97,
+  "link": "https://apionline.homedepot.com/p/Oldcastle-7-5-in-x-7-5-in-x-5-5-in-Tan-Brown-Concrete-Planter-Wall-Block-16202336/206501693",
+  "search": "garden"
+ },
+ "6346:205617876": {
+  "pid": "205617876",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "All Natural Garden Soil, Organic Soil For Flowers and Vegetables 2 cf. ft, OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6850",
+  "price": 8.47,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-All-Natural-Garden-Soil-Organic-Soil-For-Flowers-and-Vegetables-2-cf-ft-OMRI-Listed-6850/205617876",
+  "search": "garden"
+ },
+ "6346:300457596": {
+  "pid": "300457596",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "1 cu. ft. All Purpose Garden Soil for In-Ground Use for Fruits, Flowers, Vegetables and Herbs",
+  "brand": "Vigoro",
+  "model": "72171920",
+  "price": 3.97,
+  "link": "https://apionline.homedepot.com/p/Vigoro-1-cu-ft-All-Purpose-Garden-Soil-for-In-Ground-Use-for-Fruits-Flowers-Vegetables-and-Herbs-72171920/300457596",
+  "search": "garden"
+ },
+ "6346:100619053": {
+  "pid": "100619053",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Premium Topsoil 0.75 cu. ft., Lawn and Garden Top Soil, Soil Conditioner with Peat Moss",
+  "brand": "Scotts",
+  "model": "71130756",
+  "price": 3.27,
+  "link": "https://apionline.homedepot.com/p/Scotts-Premium-Topsoil-0-75-cu-ft-Lawn-and-Garden-Top-Soil-Soil-Conditioner-with-Peat-Moss-71130756/100619053",
+  "search": "garden"
+ },
+ "6346:206457033": {
+  "pid": "206457033",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Potting Mix Soil 25 qt. For Container Plants, Flowers, Vegetables, Shrubs, Feeds up to 6-Months",
+  "brand": "Miracle-Gro",
+  "model": "72781431",
+  "price": 8.0,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Potting-Mix-Soil-25-qt-For-Container-Plants-Flowers-Vegetables-Shrubs-Feeds-up-to-6-Months-72781431/206457033",
+  "search": "garden"
+ },
+ "6346:206553441": {
+  "pid": "206553441",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Potting Soil Mix 50 qt. For Container Plants, Flowers, Vegetables, Shrubs, Feeds up to 6 Months",
+  "brand": "Miracle-Gro",
+  "model": "72790430",
+  "price": 14.47,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Potting-Soil-Mix-50-qt-For-Container-Plants-Flowers-Vegetables-Shrubs-Feeds-up-to-6-Months-72790430/206553441",
+  "search": "garden"
+ },
+ "6346:317444284": {
+  "pid": "317444284",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "3-Piece Wood Handle Garden Tool Set (Trowel, Transplanter and Cultivator)",
+  "brand": "Anvil",
+  "model": "GD210308",
+  "price": 12.98,
+  "link": "https://apionline.homedepot.com/p/Anvil-3-Piece-Wood-Handle-Garden-Tool-Set-Trowel-Transplanter-and-Cultivator-GD210308/317444284",
+  "search": "garden"
+ },
+ "6346:307415467": {
+  "pid": "307415467",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Organic Premium Outdoor Potting Mix, All Natural Premium Soil 40 qt., OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6830",
+  "price": 8.97,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-Organic-Premium-Outdoor-Potting-Mix-All-Natural-Premium-Soil-40-qt-OMRI-Listed-6830/307415467",
+  "search": "garden"
+ },
+ "6346:328039967": {
+  "pid": "328039967",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Maybell 49 in. Single Sink White Freestanding Bath Vanity with White Cultured Marble Top (Assembled)",
+  "brand": "Glacier Bay",
+  "model": "MB48P2-WH",
+  "price": 499.5,
+  "link": "https://apionline.homedepot.com/p/Glacier-Bay-Maybell-49-in-Single-Sink-White-Freestanding-Bath-Vanity-with-White-Cultured-Marble-Top-Assembled-MB48P2-WH/328039967",
+  "search": "clearance"
+ },
+ "6346:311646209": {
+  "pid": "311646209",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "M12 FUEL 12V Lithium-Ion Brushless Cordless 1/4 in. Straight Die Grinder (Tool-Only)",
+  "brand": "Milwaukee",
+  "model": "2486-20",
+  "price": 194.65,
+  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-FUEL-12V-Lithium-Ion-Brushless-Cordless-1-4-in-Straight-Die-Grinder-Tool-Only-2486-20/311646209",
+  "search": "clearance"
+ },
+ "6346:339421307": {
+  "pid": "339421307",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Lancaster 73 in. W Double Sink Vanity in White and 20 in. White Mirror and 21 in. White Storage Cabinet Combo",
+  "brand": "Glacier Bay",
+  "model": "",
+  "price": 1123.65,
+  "link": "https://apionline.homedepot.com/p/sets/Glacier-Bay-Lancaster-73-in-W-Double-Sink-Vanity-in-White-and-20-in-White-Mirror-and-21-in-White-Storage-Cabinet-Combo/339421307",
+  "search": "clearance"
  },
  "6346:343267831": {
   "pid": "343267831",
@@ -1385,17 +1671,6 @@
   "link": "https://apionline.homedepot.com/p/GE-27-cu-ft-French-Door-Refrigerator-in-Fingerprint-resistant-stainless-with-Internal-Dispenser-Energy-Star-GNE27JYMFS/320243591",
   "search": "appliances"
  },
- "6346:328425540": {
-  "pid": "328425540",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "7.2 cu. ft. vented Electric Dryer in White with Auto Dry and Extended Tumble",
-  "brand": "GE",
-  "model": "GTD48EASWWB",
-  "price": 599.0,
-  "link": "https://apionline.homedepot.com/p/GE-7-2-cu-ft-vented-Electric-Dryer-in-White-with-Auto-Dry-and-Extended-Tumble-GTD48EASWWB/328425540",
-  "search": "appliances"
- },
  "6346:342364683": {
   "pid": "342364683",
   "store": "Lane Ave / Normandy",
@@ -1438,6 +1713,17 @@
   "model": "GRF40HSVSS",
   "price": 649.0,
   "link": "https://apionline.homedepot.com/p/GE-30-in-4-Burner-Element-Free-Standing-Electric-Range-in-Stainless-Steel-w-Stainless-Knobs-GRF40HSVSS/329011820",
+  "search": "appliances"
+ },
+ "6346:328425540": {
+  "pid": "328425540",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "7.2 cu. ft. vented Electric Dryer in White with Auto Dry and Extended Tumble",
+  "brand": "GE",
+  "model": "GTD48EASWWB",
+  "price": 599.0,
+  "link": "https://apionline.homedepot.com/p/GE-7-2-cu-ft-vented-Electric-Dryer-in-White-with-Auto-Dry-and-Extended-Tumble-GTD48EASWWB/328425540",
   "search": "appliances"
  },
  "6346:337198460": {
@@ -1605,17 +1891,6 @@
   "link": "https://apionline.homedepot.com/p/Govee-RGBICW-Permanent-72-bulbs-100-ft-White-Outdoor-Plug-In-Integrated-LED-Puck-String-Light-H805AA01/341892324",
   "search": "lighting"
  },
- "6346:332492272": {
-  "pid": "332492272",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "Universal Select 65/75/90-Watt Equivalent BR30 Dimmable LED Flood Light Bulb with Selectable Color Temperature (6-Pack)",
-  "brand": "EcoSmart",
-  "model": "14BR303WS6CCT01",
-  "price": 22.48,
-  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-65-75-90-Watt-Equivalent-BR30-Dimmable-LED-Flood-Light-Bulb-with-Selectable-Color-Temperature-6-Pack-14BR303WS6CCT01/332492272",
-  "search": "lighting"
- },
  "6346:316405255": {
   "pid": "316405255",
   "store": "Lane Ave / Normandy",
@@ -1627,15 +1902,26 @@
   "link": "https://apionline.homedepot.com/p/Ring-Floodlight-Cam-Plus-Wired-Outdoor-Smart-Security-Camera-with-2-LED-Lights-2-Way-Talk-Color-Night-Vision-White-B08F6GPQQ7/316405255",
   "search": "lighting"
  },
+ "6346:332492272": {
+  "pid": "332492272",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Universal Select 65/75/90-Watt Equivalent BR30 Dimmable LED Flood Light Bulb with Selectable Color Temperature (6-Pack)",
+  "brand": "EcoSmart",
+  "model": "14BR303WS6CCT01",
+  "price": 22.48,
+  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-65-75-90-Watt-Equivalent-BR30-Dimmable-LED-Flood-Light-Bulb-with-Selectable-Color-Temperature-6-Pack-14BR303WS6CCT01/332492272",
+  "search": "lighting"
+ },
  "6346:332712141": {
   "pid": "332712141",
   "store": "Lane Ave / Normandy",
   "store_id": "6346",
-  "title": "12-Pack HLBSL 6 in. Adjustable CCT Canless Integrated LED Recessed Light, 900 Lumens, 5CCT, White",
+  "title": "HLBSL 6 in. Adjustable CCT Dimmable Canless Integrated LED Recessed Light, 900 Lumens, 5CCT, White (12-Pack)",
   "brand": "HALO",
   "model": "HLBSL609FS5-12PK",
   "price": 164.0,
-  "link": "https://apionline.homedepot.com/p/HALO-12-Pack-HLBSL-6-in-Adjustable-CCT-Canless-Integrated-LED-Recessed-Light-900-Lumens-5CCT-White-HLBSL609FS5-12PK/332712141",
+  "link": "https://apionline.homedepot.com/p/HALO-HLBSL-6-in-Adjustable-CCT-Dimmable-Canless-Integrated-LED-Recessed-Light-900-Lumens-5CCT-White-12-Pack-HLBSL609FS5-12PK/332712141",
   "search": "lighting"
  },
  "6346:334462061": {
@@ -1649,17 +1935,6 @@
   "link": "https://apionline.homedepot.com/p/Hampton-Bay-24-Light-48-ft-Indoor-Outdoor-Plug-In-Filament-LED-S14-Edison-Bulb-String-Light-SL48-182-FILG2-HD-24/334462061",
   "search": "lighting"
  },
- "6346:340521984": {
-  "pid": "340521984",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "Universal Select 100-Watt Equivalent A19 Dimmable LED Light Bulb with Selectable Color Temperature (4-Pack)",
-  "brand": "EcoSmart",
-  "model": "15A19100W6CCT01",
-  "price": 15.98,
-  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-100-Watt-Equivalent-A19-Dimmable-LED-Light-Bulb-with-Selectable-Color-Temperature-4-Pack-15A19100W6CCT01/340521984",
-  "search": "lighting"
- },
  "6346:322984459": {
   "pid": "322984459",
   "store": "Lane Ave / Normandy",
@@ -1669,6 +1944,17 @@
   "model": "N608-MBK",
   "price": 299.0,
   "link": "https://apionline.homedepot.com/p/Home-Decorators-Collection-Kensgrove-II-72-in-Smart-Indoor-Outdoor-Matte-Black-Ceiling-Fan-with-Remote-Included-Powered-by-Hubspace-N608-MBK/322984459",
+  "search": "lighting"
+ },
+ "6346:340521984": {
+  "pid": "340521984",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "Universal Select 100-Watt Equivalent A19 Dimmable LED Light Bulb with Selectable Color Temperature (4-Pack)",
+  "brand": "EcoSmart",
+  "model": "15A19100W6CCT01",
+  "price": 15.98,
+  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-100-Watt-Equivalent-A19-Dimmable-LED-Light-Bulb-with-Selectable-Color-Temperature-4-Pack-15A19100W6CCT01/340521984",
   "search": "lighting"
  },
  "6346:301162049": {
@@ -1737,17 +2023,6 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-40-Gal-Medium-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE40M06ST45U1/326434008",
   "search": "plumbing"
  },
- "6351:326590448": {
-  "pid": "326590448",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "Performance 50 Gal. Tall 4500-Watt Double Element Electric Water Heater with  6-Year Warranty",
-  "brand": "Rheem",
-  "model": "XE50T06ST45U1",
-  "price": 599.0,
-  "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Tall-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50T06ST45U1/326590448",
-  "search": "plumbing"
- },
  "6351:326434092": {
   "pid": "326434092",
   "store": "North Jax (Lem Turner)",
@@ -1757,6 +2032,17 @@
   "model": "XE50M06ST45U1",
   "price": 599.0,
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Medium-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50M06ST45U1/326434092",
+  "search": "plumbing"
+ },
+ "6351:326590448": {
+  "pid": "326590448",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Performance 50 Gal. Tall 4500-Watt Double Element Electric Water Heater with  6-Year Warranty",
+  "brand": "Rheem",
+  "model": "XE50T06ST45U1",
+  "price": 599.0,
+  "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Tall-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50T06ST45U1/326590448",
   "search": "plumbing"
  },
  "6351:326590285": {
@@ -1777,7 +2063,7 @@
   "title": "Instant Hot/Cold Water Dispenser with Filtration, Invite HOT150 Faucet, Badger 500 Garbage Disposal",
   "brand": "InSinkErator",
   "model": "",
-  "price": 501.62,
+  "price": 575.99,
   "link": "https://apionline.homedepot.com/p/sets/InSinkErator-Instant-Hot-Cold-Water-Dispenser-with-Filtration-Invite-HOT150-Faucet-Badger-500-Garbage-Disposal/342866227",
   "search": "plumbing"
  },
@@ -1792,17 +2078,6 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-38-Gal-Short-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE38S06ST45U1/326590457",
   "search": "plumbing"
  },
- "6351:320557771": {
-  "pid": "320557771",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "M12 12-Volt Lithium-Ion FORCE LOGIC Press Tool Kit w/ CTS Copper Jaws w/ ONE-KEY",
-  "brand": "Milwaukee",
-  "model": "2573-22",
-  "price": 2449.0,
-  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-12-Volt-Lithium-Ion-FORCE-LOGIC-Press-Tool-Kit-w-CTS-Copper-Jaws-w-ONE-KEY-2573-22/320557771",
-  "search": "plumbing"
- },
  "6351:330317316": {
   "pid": "330317316",
   "store": "North Jax (Lem Turner)",
@@ -1812,6 +2087,17 @@
   "model": "XE50T10H45U1",
   "price": 1699.0,
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-Platinum-50-Gal-Smart-High-Efficiency-Hybrid-Heat-Pump-Water-Heater-with-10-Year-Warranty-XE50T10H45U1/330317316",
+  "search": "plumbing"
+ },
+ "6351:320557771": {
+  "pid": "320557771",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "M12 12-Volt Lithium-Ion FORCE LOGIC Press Tool Kit w/ CTS Copper Jaws w/ ONE-KEY",
+  "brand": "Milwaukee",
+  "model": "2573-22",
+  "price": 2449.0,
+  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-12-Volt-Lithium-Ion-FORCE-LOGIC-Press-Tool-Kit-w-CTS-Copper-Jaws-w-ONE-KEY-2573-22/320557771",
   "search": "plumbing"
  },
  "6351:326590441": {
@@ -1880,28 +2166,6 @@
   "link": "https://apionline.homedepot.com/p/Leviton-15-Amp-125-V-Duplex-Outlet-Receptacle-White-1-Pack-5320-W-R52-05320-00W/202066670",
   "search": "electrical"
  },
- "6351:316913518": {
-  "pid": "316913518",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "Multimeter, Voltage Tester and Outlet Tester Premium Electrical Tool Set",
-  "brand": "Klein Tools",
-  "model": "69355",
-  "price": 59.97,
-  "link": "https://apionline.homedepot.com/p/Klein-Tools-Multimeter-Voltage-Tester-and-Outlet-Tester-Premium-Electrical-Tool-Set-69355/316913518",
-  "search": "electrical"
- },
- "6351:202316375": {
-  "pid": "202316375",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
-  "brand": "Southwire",
-  "model": "28828228",
-  "price": 109.0,
-  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
-  "search": "electrical"
- },
  "6351:202065285": {
   "pid": "202065285",
   "store": "North Jax (Lem Turner)",
@@ -1924,6 +2188,28 @@
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
   "search": "electrical"
  },
+ "6351:316913518": {
+  "pid": "316913518",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Multimeter, Voltage Tester and Outlet Tester Premium Electrical Tool Set",
+  "brand": "Klein Tools",
+  "model": "69355",
+  "price": 59.97,
+  "link": "https://apionline.homedepot.com/p/Klein-Tools-Multimeter-Voltage-Tester-and-Outlet-Tester-Premium-Electrical-Tool-Set-69355/316913518",
+  "search": "electrical"
+ },
+ "6351:202316375": {
+  "pid": "202316375",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
+  "brand": "Southwire",
+  "model": "28828228",
+  "price": 109.0,
+  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
+  "search": "electrical"
+ },
  "6351:100404072": {
   "pid": "100404072",
   "store": "North Jax (Lem Turner)",
@@ -1933,39 +2219,6 @@
   "model": "B618RR",
   "price": 4.11,
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-18-cu-in-Electrical-PVC-Round-Old-Work-Electrical-Box-B618RR-B618RR/100404072",
-  "search": "electrical"
- },
- "6351:100404169": {
-  "pid": "100404169",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
-  "brand": "Carlon",
-  "model": "B225R-UPC",
-  "price": 5.32,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
-  "search": "electrical"
- },
- "6351:300832220": {
-  "pid": "300832220",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "1-Gang Metallic Weatherproof Outlet Box with (3) 1/2 in. Holes, Gray",
-  "brand": "Commercial Electric",
-  "model": "WSB350G",
-  "price": 5.95,
-  "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
-  "search": "electrical"
- },
- "6351:328610673": {
-  "pid": "328610673",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "3/4 in. x 30 ft. Commercial Carded Electrical Tape, Black",
-  "brand": "Commercial Electric",
-  "model": "1004501535",
-  "price": 2.68,
-  "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
   "search": "electrical"
  },
  "6351:305110268": {
@@ -1979,15 +2232,37 @@
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-47-cu-in-Electrical-PVC-New-Old-Work-Electrical-Box-B249B-B249B/305110268",
   "search": "electrical"
  },
- "6351:202077339": {
-  "pid": "202077339",
+ "6351:100404169": {
+  "pid": "100404169",
   "store": "North Jax (Lem Turner)",
   "store_id": "6351",
-  "title": "1-Gang 21 cu. in. Electrical PVC New Work Electrical Switch and Outlet Box with Adjustable Bracket (B121ADJ-40R)",
+  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
   "brand": "Carlon",
-  "model": "B121ADJ-40R",
-  "price": 4.98,
-  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-21-cu-in-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-with-Adjustable-Bracket-B121ADJ-40R-B121ADJ-40R/202077339",
+  "model": "B225R-UPC",
+  "price": 5.32,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
+  "search": "electrical"
+ },
+ "6351:328610673": {
+  "pid": "328610673",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "3/4 in. x 30 ft. Commercial Carded Electrical Tape, Black",
+  "brand": "Commercial Electric",
+  "model": "1004501535",
+  "price": 2.68,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
+  "search": "electrical"
+ },
+ "6351:300832220": {
+  "pid": "300832220",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "1-Gang Metallic Weatherproof Outlet Box with (3) 1/2 in. Holes, Gray",
+  "brand": "Commercial Electric",
+  "model": "WSB350G",
+  "price": 5.95,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
   "search": "electrical"
  },
  "6351:100315472": {
@@ -1999,6 +2274,28 @@
   "model": "B234ADJC",
   "price": 9.61,
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
+  "search": "electrical"
+ },
+ "6351:202077339": {
+  "pid": "202077339",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "1-Gang 21 cu. in. Electrical PVC New Work Electrical Switch and Outlet Box with Adjustable Bracket (B121ADJ-40R)",
+  "brand": "Carlon",
+  "model": "B121ADJ-40R",
+  "price": 4.98,
+  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-21-cu-in-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-with-Adjustable-Bracket-B121ADJ-40R-B121ADJ-40R/202077339",
+  "search": "electrical"
+ },
+ "6351:202077343": {
+  "pid": "202077343",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "1-Gang 22 cu. in. Electrical PVC New Work ENT Electrical Box (A122-CAR)",
+  "brand": "Carlon",
+  "model": "A122-CAR",
+  "price": 5.93,
+  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-22-cu-in-Electrical-PVC-New-Work-ENT-Electrical-Box-A122-CAR-A122-CAR/202077343",
   "search": "electrical"
  },
  "6351:315337606": {
@@ -2023,16 +2320,170 @@
   "link": "https://apionline.homedepot.com/p/Carlon-18-cu-in-Electrical-PVC-New-Work-Electrical-Ceiling-Box-B518AR-UPC-B518AR-UPC/100128777",
   "search": "electrical"
  },
- "6351:202077343": {
-  "pid": "202077343",
+ "6351:206553445": {
+  "pid": "206553445",
   "store": "North Jax (Lem Turner)",
   "store_id": "6351",
-  "title": "1-Gang 22 cu. in. Electrical PVC New Work ENT Electrical Box (A122-CAR)",
-  "brand": "Carlon",
-  "model": "A122-CAR",
-  "price": 5.93,
-  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-22-cu-in-Electrical-PVC-New-Work-ENT-Electrical-Box-A122-CAR-A122-CAR/202077343",
-  "search": "electrical"
+  "title": "Garden Soil All Purpose 0.75 cu. ft. for In-Ground Use, Gardens and Raised Beds, Flowers, Vegetables, Trees, Shrubs",
+  "brand": "Miracle-Gro",
+  "model": "75030430",
+  "price": 4.57,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Garden-Soil-All-Purpose-0-75-cu-ft-for-In-Ground-Use-Gardens-and-Raised-Beds-Flowers-Vegetables-Trees-Shrubs-75030430/206553445",
+  "search": "garden"
+ },
+ "6351:314619265": {
+  "pid": "314619265",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Garden Soil All Purpose 1.5 cu. ft. for In-Ground Use, Gardens and Raised Beds, Flowers, Vegetables, Trees, Shrubs",
+  "brand": "Miracle-Gro",
+  "model": "70359500",
+  "price": 8.47,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Garden-Soil-All-Purpose-1-5-cu-ft-for-In-Ground-Use-Gardens-and-Raised-Beds-Flowers-Vegetables-Trees-Shrubs-70359500/314619265",
+  "search": "garden"
+ },
+ "6351:205617903": {
+  "pid": "205617903",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Organic Raised Bed and Potting Mix, All Natural Premium Soil 2 cu. ft., OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6490",
+  "price": 9.97,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-Organic-Raised-Bed-and-Potting-Mix-All-Natural-Premium-Soil-2-cu-ft-OMRI-Listed-6490/205617903",
+  "search": "garden"
+ },
+ "6351:206501693": {
+  "pid": "206501693",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "7.5 in. x 7.5 in. x 5.5 in. Tan Brown Concrete Planter Wall Block",
+  "brand": "Oldcastle",
+  "model": "16202336",
+  "price": 3.97,
+  "link": "https://apionline.homedepot.com/p/Oldcastle-7-5-in-x-7-5-in-x-5-5-in-Tan-Brown-Concrete-Planter-Wall-Block-16202336/206501693",
+  "search": "garden"
+ },
+ "6351:205617876": {
+  "pid": "205617876",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "All Natural Garden Soil, Organic Soil For Flowers and Vegetables 2 cf. ft, OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6850",
+  "price": 8.47,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-All-Natural-Garden-Soil-Organic-Soil-For-Flowers-and-Vegetables-2-cf-ft-OMRI-Listed-6850/205617876",
+  "search": "garden"
+ },
+ "6351:300457596": {
+  "pid": "300457596",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "1 cu. ft. All Purpose Garden Soil for In-Ground Use for Fruits, Flowers, Vegetables and Herbs",
+  "brand": "Vigoro",
+  "model": "72171920",
+  "price": 3.97,
+  "link": "https://apionline.homedepot.com/p/Vigoro-1-cu-ft-All-Purpose-Garden-Soil-for-In-Ground-Use-for-Fruits-Flowers-Vegetables-and-Herbs-72171920/300457596",
+  "search": "garden"
+ },
+ "6351:322251434": {
+  "pid": "322251434",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "2 ft. x 40 ft. Medium Duty Perforated Raised Garden Bed Fabrics",
+  "brand": "Vigoro",
+  "model": "RGB02B40PF",
+  "price": 9.98,
+  "link": "https://apionline.homedepot.com/p/Vigoro-2-ft-x-40-ft-Medium-Duty-Perforated-Raised-Garden-Bed-Fabrics-RGB02B40PF/322251434",
+  "search": "garden"
+ },
+ "6351:100619053": {
+  "pid": "100619053",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Premium Topsoil 0.75 cu. ft., Lawn and Garden Top Soil, Soil Conditioner with Peat Moss",
+  "brand": "Scotts",
+  "model": "71130756",
+  "price": 3.27,
+  "link": "https://apionline.homedepot.com/p/Scotts-Premium-Topsoil-0-75-cu-ft-Lawn-and-Garden-Top-Soil-Soil-Conditioner-with-Peat-Moss-71130756/100619053",
+  "search": "garden"
+ },
+ "6351:206457033": {
+  "pid": "206457033",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Potting Mix Soil 25 qt. For Container Plants, Flowers, Vegetables, Shrubs, Feeds up to 6-Months",
+  "brand": "Miracle-Gro",
+  "model": "72781431",
+  "price": 8.0,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Potting-Mix-Soil-25-qt-For-Container-Plants-Flowers-Vegetables-Shrubs-Feeds-up-to-6-Months-72781431/206457033",
+  "search": "garden"
+ },
+ "6351:206553441": {
+  "pid": "206553441",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Potting Soil Mix 50 qt. For Container Plants, Flowers, Vegetables, Shrubs, Feeds up to 6 Months",
+  "brand": "Miracle-Gro",
+  "model": "72790430",
+  "price": 14.47,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Potting-Soil-Mix-50-qt-For-Container-Plants-Flowers-Vegetables-Shrubs-Feeds-up-to-6-Months-72790430/206553441",
+  "search": "garden"
+ },
+ "6351:317444284": {
+  "pid": "317444284",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "3-Piece Wood Handle Garden Tool Set (Trowel, Transplanter and Cultivator)",
+  "brand": "Anvil",
+  "model": "GD210308",
+  "price": 12.98,
+  "link": "https://apionline.homedepot.com/p/Anvil-3-Piece-Wood-Handle-Garden-Tool-Set-Trowel-Transplanter-and-Cultivator-GD210308/317444284",
+  "search": "garden"
+ },
+ "6351:307415467": {
+  "pid": "307415467",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Organic Premium Outdoor Potting Mix, All Natural Premium Soil 40 qt., OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6830",
+  "price": 8.97,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-Organic-Premium-Outdoor-Potting-Mix-All-Natural-Premium-Soil-40-qt-OMRI-Listed-6830/307415467",
+  "search": "garden"
+ },
+ "6351:328039967": {
+  "pid": "328039967",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Maybell 49 in. Single Sink White Freestanding Bath Vanity with White Cultured Marble Top (Assembled)",
+  "brand": "Glacier Bay",
+  "model": "MB48P2-WH",
+  "price": 499.5,
+  "link": "https://apionline.homedepot.com/p/Glacier-Bay-Maybell-49-in-Single-Sink-White-Freestanding-Bath-Vanity-with-White-Cultured-Marble-Top-Assembled-MB48P2-WH/328039967",
+  "search": "clearance"
+ },
+ "6351:311646209": {
+  "pid": "311646209",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "M12 FUEL 12V Lithium-Ion Brushless Cordless 1/4 in. Straight Die Grinder (Tool-Only)",
+  "brand": "Milwaukee",
+  "model": "2486-20",
+  "price": 194.65,
+  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-FUEL-12V-Lithium-Ion-Brushless-Cordless-1-4-in-Straight-Die-Grinder-Tool-Only-2486-20/311646209",
+  "search": "clearance"
+ },
+ "6351:339421307": {
+  "pid": "339421307",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Lancaster 73 in. W Double Sink Vanity in White and 20 in. White Mirror and 21 in. White Storage Cabinet Combo",
+  "brand": "Glacier Bay",
+  "model": "",
+  "price": 1123.65,
+  "link": "https://apionline.homedepot.com/p/sets/Glacier-Bay-Lancaster-73-in-W-Double-Sink-Vanity-in-White-and-20-in-White-Mirror-and-21-in-White-Storage-Cabinet-Combo/339421307",
+  "search": "clearance"
  },
  "6351:343267831": {
   "pid": "343267831",
@@ -2243,17 +2694,6 @@
   "link": "https://apionline.homedepot.com/p/GE-27-cu-ft-French-Door-Refrigerator-in-Fingerprint-resistant-stainless-with-Internal-Dispenser-Energy-Star-GNE27JYMFS/320243591",
   "search": "appliances"
  },
- "6351:328425540": {
-  "pid": "328425540",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "7.2 cu. ft. vented Electric Dryer in White with Auto Dry and Extended Tumble",
-  "brand": "GE",
-  "model": "GTD48EASWWB",
-  "price": 599.0,
-  "link": "https://apionline.homedepot.com/p/GE-7-2-cu-ft-vented-Electric-Dryer-in-White-with-Auto-Dry-and-Extended-Tumble-GTD48EASWWB/328425540",
-  "search": "appliances"
- },
  "6351:342364683": {
   "pid": "342364683",
   "store": "North Jax (Lem Turner)",
@@ -2296,6 +2736,17 @@
   "model": "GRF40HSVSS",
   "price": 649.0,
   "link": "https://apionline.homedepot.com/p/GE-30-in-4-Burner-Element-Free-Standing-Electric-Range-in-Stainless-Steel-w-Stainless-Knobs-GRF40HSVSS/329011820",
+  "search": "appliances"
+ },
+ "6351:328425540": {
+  "pid": "328425540",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "7.2 cu. ft. vented Electric Dryer in White with Auto Dry and Extended Tumble",
+  "brand": "GE",
+  "model": "GTD48EASWWB",
+  "price": 599.0,
+  "link": "https://apionline.homedepot.com/p/GE-7-2-cu-ft-vented-Electric-Dryer-in-White-with-Auto-Dry-and-Extended-Tumble-GTD48EASWWB/328425540",
   "search": "appliances"
  },
  "6351:337198460": {
@@ -2463,17 +2914,6 @@
   "link": "https://apionline.homedepot.com/p/Govee-RGBICW-Permanent-72-bulbs-100-ft-White-Outdoor-Plug-In-Integrated-LED-Puck-String-Light-H805AA01/341892324",
   "search": "lighting"
  },
- "6351:332492272": {
-  "pid": "332492272",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "Universal Select 65/75/90-Watt Equivalent BR30 Dimmable LED Flood Light Bulb with Selectable Color Temperature (6-Pack)",
-  "brand": "EcoSmart",
-  "model": "14BR303WS6CCT01",
-  "price": 22.48,
-  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-65-75-90-Watt-Equivalent-BR30-Dimmable-LED-Flood-Light-Bulb-with-Selectable-Color-Temperature-6-Pack-14BR303WS6CCT01/332492272",
-  "search": "lighting"
- },
  "6351:316405255": {
   "pid": "316405255",
   "store": "North Jax (Lem Turner)",
@@ -2485,15 +2925,26 @@
   "link": "https://apionline.homedepot.com/p/Ring-Floodlight-Cam-Plus-Wired-Outdoor-Smart-Security-Camera-with-2-LED-Lights-2-Way-Talk-Color-Night-Vision-White-B08F6GPQQ7/316405255",
   "search": "lighting"
  },
+ "6351:332492272": {
+  "pid": "332492272",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Universal Select 65/75/90-Watt Equivalent BR30 Dimmable LED Flood Light Bulb with Selectable Color Temperature (6-Pack)",
+  "brand": "EcoSmart",
+  "model": "14BR303WS6CCT01",
+  "price": 22.48,
+  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-65-75-90-Watt-Equivalent-BR30-Dimmable-LED-Flood-Light-Bulb-with-Selectable-Color-Temperature-6-Pack-14BR303WS6CCT01/332492272",
+  "search": "lighting"
+ },
  "6351:332712141": {
   "pid": "332712141",
   "store": "North Jax (Lem Turner)",
   "store_id": "6351",
-  "title": "12-Pack HLBSL 6 in. Adjustable CCT Canless Integrated LED Recessed Light, 900 Lumens, 5CCT, White",
+  "title": "HLBSL 6 in. Adjustable CCT Dimmable Canless Integrated LED Recessed Light, 900 Lumens, 5CCT, White (12-Pack)",
   "brand": "HALO",
   "model": "HLBSL609FS5-12PK",
   "price": 164.0,
-  "link": "https://apionline.homedepot.com/p/HALO-12-Pack-HLBSL-6-in-Adjustable-CCT-Canless-Integrated-LED-Recessed-Light-900-Lumens-5CCT-White-HLBSL609FS5-12PK/332712141",
+  "link": "https://apionline.homedepot.com/p/HALO-HLBSL-6-in-Adjustable-CCT-Dimmable-Canless-Integrated-LED-Recessed-Light-900-Lumens-5CCT-White-12-Pack-HLBSL609FS5-12PK/332712141",
   "search": "lighting"
  },
  "6351:334462061": {
@@ -2507,17 +2958,6 @@
   "link": "https://apionline.homedepot.com/p/Hampton-Bay-24-Light-48-ft-Indoor-Outdoor-Plug-In-Filament-LED-S14-Edison-Bulb-String-Light-SL48-182-FILG2-HD-24/334462061",
   "search": "lighting"
  },
- "6351:340521984": {
-  "pid": "340521984",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "Universal Select 100-Watt Equivalent A19 Dimmable LED Light Bulb with Selectable Color Temperature (4-Pack)",
-  "brand": "EcoSmart",
-  "model": "15A19100W6CCT01",
-  "price": 15.98,
-  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-100-Watt-Equivalent-A19-Dimmable-LED-Light-Bulb-with-Selectable-Color-Temperature-4-Pack-15A19100W6CCT01/340521984",
-  "search": "lighting"
- },
  "6351:322984459": {
   "pid": "322984459",
   "store": "North Jax (Lem Turner)",
@@ -2527,6 +2967,17 @@
   "model": "N608-MBK",
   "price": 299.0,
   "link": "https://apionline.homedepot.com/p/Home-Decorators-Collection-Kensgrove-II-72-in-Smart-Indoor-Outdoor-Matte-Black-Ceiling-Fan-with-Remote-Included-Powered-by-Hubspace-N608-MBK/322984459",
+  "search": "lighting"
+ },
+ "6351:340521984": {
+  "pid": "340521984",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Universal Select 100-Watt Equivalent A19 Dimmable LED Light Bulb with Selectable Color Temperature (4-Pack)",
+  "brand": "EcoSmart",
+  "model": "15A19100W6CCT01",
+  "price": 15.98,
+  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-100-Watt-Equivalent-A19-Dimmable-LED-Light-Bulb-with-Selectable-Color-Temperature-4-Pack-15A19100W6CCT01/340521984",
   "search": "lighting"
  },
  "6351:301162049": {
@@ -2595,17 +3046,6 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-40-Gal-Medium-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE40M06ST45U1/326434008",
   "search": "plumbing"
  },
- "0226:326590448": {
-  "pid": "326590448",
-  "store": "Southside Blvd",
-  "store_id": "0226",
-  "title": "Performance 50 Gal. Tall 4500-Watt Double Element Electric Water Heater with  6-Year Warranty",
-  "brand": "Rheem",
-  "model": "XE50T06ST45U1",
-  "price": 599.0,
-  "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Tall-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50T06ST45U1/326590448",
-  "search": "plumbing"
- },
  "0226:326434092": {
   "pid": "326434092",
   "store": "Southside Blvd",
@@ -2615,6 +3055,17 @@
   "model": "XE50M06ST45U1",
   "price": 599.0,
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Medium-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50M06ST45U1/326434092",
+  "search": "plumbing"
+ },
+ "0226:326590448": {
+  "pid": "326590448",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Performance 50 Gal. Tall 4500-Watt Double Element Electric Water Heater with  6-Year Warranty",
+  "brand": "Rheem",
+  "model": "XE50T06ST45U1",
+  "price": 599.0,
+  "link": "https://apionline.homedepot.com/p/Rheem-Performance-50-Gal-Tall-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE50T06ST45U1/326590448",
   "search": "plumbing"
  },
  "0226:326590285": {
@@ -2635,7 +3086,7 @@
   "title": "Instant Hot/Cold Water Dispenser with Filtration, Invite HOT150 Faucet, Badger 500 Garbage Disposal",
   "brand": "InSinkErator",
   "model": "",
-  "price": 501.62,
+  "price": 575.99,
   "link": "https://apionline.homedepot.com/p/sets/InSinkErator-Instant-Hot-Cold-Water-Dispenser-with-Filtration-Invite-HOT150-Faucet-Badger-500-Garbage-Disposal/342866227",
   "search": "plumbing"
  },
@@ -2650,17 +3101,6 @@
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-38-Gal-Short-4500-Watt-Double-Element-Electric-Water-Heater-with-6-Year-Warranty-XE38S06ST45U1/326590457",
   "search": "plumbing"
  },
- "0226:320557771": {
-  "pid": "320557771",
-  "store": "Southside Blvd",
-  "store_id": "0226",
-  "title": "M12 12-Volt Lithium-Ion FORCE LOGIC Press Tool Kit w/ CTS Copper Jaws w/ ONE-KEY",
-  "brand": "Milwaukee",
-  "model": "2573-22",
-  "price": 2449.0,
-  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-12-Volt-Lithium-Ion-FORCE-LOGIC-Press-Tool-Kit-w-CTS-Copper-Jaws-w-ONE-KEY-2573-22/320557771",
-  "search": "plumbing"
- },
  "0226:330317316": {
   "pid": "330317316",
   "store": "Southside Blvd",
@@ -2670,6 +3110,17 @@
   "model": "XE50T10H45U1",
   "price": 1699.0,
   "link": "https://apionline.homedepot.com/p/Rheem-Performance-Platinum-50-Gal-Smart-High-Efficiency-Hybrid-Heat-Pump-Water-Heater-with-10-Year-Warranty-XE50T10H45U1/330317316",
+  "search": "plumbing"
+ },
+ "0226:320557771": {
+  "pid": "320557771",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "M12 12-Volt Lithium-Ion FORCE LOGIC Press Tool Kit w/ CTS Copper Jaws w/ ONE-KEY",
+  "brand": "Milwaukee",
+  "model": "2573-22",
+  "price": 2449.0,
+  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-12-Volt-Lithium-Ion-FORCE-LOGIC-Press-Tool-Kit-w-CTS-Copper-Jaws-w-ONE-KEY-2573-22/320557771",
   "search": "plumbing"
  },
  "0226:326590441": {
@@ -2690,7 +3141,7 @@
   "title": "250 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
   "brand": "Southwire",
   "model": "28828269",
-  "price": 179.0,
+  "price": 182.0,
   "link": "https://apionline.homedepot.com/p/Southwire-250-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828269/202019375",
   "search": "electrical"
  },
@@ -2738,15 +3189,26 @@
   "link": "https://apionline.homedepot.com/p/Leviton-15-Amp-125-V-Duplex-Outlet-Receptacle-White-1-Pack-5320-W-R52-05320-00W/202066670",
   "search": "electrical"
  },
- "0226:202065285": {
-  "pid": "202065285",
+ "0226:202316379": {
+  "pid": "202316379",
   "store": "Southside Blvd",
   "store_id": "0226",
-  "title": "2-Gang 32 cu. in. Blue Electrical PVC New Work Electrical Switch and Outlet Box (B232ACP)",
-  "brand": "Carlon",
-  "model": "B232ACP",
-  "price": 2.35,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
+  "title": "100 ft. 14/2 Solid Romex SIMpull CU NM-B W/G Wire",
+  "brand": "Southwire",
+  "model": "28827428",
+  "price": 88.0,
+  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
+  "search": "electrical"
+ },
+ "0226:202316375": {
+  "pid": "202316375",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
+  "brand": "Southwire",
+  "model": "28828228",
+  "price": 116.0,
+  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
   "search": "electrical"
  },
  "0226:316913518": {
@@ -2760,26 +3222,15 @@
   "link": "https://apionline.homedepot.com/p/Klein-Tools-Multimeter-Voltage-Tester-and-Outlet-Tester-Premium-Electrical-Tool-Set-69355/316913518",
   "search": "electrical"
  },
- "0226:202316375": {
-  "pid": "202316375",
+ "0226:202065285": {
+  "pid": "202065285",
   "store": "Southside Blvd",
   "store_id": "0226",
-  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
-  "brand": "Southwire",
-  "model": "28828228",
-  "price": 109.0,
-  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
-  "search": "electrical"
- },
- "0226:202316379": {
-  "pid": "202316379",
-  "store": "Southside Blvd",
-  "store_id": "0226",
-  "title": "100 ft. 14/2 Solid Romex SIMpull CU NM-B W/G Wire",
-  "brand": "Southwire",
-  "model": "28827428",
-  "price": 84.0,
-  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
+  "title": "2-Gang 32 cu. in. Blue Electrical PVC New Work Electrical Switch and Outlet Box (B232ACP)",
+  "brand": "Carlon",
+  "model": "B232ACP",
+  "price": 2.35,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
   "search": "electrical"
  },
  "0226:100404072": {
@@ -2815,17 +3266,6 @@
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
   "search": "electrical"
  },
- "0226:300832220": {
-  "pid": "300832220",
-  "store": "Southside Blvd",
-  "store_id": "0226",
-  "title": "1-Gang Metallic Weatherproof Outlet Box with (3) 1/2 in. Holes, Gray",
-  "brand": "Commercial Electric",
-  "model": "WSB350G",
-  "price": 5.95,
-  "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
-  "search": "electrical"
- },
  "0226:328610673": {
   "pid": "328610673",
   "store": "Southside Blvd",
@@ -2835,6 +3275,17 @@
   "model": "1004501535",
   "price": 2.68,
   "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
+  "search": "electrical"
+ },
+ "0226:300832220": {
+  "pid": "300832220",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "1-Gang Metallic Weatherproof Outlet Box with (3) 1/2 in. Holes, Gray",
+  "brand": "Commercial Electric",
+  "model": "WSB350G",
+  "price": 5.95,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
   "search": "electrical"
  },
  "0226:202077339": {
@@ -2859,6 +3310,17 @@
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
   "search": "electrical"
  },
+ "0226:202077343": {
+  "pid": "202077343",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "1-Gang 22 cu. in. Electrical PVC New Work ENT Electrical Box (A122-CAR)",
+  "brand": "Carlon",
+  "model": "A122-CAR",
+  "price": 5.93,
+  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-22-cu-in-Electrical-PVC-New-Work-ENT-Electrical-Box-A122-CAR-A122-CAR/202077343",
+  "search": "electrical"
+ },
  "0226:315337606": {
   "pid": "315337606",
   "store": "Southside Blvd",
@@ -2870,16 +3332,170 @@
   "link": "https://apionline.homedepot.com/p/Klein-Tools-Electrical-Test-Kit-with-Voltage-and-Receptacle-Tester-ET45VP/315337606",
   "search": "electrical"
  },
- "0226:202077343": {
-  "pid": "202077343",
+ "0226:206553445": {
+  "pid": "206553445",
   "store": "Southside Blvd",
   "store_id": "0226",
-  "title": "1-Gang 22 cu. in. Electrical PVC New Work ENT Electrical Box (A122-CAR)",
-  "brand": "Carlon",
-  "model": "A122-CAR",
-  "price": 5.93,
-  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-22-cu-in-Electrical-PVC-New-Work-ENT-Electrical-Box-A122-CAR-A122-CAR/202077343",
-  "search": "electrical"
+  "title": "Garden Soil All Purpose 0.75 cu. ft. for In-Ground Use, Gardens and Raised Beds, Flowers, Vegetables, Trees, Shrubs",
+  "brand": "Miracle-Gro",
+  "model": "75030430",
+  "price": 4.57,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Garden-Soil-All-Purpose-0-75-cu-ft-for-In-Ground-Use-Gardens-and-Raised-Beds-Flowers-Vegetables-Trees-Shrubs-75030430/206553445",
+  "search": "garden"
+ },
+ "0226:314619265": {
+  "pid": "314619265",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Garden Soil All Purpose 1.5 cu. ft. for In-Ground Use, Gardens and Raised Beds, Flowers, Vegetables, Trees, Shrubs",
+  "brand": "Miracle-Gro",
+  "model": "70359500",
+  "price": 8.47,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Garden-Soil-All-Purpose-1-5-cu-ft-for-In-Ground-Use-Gardens-and-Raised-Beds-Flowers-Vegetables-Trees-Shrubs-70359500/314619265",
+  "search": "garden"
+ },
+ "0226:205617903": {
+  "pid": "205617903",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Organic Raised Bed and Potting Mix, All Natural Premium Soil 2 cu. ft., OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6490",
+  "price": 9.97,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-Organic-Raised-Bed-and-Potting-Mix-All-Natural-Premium-Soil-2-cu-ft-OMRI-Listed-6490/205617903",
+  "search": "garden"
+ },
+ "0226:206501693": {
+  "pid": "206501693",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "7.5 in. x 7.5 in. x 5.5 in. Tan Brown Concrete Planter Wall Block",
+  "brand": "Oldcastle",
+  "model": "16202336",
+  "price": 3.97,
+  "link": "https://apionline.homedepot.com/p/Oldcastle-7-5-in-x-7-5-in-x-5-5-in-Tan-Brown-Concrete-Planter-Wall-Block-16202336/206501693",
+  "search": "garden"
+ },
+ "0226:205617876": {
+  "pid": "205617876",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "All Natural Garden Soil, Organic Soil For Flowers and Vegetables 2 cf. ft, OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6850",
+  "price": 8.47,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-All-Natural-Garden-Soil-Organic-Soil-For-Flowers-and-Vegetables-2-cf-ft-OMRI-Listed-6850/205617876",
+  "search": "garden"
+ },
+ "0226:300457596": {
+  "pid": "300457596",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "1 cu. ft. All Purpose Garden Soil for In-Ground Use for Fruits, Flowers, Vegetables and Herbs",
+  "brand": "Vigoro",
+  "model": "72171920",
+  "price": 3.97,
+  "link": "https://apionline.homedepot.com/p/Vigoro-1-cu-ft-All-Purpose-Garden-Soil-for-In-Ground-Use-for-Fruits-Flowers-Vegetables-and-Herbs-72171920/300457596",
+  "search": "garden"
+ },
+ "0226:322251434": {
+  "pid": "322251434",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "2 ft. x 40 ft. Medium Duty Perforated Raised Garden Bed Fabrics",
+  "brand": "Vigoro",
+  "model": "RGB02B40PF",
+  "price": 9.98,
+  "link": "https://apionline.homedepot.com/p/Vigoro-2-ft-x-40-ft-Medium-Duty-Perforated-Raised-Garden-Bed-Fabrics-RGB02B40PF/322251434",
+  "search": "garden"
+ },
+ "0226:100619053": {
+  "pid": "100619053",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Premium Topsoil 0.75 cu. ft., Lawn and Garden Top Soil, Soil Conditioner with Peat Moss",
+  "brand": "Scotts",
+  "model": "71130756",
+  "price": 3.27,
+  "link": "https://apionline.homedepot.com/p/Scotts-Premium-Topsoil-0-75-cu-ft-Lawn-and-Garden-Top-Soil-Soil-Conditioner-with-Peat-Moss-71130756/100619053",
+  "search": "garden"
+ },
+ "0226:206457033": {
+  "pid": "206457033",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Potting Mix Soil 25 qt. For Container Plants, Flowers, Vegetables, Shrubs, Feeds up to 6-Months",
+  "brand": "Miracle-Gro",
+  "model": "72781431",
+  "price": 8.0,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Potting-Mix-Soil-25-qt-For-Container-Plants-Flowers-Vegetables-Shrubs-Feeds-up-to-6-Months-72781431/206457033",
+  "search": "garden"
+ },
+ "0226:206553441": {
+  "pid": "206553441",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Potting Soil Mix 50 qt. For Container Plants, Flowers, Vegetables, Shrubs, Feeds up to 6 Months",
+  "brand": "Miracle-Gro",
+  "model": "72790430",
+  "price": 16.37,
+  "link": "https://apionline.homedepot.com/p/Miracle-Gro-Potting-Soil-Mix-50-qt-For-Container-Plants-Flowers-Vegetables-Shrubs-Feeds-up-to-6-Months-72790430/206553441",
+  "search": "garden"
+ },
+ "0226:317444284": {
+  "pid": "317444284",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "3-Piece Wood Handle Garden Tool Set (Trowel, Transplanter and Cultivator)",
+  "brand": "Anvil",
+  "model": "GD210308",
+  "price": 12.98,
+  "link": "https://apionline.homedepot.com/p/Anvil-3-Piece-Wood-Handle-Garden-Tool-Set-Trowel-Transplanter-and-Cultivator-GD210308/317444284",
+  "search": "garden"
+ },
+ "0226:307415467": {
+  "pid": "307415467",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Organic Premium Outdoor Potting Mix, All Natural Premium Soil 40 qt., OMRI Listed",
+  "brand": "Kellogg Garden Organics",
+  "model": "6830",
+  "price": 8.97,
+  "link": "https://apionline.homedepot.com/p/Kellogg-Garden-Organics-Organic-Premium-Outdoor-Potting-Mix-All-Natural-Premium-Soil-40-qt-OMRI-Listed-6830/307415467",
+  "search": "garden"
+ },
+ "0226:328039967": {
+  "pid": "328039967",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Maybell 49 in. Single Sink White Freestanding Bath Vanity with White Cultured Marble Top (Assembled)",
+  "brand": "Glacier Bay",
+  "model": "MB48P2-WH",
+  "price": 499.5,
+  "link": "https://apionline.homedepot.com/p/Glacier-Bay-Maybell-49-in-Single-Sink-White-Freestanding-Bath-Vanity-with-White-Cultured-Marble-Top-Assembled-MB48P2-WH/328039967",
+  "search": "clearance"
+ },
+ "0226:311646209": {
+  "pid": "311646209",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "M12 FUEL 12V Lithium-Ion Brushless Cordless 1/4 in. Straight Die Grinder (Tool-Only)",
+  "brand": "Milwaukee",
+  "model": "2486-20",
+  "price": 194.65,
+  "link": "https://apionline.homedepot.com/p/Milwaukee-M12-FUEL-12V-Lithium-Ion-Brushless-Cordless-1-4-in-Straight-Die-Grinder-Tool-Only-2486-20/311646209",
+  "search": "clearance"
+ },
+ "0226:339421307": {
+  "pid": "339421307",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Lancaster 73 in. W Double Sink Vanity in White and 20 in. White Mirror and 21 in. White Storage Cabinet Combo",
+  "brand": "Glacier Bay",
+  "model": "",
+  "price": 1123.65,
+  "link": "https://apionline.homedepot.com/p/sets/Glacier-Bay-Lancaster-73-in-W-Double-Sink-Vanity-in-White-and-20-in-White-Mirror-and-21-in-White-Storage-Cabinet-Combo/339421307",
+  "search": "clearance"
  },
  "0226:343267831": {
   "pid": "343267831",
@@ -3090,17 +3706,6 @@
   "link": "https://apionline.homedepot.com/p/GE-27-cu-ft-French-Door-Refrigerator-in-Fingerprint-resistant-stainless-with-Internal-Dispenser-Energy-Star-GNE27JYMFS/320243591",
   "search": "appliances"
  },
- "0226:328425540": {
-  "pid": "328425540",
-  "store": "Southside Blvd",
-  "store_id": "0226",
-  "title": "7.2 cu. ft. vented Electric Dryer in White with Auto Dry and Extended Tumble",
-  "brand": "GE",
-  "model": "GTD48EASWWB",
-  "price": 599.0,
-  "link": "https://apionline.homedepot.com/p/GE-7-2-cu-ft-vented-Electric-Dryer-in-White-with-Auto-Dry-and-Extended-Tumble-GTD48EASWWB/328425540",
-  "search": "appliances"
- },
  "0226:342364683": {
   "pid": "342364683",
   "store": "Southside Blvd",
@@ -3143,6 +3748,17 @@
   "model": "GRF40HSVSS",
   "price": 649.0,
   "link": "https://apionline.homedepot.com/p/GE-30-in-4-Burner-Element-Free-Standing-Electric-Range-in-Stainless-Steel-w-Stainless-Knobs-GRF40HSVSS/329011820",
+  "search": "appliances"
+ },
+ "0226:328425540": {
+  "pid": "328425540",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "7.2 cu. ft. vented Electric Dryer in White with Auto Dry and Extended Tumble",
+  "brand": "GE",
+  "model": "GTD48EASWWB",
+  "price": 599.0,
+  "link": "https://apionline.homedepot.com/p/GE-7-2-cu-ft-vented-Electric-Dryer-in-White-with-Auto-Dry-and-Extended-Tumble-GTD48EASWWB/328425540",
   "search": "appliances"
  },
  "0226:337198460": {
@@ -3229,7 +3845,7 @@
   "title": "250 ft. 12/2 Solid Romex SIMpull Wire and HL 6 in. Canless Recessed Fixture Mounting Frame Combo (6-Pack)",
   "brand": "",
   "model": "",
-  "price": 203.27,
+  "price": 206.12,
   "link": "https://apionline.homedepot.com/p/sets/250-ft-12-2-Solid-Romex-SIMpull-Wire-and-HL-6-in-Canless-Recessed-Fixture-Mounting-Frame-Combo-6-Pack/340327796",
   "search": "lighting"
  },
@@ -3240,7 +3856,7 @@
   "title": "Pro Value 6 in. LED Recessed Light 12-Pk and 250 ft. 14/2 Romex SIMpull Wire Combo",
   "brand": "",
   "model": "",
-  "price": 295.15,
+  "price": 296.1,
   "link": "https://apionline.homedepot.com/p/sets/Pro-Value-6-in-LED-Recessed-Light-12-Pk-and-250-ft-14-2-Romex-SIMpull-Wire-Combo/340327783",
   "search": "lighting"
  },
@@ -3310,17 +3926,6 @@
   "link": "https://apionline.homedepot.com/p/Govee-RGBICW-Permanent-72-bulbs-100-ft-White-Outdoor-Plug-In-Integrated-LED-Puck-String-Light-H805AA01/341892324",
   "search": "lighting"
  },
- "0226:332492272": {
-  "pid": "332492272",
-  "store": "Southside Blvd",
-  "store_id": "0226",
-  "title": "Universal Select 65/75/90-Watt Equivalent BR30 Dimmable LED Flood Light Bulb with Selectable Color Temperature (6-Pack)",
-  "brand": "EcoSmart",
-  "model": "14BR303WS6CCT01",
-  "price": 22.48,
-  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-65-75-90-Watt-Equivalent-BR30-Dimmable-LED-Flood-Light-Bulb-with-Selectable-Color-Temperature-6-Pack-14BR303WS6CCT01/332492272",
-  "search": "lighting"
- },
  "0226:316405255": {
   "pid": "316405255",
   "store": "Southside Blvd",
@@ -3332,15 +3937,26 @@
   "link": "https://apionline.homedepot.com/p/Ring-Floodlight-Cam-Plus-Wired-Outdoor-Smart-Security-Camera-with-2-LED-Lights-2-Way-Talk-Color-Night-Vision-White-B08F6GPQQ7/316405255",
   "search": "lighting"
  },
+ "0226:332492272": {
+  "pid": "332492272",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Universal Select 65/75/90-Watt Equivalent BR30 Dimmable LED Flood Light Bulb with Selectable Color Temperature (6-Pack)",
+  "brand": "EcoSmart",
+  "model": "14BR303WS6CCT01",
+  "price": 22.48,
+  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-65-75-90-Watt-Equivalent-BR30-Dimmable-LED-Flood-Light-Bulb-with-Selectable-Color-Temperature-6-Pack-14BR303WS6CCT01/332492272",
+  "search": "lighting"
+ },
  "0226:332712141": {
   "pid": "332712141",
   "store": "Southside Blvd",
   "store_id": "0226",
-  "title": "12-Pack HLBSL 6 in. Adjustable CCT Canless Integrated LED Recessed Light, 900 Lumens, 5CCT, White",
+  "title": "HLBSL 6 in. Adjustable CCT Dimmable Canless Integrated LED Recessed Light, 900 Lumens, 5CCT, White (12-Pack)",
   "brand": "HALO",
   "model": "HLBSL609FS5-12PK",
   "price": 164.0,
-  "link": "https://apionline.homedepot.com/p/HALO-12-Pack-HLBSL-6-in-Adjustable-CCT-Canless-Integrated-LED-Recessed-Light-900-Lumens-5CCT-White-HLBSL609FS5-12PK/332712141",
+  "link": "https://apionline.homedepot.com/p/HALO-HLBSL-6-in-Adjustable-CCT-Dimmable-Canless-Integrated-LED-Recessed-Light-900-Lumens-5CCT-White-12-Pack-HLBSL609FS5-12PK/332712141",
   "search": "lighting"
  },
  "0226:334462061": {
@@ -3354,17 +3970,6 @@
   "link": "https://apionline.homedepot.com/p/Hampton-Bay-24-Light-48-ft-Indoor-Outdoor-Plug-In-Filament-LED-S14-Edison-Bulb-String-Light-SL48-182-FILG2-HD-24/334462061",
   "search": "lighting"
  },
- "0226:340521984": {
-  "pid": "340521984",
-  "store": "Southside Blvd",
-  "store_id": "0226",
-  "title": "Universal Select 100-Watt Equivalent A19 Dimmable LED Light Bulb with Selectable Color Temperature (4-Pack)",
-  "brand": "EcoSmart",
-  "model": "15A19100W6CCT01",
-  "price": 15.98,
-  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-100-Watt-Equivalent-A19-Dimmable-LED-Light-Bulb-with-Selectable-Color-Temperature-4-Pack-15A19100W6CCT01/340521984",
-  "search": "lighting"
- },
  "0226:322984459": {
   "pid": "322984459",
   "store": "Southside Blvd",
@@ -3374,6 +3979,17 @@
   "model": "N608-MBK",
   "price": 299.0,
   "link": "https://apionline.homedepot.com/p/Home-Decorators-Collection-Kensgrove-II-72-in-Smart-Indoor-Outdoor-Matte-Black-Ceiling-Fan-with-Remote-Included-Powered-by-Hubspace-N608-MBK/322984459",
+  "search": "lighting"
+ },
+ "0226:340521984": {
+  "pid": "340521984",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "Universal Select 100-Watt Equivalent A19 Dimmable LED Light Bulb with Selectable Color Temperature (4-Pack)",
+  "brand": "EcoSmart",
+  "model": "15A19100W6CCT01",
+  "price": 15.98,
+  "link": "https://apionline.homedepot.com/p/EcoSmart-Universal-Select-100-Watt-Equivalent-A19-Dimmable-LED-Light-Bulb-with-Selectable-Color-Temperature-4-Pack-15A19100W6CCT01/340521984",
   "search": "lighting"
  },
  "0226:301162049": {
