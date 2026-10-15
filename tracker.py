@@ -59,10 +59,35 @@ def fetch_page(store, query, page):
     return data.get("products", [])
 
 
+def sold_in_store(p):
+    """True = sold in the store, False = online only, None = can't tell (kept, to be safe)."""
+    pickup = p.get("pickup")
+    if not pickup:
+        return None
+    if isinstance(pickup, dict):
+        if pickup.get("quantity") is not None or pickup.get("store_name") or pickup.get("out_of_stock"):
+            return True
+        if pickup.get("free_ship_to_store"):
+            return False
+        return None
+    text = str(pickup).lower()
+    if "ship to store" in text and "in stock" not in text:
+        return False
+    return True
+
+
+def ends_in_03(price):
+    try:
+        return f"{float(price):.2f}".endswith(".03")
+    except (TypeError, ValueError):
+        return False
+
+
 def fetch_listings():
     """Returns {"STOREID:PRODUCTID": item} — each store tracked separately."""
     items = {}
     searches_used = 0
+    skip_online = CONFIG.get("skip_online_only", True)
     for store in stores():
         for query in CONFIG["searches"]:
             for page in range(CONFIG["pages_per_search"]):
@@ -75,6 +100,8 @@ def fetch_listings():
                 for p in products:
                     pid = str(p.get("product_id") or "")
                     if not pid:
+                        continue
+                    if skip_online and sold_in_store(p) is False:
                         continue
                     items[f"{store['id']}:{pid}"] = {
                         "pid": pid,
@@ -118,7 +145,8 @@ def demo_listings(day_offset):
             base[f"{s['id']}:{pid}"] = {
                 "pid": pid, "store": s["name"], "store_id": s["id"],
                 "title": f"Demo Product {i}", "brand": random.choice(["RYOBI", "DEWALT", "Milwaukee", "HDX"]),
-                "model": f"M{i:04d}", "price": round(random.uniform(9, 399), 2),
+                "model": f"M{i:04d}",
+                "price": (int(random.uniform(9, 99)) + 0.03) if i % 7 == 0 else round(random.uniform(9, 399), 2),
                 "link": "https://www.homedepot.com", "search": "demo"}
     if day_offset == 1:            # "today": a few items vanished, a few new
         for key in random.sample(sorted(base), 6):
@@ -166,6 +194,19 @@ def main():
     log = load_json(LOG_FILE, [])
     gone, new = [], []
 
+    if prev is not None and not demo:
+        # Only compare departments we still track, so changing the list doesn't look like a mass discontinue.
+        prev = {k: v for k, v in prev.items() if v.get("search") in CONFIG["searches"]}
+
+    # Prices ending in .03 — often the last markdown before a penny.
+    point03 = []
+    for key, it in items.items():
+        if ends_in_03(it.get("price")):
+            was = (prev or {}).get(key)
+            fresh = not (was and ends_in_03(was.get("price")))
+            point03.append(dict(it, id=key, status="New .03 today" if fresh else ".03"))
+    point03.sort(key=lambda r: (r["status"] != "New .03 today", r["store"], r["title"]))
+
     if prev is not None:
         # A store that returned nothing today had a failed pull — don't count its items as gone.
         stores_ok = {it["store_id"] for it in items.values()}
@@ -194,8 +235,9 @@ def main():
                 log.append(row)
         LOG_FILE.write_text(json.dumps(log, indent=1))
 
-    write_report(today_str, prev_day, items, gone, new, log, used, demo)
-    print(f"Done. {len(items)} items today, {len(gone)} disappeared, {len(new)} new. "
+    write_report(today_str, prev_day, items, gone, new, log, used, demo, point03)
+    print(f"Done. {len(items)} items today, {len(gone)} disappeared, {len(new)} new, "
+          f"{len(point03)} priced .03. "
           f"SerpApi searches used: {used}")
 
 
@@ -215,7 +257,7 @@ def rows(items, show_status=True, date_key=None):
     for it in items:
         badge = ""
         if show_status:
-            cls = {"Discontinued": "bad", "Gone from site": "bad",
+            cls = {"Discontinued": "bad", "Gone from site": "bad", "New .03 today": "bad",
                    "Still listed": "ok"}.get(it.get("status"), "meh")
             badge = f'<span class="badge {cls}">{html.escape(it.get("status", ""))}</span>'
         when = f'<span class="when">{html.escape(it.get(date_key, ""))}</span>' if date_key else ""
@@ -229,7 +271,7 @@ def rows(items, show_status=True, date_key=None):
     return "\n".join(out)
 
 
-def write_report(today, prev_day, items, gone, new, log, used, demo):
+def write_report(today, prev_day, items, gone, new, log, used, demo, point03):
     confirmed = [g for g in gone if g["status"] in ("Discontinued", "Gone from site")]
     other = [g for g in gone if g not in confirmed]
     compare = f"Compared with {prev_day}" if prev_day else "First day — nothing to compare yet. Check back tomorrow."
@@ -249,7 +291,7 @@ header {{ background:var(--orange); color:#fff; padding:18px 16px 14px; }}
 header h1 {{ margin:0; font-size:20px; }}
 header p {{ margin:4px 0 0; opacity:.9; font-size:13px; }}
 main {{ max-width:720px; margin:0 auto; padding:12px 16px 40px; }}
-.stats {{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:4px 0 16px; }}
+.stats {{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:4px 0 16px; }}
 .stat {{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px; text-align:center; }}
 .stat b {{ display:block; font-size:22px; }}
 .stat span {{ font-size:12px; color:var(--mute); }}
@@ -277,11 +319,15 @@ footer {{ color:var(--mute); font-size:12px; margin-top:28px; }}
 <div class="stats">
   <div class="stat"><b>{len(items)}</b><span>tracked today</span></div>
   <div class="stat"><b>{len(confirmed)}</b><span>discontinued today</span></div>
+  <div class="stat"><b>{len(point03)}</b><span>priced .03</span></div>
   <div class="stat"><b>{len(new)}</b><span>new today</span></div>
 </div>
 
 <h2>Discontinued since yesterday</h2>
 {rows(confirmed)}
+
+<h2>Prices ending in .03 <small>(often next stop is a penny)</small></h2>
+{rows(point03)}
 
 <h2>Disappeared, not confirmed <small>({len(other)})</small></h2>
 {rows(other)}
