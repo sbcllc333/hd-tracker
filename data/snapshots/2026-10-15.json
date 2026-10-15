@@ -186,17 +186,6 @@
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
   "search": "electrical"
  },
- "0275:202316375": {
-  "pid": "202316375",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
-  "brand": "Southwire",
-  "model": "28828228",
-  "price": 116.0,
-  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
-  "search": "electrical"
- },
  "0275:316913518": {
   "pid": "316913518",
   "store": "Orange Park (Wells Rd)",
@@ -219,6 +208,17 @@
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
   "search": "electrical"
  },
+ "0275:202316375": {
+  "pid": "202316375",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
+  "brand": "Southwire",
+  "model": "28828228",
+  "price": 116.0,
+  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
+  "search": "electrical"
+ },
  "0275:100404072": {
   "pid": "100404072",
   "store": "Orange Park (Wells Rd)",
@@ -228,28 +228,6 @@
   "model": "B618RR",
   "price": 4.11,
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-18-cu-in-Electrical-PVC-Round-Old-Work-Electrical-Box-B618RR-B618RR/100404072",
-  "search": "electrical"
- },
- "0275:100404169": {
-  "pid": "100404169",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
-  "brand": "Carlon",
-  "model": "B225R-UPC",
-  "price": 5.32,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
-  "search": "electrical"
- },
- "0275:328610673": {
-  "pid": "328610673",
-  "store": "Orange Park (Wells Rd)",
-  "store_id": "0275",
-  "title": "3/4 in. x 30 ft. Commercial Carded Electrical Tape, Black",
-  "brand": "Commercial Electric",
-  "model": "1004501535",
-  "price": 2.68,
-  "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
   "search": "electrical"
  },
  "0275:305110268": {
@@ -263,6 +241,28 @@
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-47-cu-in-Electrical-PVC-New-Old-Work-Electrical-Box-B249B-B249B/305110268",
   "search": "electrical"
  },
+ "0275:328610673": {
+  "pid": "328610673",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "3/4 in. x 30 ft. Commercial Carded Electrical Tape, Black",
+  "brand": "Commercial Electric",
+  "model": "1004501535",
+  "price": 2.68,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
+  "search": "electrical"
+ },
+ "0275:100404169": {
+  "pid": "100404169",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
+  "brand": "Carlon",
+  "model": "B225R-UPC",
+  "price": 5.32,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
+  "search": "electrical"
+ },
  "0275:300832220": {
   "pid": "300832220",
   "store": "Orange Park (Wells Rd)",
@@ -272,6 +272,17 @@
   "model": "WSB350G",
   "price": 5.95,
   "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
+  "search": "electrical"
+ },
+ "0275:202077339": {
+  "pid": "202077339",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "1-Gang 21 cu. in. Electrical PVC New Work Electrical Switch and Outlet Box with Adjustable Bracket (B121ADJ-40R)",
+  "brand": "Carlon",
+  "model": "B121ADJ-40R",
+  "price": 4.98,
+  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-21-cu-in-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-with-Adjustable-Bracket-B121ADJ-40R-B121ADJ-40R/202077339",
   "search": "electrical"
  },
  "0275:100315472": {
@@ -285,15 +296,15 @@
   "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
   "search": "electrical"
  },
- "0275:202077339": {
-  "pid": "202077339",
+ "0275:100085271": {
+  "pid": "100085271",
   "store": "Orange Park (Wells Rd)",
   "store_id": "0275",
-  "title": "1-Gang 21 cu. in. Electrical PVC New Work Electrical Switch and Outlet Box with Adjustable Bracket (B121ADJ-40R)",
-  "brand": "Carlon",
-  "model": "B121ADJ-40R",
-  "price": 4.98,
-  "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-21-cu-in-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-with-Adjustable-Bracket-B121ADJ-40R-B121ADJ-40R/202077339",
+  "title": "Wiring Simplified 46th Edition, DIY Electrical Installation Guide",
+  "brand": "",
+  "model": "ERB-WS",
+  "price": 10.38,
+  "link": "https://apionline.homedepot.com/p/Wiring-Simplified-46th-Edition-DIY-Electrical-Installation-Guide-ERB-WS/100085271",
   "search": "electrical"
  },
  "0275:202077343": {
@@ -1117,7 +1128,7 @@
   "title": "250 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
   "brand": "Southwire",
   "model": "28828269",
-  "price": 179.0,
+  "price": 182.0,
   "link": "https://apionline.homedepot.com/p/Southwire-250-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828269/202019375",
   "search": "electrical"
  },
@@ -1183,19 +1194,8 @@
   "title": "100 ft. 14/2 Solid Romex SIMpull CU NM-B W/G Wire",
   "brand": "Southwire",
   "model": "28827428",
-  "price": 84.0,
+  "price": 88.0,
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
-  "search": "electrical"
- },
- "6346:202065285": {
-  "pid": "202065285",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "2-Gang 32 cu. in. Blue Electrical PVC New Work Electrical Switch and Outlet Box (B232ACP)",
-  "brand": "Carlon",
-  "model": "B232ACP",
-  "price": 2.35,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
   "search": "electrical"
  },
  "6346:202316375": {
@@ -1207,6 +1207,17 @@
   "model": "28828228",
   "price": 109.0,
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
+  "search": "electrical"
+ },
+ "6346:202065285": {
+  "pid": "202065285",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "2-Gang 32 cu. in. Blue Electrical PVC New Work Electrical Switch and Outlet Box (B232ACP)",
+  "brand": "Carlon",
+  "model": "B232ACP",
+  "price": 2.35,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
   "search": "electrical"
  },
  "6346:100404072": {
@@ -1242,6 +1253,17 @@
   "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
   "search": "electrical"
  },
+ "6346:100404169": {
+  "pid": "100404169",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
+  "brand": "Carlon",
+  "model": "B225R-UPC",
+  "price": 5.32,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
+  "search": "electrical"
+ },
  "6346:202077339": {
   "pid": "202077339",
   "store": "Lane Ave / Normandy",
@@ -1264,17 +1286,6 @@
   "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
   "search": "electrical"
  },
- "6346:100315472": {
-  "pid": "100315472",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "2-Gang 34 cu. in. Electrical PVC New Work Electrical Box with Adjustable Bracket (B234ADJC)",
-  "brand": "Carlon",
-  "model": "B234ADJC",
-  "price": 9.61,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
-  "search": "electrical"
- },
  "6346:202077343": {
   "pid": "202077343",
   "store": "Lane Ave / Normandy",
@@ -1286,17 +1297,6 @@
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-22-cu-in-Electrical-PVC-New-Work-ENT-Electrical-Box-A122-CAR-A122-CAR/202077343",
   "search": "electrical"
  },
- "6346:100404169": {
-  "pid": "100404169",
-  "store": "Lane Ave / Normandy",
-  "store_id": "6346",
-  "title": "2-Gang 25 cu. in. Electrical PVC Old Work Electrical Switch and Outlet Box (B225R-UPC)",
-  "brand": "Carlon",
-  "model": "B225R-UPC",
-  "price": 5.32,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-25-cu-in-Electrical-PVC-Old-Work-Electrical-Switch-and-Outlet-Box-B225R-UPC-B225R-UPC/100404169",
-  "search": "electrical"
- },
  "6346:315337606": {
   "pid": "315337606",
   "store": "Lane Ave / Normandy",
@@ -1306,6 +1306,17 @@
   "model": "ET45VP",
   "price": 19.97,
   "link": "https://apionline.homedepot.com/p/Klein-Tools-Electrical-Test-Kit-with-Voltage-and-Receptacle-Tester-ET45VP/315337606",
+  "search": "electrical"
+ },
+ "6346:100315472": {
+  "pid": "100315472",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "2-Gang 34 cu. in. Electrical PVC New Work Electrical Box with Adjustable Bracket (B234ADJC)",
+  "brand": "Carlon",
+  "model": "B234ADJC",
+  "price": 9.61,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
   "search": "electrical"
  },
  "6346:206553445": {
@@ -1810,7 +1821,7 @@
   "title": "250 ft. 12/2 Solid Romex SIMpull Wire and HL 6 in. Canless Recessed Fixture Mounting Frame Combo (6-Pack)",
   "brand": "",
   "model": "",
-  "price": 203.27,
+  "price": 206.12,
   "link": "https://apionline.homedepot.com/p/sets/250-ft-12-2-Solid-Romex-SIMpull-Wire-and-HL-6-in-Canless-Recessed-Fixture-Mounting-Frame-Combo-6-Pack/340327796",
   "search": "lighting"
  },
@@ -1821,7 +1832,7 @@
   "title": "Pro Value 6 in. LED Recessed Light 12-Pk and 250 ft. 14/2 Romex SIMpull Wire Combo",
   "brand": "",
   "model": "",
-  "price": 295.15,
+  "price": 296.1,
   "link": "https://apionline.homedepot.com/p/sets/Pro-Value-6-in-LED-Recessed-Light-12-Pk-and-250-ft-14-2-Romex-SIMpull-Wire-Combo/340327783",
   "search": "lighting"
  },
@@ -2166,17 +2177,6 @@
   "link": "https://apionline.homedepot.com/p/Leviton-15-Amp-125-V-Duplex-Outlet-Receptacle-White-1-Pack-5320-W-R52-05320-00W/202066670",
   "search": "electrical"
  },
- "6351:202065285": {
-  "pid": "202065285",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "2-Gang 32 cu. in. Blue Electrical PVC New Work Electrical Switch and Outlet Box (B232ACP)",
-  "brand": "Carlon",
-  "model": "B232ACP",
-  "price": 2.35,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
-  "search": "electrical"
- },
  "6351:202316379": {
   "pid": "202316379",
   "store": "North Jax (Lem Turner)",
@@ -2186,17 +2186,6 @@
   "model": "28827428",
   "price": 84.0,
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
-  "search": "electrical"
- },
- "6351:316913518": {
-  "pid": "316913518",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "Multimeter, Voltage Tester and Outlet Tester Premium Electrical Tool Set",
-  "brand": "Klein Tools",
-  "model": "69355",
-  "price": 59.97,
-  "link": "https://apionline.homedepot.com/p/Klein-Tools-Multimeter-Voltage-Tester-and-Outlet-Tester-Premium-Electrical-Tool-Set-69355/316913518",
   "search": "electrical"
  },
  "6351:202316375": {
@@ -2210,6 +2199,28 @@
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
   "search": "electrical"
  },
+ "6351:316913518": {
+  "pid": "316913518",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "Multimeter, Voltage Tester and Outlet Tester Premium Electrical Tool Set",
+  "brand": "Klein Tools",
+  "model": "69355",
+  "price": 59.97,
+  "link": "https://apionline.homedepot.com/p/Klein-Tools-Multimeter-Voltage-Tester-and-Outlet-Tester-Premium-Electrical-Tool-Set-69355/316913518",
+  "search": "electrical"
+ },
+ "6351:202065285": {
+  "pid": "202065285",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "2-Gang 32 cu. in. Blue Electrical PVC New Work Electrical Switch and Outlet Box (B232ACP)",
+  "brand": "Carlon",
+  "model": "B232ACP",
+  "price": 2.35,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-32-cu-in-Blue-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-B232ACP-B232ACP/202065285",
+  "search": "electrical"
+ },
  "6351:100404072": {
   "pid": "100404072",
   "store": "North Jax (Lem Turner)",
@@ -2219,17 +2230,6 @@
   "model": "B618RR",
   "price": 4.11,
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-18-cu-in-Electrical-PVC-Round-Old-Work-Electrical-Box-B618RR-B618RR/100404072",
-  "search": "electrical"
- },
- "6351:305110268": {
-  "pid": "305110268",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "2-Gang 47 cu. in. Electrical PVC New/Old Work Electrical Box (B249B)",
-  "brand": "Carlon",
-  "model": "B249B",
-  "price": 4.77,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-47-cu-in-Electrical-PVC-New-Old-Work-Electrical-Box-B249B-B249B/305110268",
   "search": "electrical"
  },
  "6351:100404169": {
@@ -2254,6 +2254,17 @@
   "link": "https://apionline.homedepot.com/p/Commercial-Electric-3-4-in-x-30-ft-Commercial-Carded-Electrical-Tape-Black-1004501535/328610673",
   "search": "electrical"
  },
+ "6351:305110268": {
+  "pid": "305110268",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "2-Gang 47 cu. in. Electrical PVC New/Old Work Electrical Box (B249B)",
+  "brand": "Carlon",
+  "model": "B249B",
+  "price": 4.77,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-47-cu-in-Electrical-PVC-New-Old-Work-Electrical-Box-B249B-B249B/305110268",
+  "search": "electrical"
+ },
  "6351:300832220": {
   "pid": "300832220",
   "store": "North Jax (Lem Turner)",
@@ -2265,17 +2276,6 @@
   "link": "https://apionline.homedepot.com/p/Commercial-Electric-1-Gang-Metallic-Weatherproof-Outlet-Box-with-3-1-2-in-Holes-Gray-WSB350G/300832220",
   "search": "electrical"
  },
- "6351:100315472": {
-  "pid": "100315472",
-  "store": "North Jax (Lem Turner)",
-  "store_id": "6351",
-  "title": "2-Gang 34 cu. in. Electrical PVC New Work Electrical Box with Adjustable Bracket (B234ADJC)",
-  "brand": "Carlon",
-  "model": "B234ADJC",
-  "price": 9.61,
-  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
-  "search": "electrical"
- },
  "6351:202077339": {
   "pid": "202077339",
   "store": "North Jax (Lem Turner)",
@@ -2285,6 +2285,17 @@
   "model": "B121ADJ-40R",
   "price": 4.98,
   "link": "https://apionline.homedepot.com/p/Carlon-1-Gang-21-cu-in-Electrical-PVC-New-Work-Electrical-Switch-and-Outlet-Box-with-Adjustable-Bracket-B121ADJ-40R-B121ADJ-40R/202077339",
+  "search": "electrical"
+ },
+ "6351:100315472": {
+  "pid": "100315472",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "2-Gang 34 cu. in. Electrical PVC New Work Electrical Box with Adjustable Bracket (B234ADJC)",
+  "brand": "Carlon",
+  "model": "B234ADJC",
+  "price": 9.61,
+  "link": "https://apionline.homedepot.com/p/Carlon-2-Gang-34-cu-in-Electrical-PVC-New-Work-Electrical-Box-with-Adjustable-Bracket-B234ADJC-B234ADJC/100315472",
   "search": "electrical"
  },
  "6351:202077343": {
@@ -3200,17 +3211,6 @@
   "link": "https://apionline.homedepot.com/p/Southwire-100-ft-14-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28827428/202316379",
   "search": "electrical"
  },
- "0226:202316375": {
-  "pid": "202316375",
-  "store": "Southside Blvd",
-  "store_id": "0226",
-  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
-  "brand": "Southwire",
-  "model": "28828228",
-  "price": 116.0,
-  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
-  "search": "electrical"
- },
  "0226:316913518": {
   "pid": "316913518",
   "store": "Southside Blvd",
@@ -3220,6 +3220,17 @@
   "model": "69355",
   "price": 59.97,
   "link": "https://apionline.homedepot.com/p/Klein-Tools-Multimeter-Voltage-Tester-and-Outlet-Tester-Premium-Electrical-Tool-Set-69355/316913518",
+  "search": "electrical"
+ },
+ "0226:202316375": {
+  "pid": "202316375",
+  "store": "Southside Blvd",
+  "store_id": "0226",
+  "title": "100 ft. 12/2 Solid Romex SIMpull CU NM-B W/G Wire",
+  "brand": "Southwire",
+  "model": "28828228",
+  "price": 116.0,
+  "link": "https://apionline.homedepot.com/p/Southwire-100-ft-12-2-Solid-Romex-SIMpull-CU-NM-B-W-G-Wire-28828228/202316375",
   "search": "electrical"
  },
  "0226:202065285": {
