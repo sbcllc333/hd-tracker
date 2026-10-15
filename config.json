@@ -3,6 +3,10 @@
   "pages_per_search": 1,
   "double_check_limit": 3,
   "skip_online_only": true,
+  "fallbacks": {
+    "garden": ["lawn and garden", "garden supplies"],
+    "clearance": ["clearance items", "clearance sale"]
+  },
   "stores": [
     {"id": "0275", "name": "Orange Park (Wells Rd)",   "on": true},
     {"id": "6346", "name": "Lane Ave / Normandy",      "on": true},

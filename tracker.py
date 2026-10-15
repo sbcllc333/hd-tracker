@@ -22,6 +22,7 @@ import sys
 import urllib.parse
 import urllib.request
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -30,6 +31,7 @@ SNAP_DIR = ROOT / "data" / "snapshots"
 LOG_FILE = ROOT / "data" / "discontinued_log.json"
 REPORT = ROOT / "docs" / "index.html"
 API = "https://serpapi.com/search.json"
+TZ = ZoneInfo("America/New_York")   # GitHub runs on UTC; use Jacksonville time
 PAGE_SIZE = 24
 
 DEAD_WORDS = ("discontinued", "no longer available", "no longer sold",
@@ -84,40 +86,54 @@ def ends_in_03(price):
 
 
 def fetch_listings():
-    """Returns {"STOREID:PRODUCTID": item} — each store tracked separately."""
+    """Returns {"STOREID:PRODUCTID": item} — each store tracked separately.
+    If a search word gives nothing (Home Depot sometimes treats words like
+    "garden" or "clearance" as special pages), it tries the backup words in
+    config.json "fallbacks"."""
     items = {}
     searches_used = 0
+    run_log = []
     skip_online = CONFIG.get("skip_online_only", True)
+    fallbacks = CONFIG.get("fallbacks", {})
     for store in stores():
-        for query in CONFIG["searches"]:
-            for page in range(CONFIG["pages_per_search"]):
-                try:
-                    products = fetch_page(store, query, page)
-                    searches_used += 1
-                except Exception as e:
-                    print(f"  ! {store['name']} '{query}' page {page + 1} failed: {e}")
+        for dept in CONFIG["searches"]:
+            got, tried, last_err = 0, [], ""
+            for query in [dept] + fallbacks.get(dept, []):
+                tried.append(query)
+                for page in range(CONFIG["pages_per_search"]):
+                    try:
+                        products = fetch_page(store, query, page)
+                        searches_used += 1
+                    except Exception as e:
+                        last_err = str(e)
+                        print(f"  ! {store['name']} '{query}' page {page + 1} failed: {e}")
+                        break
+                    for p in products:
+                        pid = str(p.get("product_id") or "")
+                        if not pid:
+                            continue
+                        if skip_online and sold_in_store(p) is False:
+                            continue
+                        got += 1
+                        items[f"{store['id']}:{pid}"] = {
+                            "pid": pid,
+                            "store": store["name"],
+                            "store_id": store["id"],
+                            "title": p.get("title", ""),
+                            "brand": p.get("brand", ""),
+                            "model": p.get("model_number", ""),
+                            "price": p.get("price"),
+                            "link": p.get("link", ""),
+                            "search": dept,
+                        }
+                    print(f"  {store['name']} '{query}' page {page + 1}: {len(products)} items")
+                    if len(products) < PAGE_SIZE:
+                        break
+                if got:
                     break
-                for p in products:
-                    pid = str(p.get("product_id") or "")
-                    if not pid:
-                        continue
-                    if skip_online and sold_in_store(p) is False:
-                        continue
-                    items[f"{store['id']}:{pid}"] = {
-                        "pid": pid,
-                        "store": store["name"],
-                        "store_id": store["id"],
-                        "title": p.get("title", ""),
-                        "brand": p.get("brand", ""),
-                        "model": p.get("model_number", ""),
-                        "price": p.get("price"),
-                        "link": p.get("link", ""),
-                        "search": query,
-                    }
-                print(f"  {store['name']} '{query}' page {page + 1}: {len(products)} items")
-                if len(products) < PAGE_SIZE:
-                    break
-    return items, searches_used
+            run_log.append({"store": store["name"], "dept": dept, "count": got,
+                            "used": tried[-1], "error": "" if got else (last_err or "no results")})
+    return items, searches_used, run_log
 
 
 def check_product(pid, store_id):
@@ -177,13 +193,13 @@ def main():
     SNAP_DIR.mkdir(parents=True, exist_ok=True)
     REPORT.parent.mkdir(parents=True, exist_ok=True)
 
-    today = date.today()
+    today = datetime.now(TZ).date()
     if demo:   # make a fake "yesterday" first so there is something to compare
         (SNAP_DIR / f"{today - timedelta(days=1)}.json").write_text(json.dumps(demo_listings(0)))
-        items, used = demo_listings(1), 0
+        items, used, run_log = demo_listings(1), 0, []
     else:
         print("Pulling today's listings...")
-        items, used = fetch_listings()
+        items, used, run_log = fetch_listings()
 
     today_str = today.isoformat()
     if not items:
@@ -235,7 +251,7 @@ def main():
                 log.append(row)
         LOG_FILE.write_text(json.dumps(log, indent=1))
 
-    write_report(today_str, prev_day, items, gone, new, log, used, demo, point03)
+    write_report(today_str, prev_day, items, gone, new, log, used, demo, point03, run_log)
     print(f"Done. {len(items)} items today, {len(gone)} disappeared, {len(new)} new, "
           f"{len(point03)} priced .03. "
           f"SerpApi searches used: {used}")
@@ -271,7 +287,20 @@ def rows(items, show_status=True, date_key=None):
     return "\n".join(out)
 
 
-def write_report(today, prev_day, items, gone, new, log, used, demo, point03):
+def run_table(run_log):
+    if not run_log:
+        return '<p class="empty">Nothing here.</p>'
+    out = []
+    for r in run_log:
+        if r["count"]:
+            note = f'{r["count"]} items' + (f' (used "{html.escape(r["used"])}")' if r["used"] != r["dept"] else "")
+        else:
+            note = f'<span style="color:var(--bad)">nothing: {html.escape(r["error"][:120])}</span>'
+        out.append(f'<div class="m">{html.escape(r["store"])} · {html.escape(r["dept"])} · {note}</div>')
+    return "\n".join(out)
+
+
+def write_report(today, prev_day, items, gone, new, log, used, demo, point03, run_log):
     confirmed = [g for g in gone if g["status"] in ("Discontinued", "Gone from site")]
     other = [g for g in gone if g not in confirmed]
     compare = f"Compared with {prev_day}" if prev_day else "First day — nothing to compare yet. Check back tomorrow."
@@ -333,12 +362,14 @@ footer {{ color:var(--mute); font-size:12px; margin-top:28px; }}
 {rows(other)}
 
 <details><summary>New items today ({len(new)})</summary>{rows(new, show_status=False)}</details>
+<details><summary>Search results by store ({sum(1 for r in run_log if not r["count"])} with nothing)</summary>
+{run_table(run_log)}</details>
 <details><summary>All discontinued, every day ({len(log)})</summary>
 {rows(list(reversed(log)), date_key="noticed")}</details>
 
 <footer>Stores: {html.escape(", ".join(s["name"] for s in stores()))} ·
 Searches tracked: {html.escape(", ".join(CONFIG["searches"]))} ·
-SerpApi searches used this run: {used} · Updated {datetime.now():%b %d, %Y %I:%M %p}</footer>
+SerpApi searches used this run: {used} · Updated {datetime.now(TZ):%b %d, %Y %I:%M %p}</footer>
 </main></body></html>"""
     REPORT.write_text(page)
 
