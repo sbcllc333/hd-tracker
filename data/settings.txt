@@ -1,0 +1,1 @@
+{"fallbacks": {"clearance": ["clearance items", "clearance sale"], "garden": ["lawn and garden", "garden supplies"]}, "min_price": 10, "searches": ["plumbing", "electrical", "garden", "clearance", "appliances", "lighting", "tools"], "stores": ["0275", "6346", "6351", "0226"]}
