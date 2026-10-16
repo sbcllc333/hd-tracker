@@ -1,1 +1,18 @@
-[]
+[
+ {
+  "pid": "100085271",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "Wiring Simplified 46th Edition, DIY Electrical Installation Guide",
+  "brand": "",
+  "model": "ERB-WS",
+  "price": 10.38,
+  "link": "https://apionline.homedepot.com/p/Wiring-Simplified-46th-Edition-DIY-Electrical-Installation-Guide-ERB-WS/100085271",
+  "search": "electrical",
+  "id": "0275:100085271",
+  "status": "Discontinued",
+  "note": "Home Depot marks it no longer available",
+  "last_seen": "2026-10-15",
+  "noticed": "2026-10-16"
+ }
+]
