@@ -55,6 +55,8 @@ def fetch_page(store, query, page):
     """One SerpApi search = one page of up to 24 items at one store."""
     params = {"engine": "home_depot", "q": query, "store_id": store["id"],
               "nao": page * PAGE_SIZE, "ps": PAGE_SIZE}
+    if CONFIG.get("min_price"):
+        params["lowerbound"] = CONFIG["min_price"]   # ask Home Depot for $X and up only
     data = serpapi(params)
     if data.get("error"):
         raise RuntimeError(data["error"])
@@ -76,6 +78,21 @@ def sold_in_store(p):
     if "ship to store" in text and "in stock" not in text:
         return False
     return True
+
+
+def too_cheap(price):
+    """True if under min_price. Items with no price shown are kept, to be safe."""
+    try:
+        return float(price) < float(CONFIG.get("min_price") or 0)
+    except (TypeError, ValueError):
+        return False
+
+
+def settings_fingerprint():
+    """Changes when departments, stores or the price floor change."""
+    return json.dumps({"searches": CONFIG["searches"], "fallbacks": CONFIG.get("fallbacks", {}),
+                       "min_price": CONFIG.get("min_price"),
+                       "stores": [s["id"] for s in stores()]}, sort_keys=True)
 
 
 def ends_in_03(price):
@@ -113,6 +130,8 @@ def fetch_listings():
                         if not pid:
                             continue
                         if skip_online and sold_in_store(p) is False:
+                            continue
+                        if too_cheap(p.get("price")):
                             continue
                         got += 1
                         items[f"{store['id']}:{pid}"] = {
@@ -208,6 +227,15 @@ def main():
 
     prev_day, prev = previous_snapshot(today_str)
     log = load_json(LOG_FILE, [])
+    fp_file = ROOT / "data" / "settings.txt"
+    fresh_start = False
+    if not demo:
+        fp = settings_fingerprint()
+        if prev is not None and (not fp_file.exists() or fp_file.read_text() != fp):
+            # Settings changed: yesterday's list isn't comparable, so start a new baseline today.
+            print("  Settings changed since last run — starting fresh, no comparison today.")
+            prev, prev_day, fresh_start = None, None, True
+        fp_file.write_text(fp)
     gone, new = [], []
 
     if prev is not None and not demo:
@@ -251,7 +279,7 @@ def main():
                 log.append(row)
         LOG_FILE.write_text(json.dumps(log, indent=1))
 
-    write_report(today_str, prev_day, items, gone, new, log, used, demo, point03, run_log)
+    write_report(today_str, prev_day, items, gone, new, log, used, demo, point03, run_log, fresh_start)
     print(f"Done. {len(items)} items today, {len(gone)} disappeared, {len(new)} new, "
           f"{len(point03)} priced .03. "
           f"SerpApi searches used: {used}")
@@ -300,10 +328,15 @@ def run_table(run_log):
     return "\n".join(out)
 
 
-def write_report(today, prev_day, items, gone, new, log, used, demo, point03, run_log):
+def write_report(today, prev_day, items, gone, new, log, used, demo, point03, run_log, fresh_start=False):
     confirmed = [g for g in gone if g["status"] in ("Discontinued", "Gone from site")]
     other = [g for g in gone if g not in confirmed]
-    compare = f"Compared with {prev_day}" if prev_day else "First day — nothing to compare yet. Check back tomorrow."
+    if prev_day:
+        compare = f"Compared with {prev_day}"
+    elif fresh_start:
+        compare = "Settings changed — starting fresh today. Check back tomorrow."
+    else:
+        compare = "First day — nothing to compare yet. Check back tomorrow."
     page = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -369,6 +402,7 @@ footer {{ color:var(--mute); font-size:12px; margin-top:28px; }}
 
 <footer>Stores: {html.escape(", ".join(s["name"] for s in stores()))} ·
 Searches tracked: {html.escape(", ".join(CONFIG["searches"]))} ·
+{f"Items ${CONFIG['min_price']}+ only · " if CONFIG.get("min_price") else ""}
 SerpApi searches used this run: {used} · Updated {datetime.now(TZ):%b %d, %Y %I:%M %p}</footer>
 </main></body></html>"""
     REPORT.write_text(page)

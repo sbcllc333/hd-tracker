@@ -1,8 +1,9 @@
 {
-  "searches": ["plumbing", "electrical", "garden", "clearance", "appliances", "lighting"],
+  "searches": ["plumbing", "electrical", "garden", "clearance", "appliances", "lighting", "tools"],
   "pages_per_search": 1,
   "double_check_limit": 3,
   "skip_online_only": true,
+  "min_price": 10,
   "fallbacks": {
     "garden": ["lawn and garden", "garden supplies"],
     "clearance": ["clearance items", "clearance sale"]
