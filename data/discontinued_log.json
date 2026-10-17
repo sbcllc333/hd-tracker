@@ -14,5 +14,53 @@
   "note": "Home Depot marks it no longer available",
   "last_seen": "2026-10-15",
   "noticed": "2026-10-16"
+ },
+ {
+  "pid": "328610666",
+  "store": "Orange Park (Wells Rd)",
+  "store_id": "0275",
+  "title": "0.75 in. x 60 ft. 7 mil Vinyl Electrical Tape - Black (10-Pack)",
+  "brand": "Commercial Electric",
+  "model": "515192",
+  "price": 16.98,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-0-75-in-x-60-ft-7-mil-Vinyl-Electrical-Tape-Black-10-Pack-515192/328610666",
+  "search": "electrical",
+  "id": "0275:328610666",
+  "status": "Gone from site",
+  "note": "Home Depot hasn't returned any results for this query.",
+  "last_seen": "2026-10-16",
+  "noticed": "2026-10-17"
+ },
+ {
+  "pid": "328610666",
+  "store": "Lane Ave / Normandy",
+  "store_id": "6346",
+  "title": "0.75 in. x 60 ft. 7 mil Vinyl Electrical Tape - Black (10-Pack)",
+  "brand": "Commercial Electric",
+  "model": "515192",
+  "price": 16.98,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-0-75-in-x-60-ft-7-mil-Vinyl-Electrical-Tape-Black-10-Pack-515192/328610666",
+  "search": "electrical",
+  "id": "6346:328610666",
+  "status": "Gone from site",
+  "note": "Home Depot hasn't returned any results for this query.",
+  "last_seen": "2026-10-16",
+  "noticed": "2026-10-17"
+ },
+ {
+  "pid": "328610666",
+  "store": "North Jax (Lem Turner)",
+  "store_id": "6351",
+  "title": "0.75 in. x 60 ft. 7 mil Vinyl Electrical Tape - Black (10-Pack)",
+  "brand": "Commercial Electric",
+  "model": "515192",
+  "price": 16.98,
+  "link": "https://apionline.homedepot.com/p/Commercial-Electric-0-75-in-x-60-ft-7-mil-Vinyl-Electrical-Tape-Black-10-Pack-515192/328610666",
+  "search": "electrical",
+  "id": "6351:328610666",
+  "status": "Gone from site",
+  "note": "Home Depot hasn't returned any results for this query.",
+  "last_seen": "2026-10-16",
+  "noticed": "2026-10-17"
  }
 ]
