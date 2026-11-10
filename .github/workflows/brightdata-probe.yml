@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/brightdata-test]
-    paths: ["probe/**", ".github/workflows/brightdata-probe.yml"]
+    paths: ["probe/brightdata_probe.py", ".github/workflows/brightdata-probe.yml"]
 
 permissions:
   contents: read
