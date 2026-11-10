@@ -28,7 +28,7 @@ s, t = call("GET", "/users/me/limits")
 print("=== account limits: HTTP", s, t[:700])
 
 s, t = call("POST", f"/acts/{ACTOR}/runs", {"memory": 512, "timeout": 3600, "maxTotalChargeUsd": 1.5}, {
-    "storeId": STORE, "parallelRequests": 15, "maxResults": 0,
+    "storeId": STORE, "parallelRequests": 6, "maxResults": 0,
     "proxyConfig": {"useApifyProxy": True, "apifyProxyGroups": ["RESIDENTIAL"],
                     "apifyProxyCountry": "US"}})
 print("=== start run: HTTP", s, t[:600])
@@ -47,7 +47,9 @@ print("=== finished:", run.get("status"), "| cost USD:", run.get("usageTotalUsd"
 print("usage:", json.dumps(run.get("usageUsd")))
 
 s, t = call("GET", f"/actor-runs/{rid}/log")
-print("=== last log lines\n" + "\n".join(t.splitlines()[-25:])[:3000])
+L = t.splitlines()
+print("=== log:", len(L), "lines |", sum("Error" in x for x in L), "errors |", sum("Fetching products" in x for x in L), "fetches")
+print("\n".join(L[-12:])[:1500])
 
 items, off = [], 0
 while True:
