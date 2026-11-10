@@ -80,15 +80,10 @@ def run(label, params, body):
     return recs
 
 
-# 2. Keyword search, localized to Orange Park (Wells Rd) zip
-kw = run("keyword search",
-         {"type": "discover_new", "discover_by": "keyword"},
-         {"input": [{"keyword": "clearance plumbing", "zipcode": "32073"}],
-          "limit_per_input": 5})
-if kw is None:  # maybe the field names differ; the error text above will say
-    kw = run("keyword search (keyword only)",
-             {"type": "discover_new", "discover_by": "keyword"},
-             {"input": [{"keyword": "clearance plumbing"}], "limit_per_input": 5})
+# 2. Keyword search (this scraper does not accept a zip code for searches)
+run("keyword search",
+    {"type": "discover_new", "discover_by": "keyword"},
+    {"input": [{"keyword": "clearance plumbing"}], "limit_per_input": 5})
 
 # 3. One known product page, two different zips, to see if results are store-specific
 url = "https://www.homedepot.com/p/Con-Tact-Shelf-and-Storage-Clear-Shelf-Drawer-Liner-06F-C8Q01-06/100572514"
