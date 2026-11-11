@@ -1,75 +1,164 @@
 """
-Home Depot Discontinued Tracker
---------------------------------
-Once a day:
-  1. Pulls Home Depot product listings for the searches in config.json (via SerpApi).
-  2. Saves today's list to data/snapshots/YYYY-MM-DD.json.
-  3. Compares with the last saved day and finds items that disappeared.
-  4. Double-checks a few of those items to see if Home Depot marks them
-     discontinued / no longer available.
-  5. Writes docs/index.html — the page you open to see the results.
+Penny Run — clearance tracker for a few Home Depot stores
+----------------------------------------------------------
+Runs once a day (GitHub Actions). Each day it scans ONE store, so every store
+is scanned every 4 days and the whole thing fits in SerpApi's free plan.
 
-Needs one secret: SERPAPI_KEY (your SerpApi key).
-Run:  python tracker.py          (real run)
-      python tracker.py --demo   (fake data, no key needed, for testing)
+  1. Picks the store that was scanned longest ago.
+  2. For each department, asks SerpApi for that store's deep-discount items.
+  3. Updates data/ledger.json: a running history per item per store
+     (first seen on clearance, every price change, stock count).
+  4. Asks Bright Data whether the most promising items are discontinued.
+  5. Scores every item 0-100 for how close it looks to a penny.
+  6. Writes docs/data.json, which the app (docs/index.html) reads.
+
+Secrets: SERPAPI_KEY (needed), BRIGHTDATA_KEY (optional).
+Run:  python tracker.py           real run
+      python tracker.py --demo    fake data, no keys, for testing the app
+      python tracker.py --rebuild only rewrite docs/data.json from the ledger
 """
 
-import html
 import json
 import os
 import random
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import date, datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).parent
 CONFIG = json.loads((ROOT / "config.json").read_text())
-SNAP_DIR = ROOT / "data" / "snapshots"
-LOG_FILE = ROOT / "data" / "discontinued_log.json"
-REPORT = ROOT / "docs" / "index.html"
-API = "https://serpapi.com/search.json"
-TZ = ZoneInfo("America/New_York")   # GitHub runs on UTC; use Jacksonville time
+DATA = ROOT / "data"
+LEDGER = DATA / "ledger.json"
+SNAP_DIR = DATA / "snapshots"          # old daily snapshots, used once to seed the ledger
+OUT = ROOT / "docs" / "data.json"
+SERP = "https://serpapi.com/search.json"
+BRIGHT = "https://api.brightdata.com"
+BRIGHT_DATASET = "gd_lmusivh019i7g97q2n"   # Bright Data "Home Depot US"
+TZ = ZoneInfo("America/New_York")
 PAGE_SIZE = 24
 
-DEAD_WORDS = ("discontinued", "no longer available", "no longer sold",
-              "not available", "product not found", "page not found")
+
+class OutOfSearches(Exception):
+    """SerpApi says the monthly or hourly allowance is used up."""
 
 
-# ---------- talking to SerpApi ----------
+# ---------- small helpers ----------
 
-def serpapi(params):
-    params = dict(params, api_key=os.environ["SERPAPI_KEY"])
-    url = API + "?" + urllib.parse.urlencode(params)
-    with urllib.request.urlopen(url, timeout=60) as r:
-        return json.loads(r.read().decode())
+def today():
+    return datetime.now(TZ).date()
+
+
+def num(v):
+    """'$1,234.50' -> 1234.5 ; None/garbage -> None"""
+    if v is None or isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    try:
+        return float(str(v).replace("$", "").replace(",", "").replace("%", "").strip())
+    except ValueError:
+        return None
+
+
+def days_between(a, b):
+    try:
+        return (date.fromisoformat(b) - date.fromisoformat(a)).days
+    except (TypeError, ValueError):
+        return 0
+
+
+def ending(price):
+    return int(round(price * 100)) % 100 if price is not None else None
+
+
+def clean_link(link, pid):
+    """SerpApi sometimes returns an internal host; always send people to the public site."""
+    if link and "/p/" in link:
+        return "https://www.homedepot.com" + link[link.index("/p/"):].split("?")[0]
+    return f"https://www.homedepot.com/p/{pid}"
 
 
 def stores():
     return [s for s in CONFIG["stores"] if s.get("on", True)]
 
 
-def fetch_page(store, query, page):
-    """One SerpApi search = one page of up to 24 items at one store."""
-    params = {"engine": "home_depot", "q": query, "store_id": store["id"],
-              "nao": page * PAGE_SIZE, "ps": PAGE_SIZE}
+def load_ledger():
+    if LEDGER.exists():
+        return json.loads(LEDGER.read_text())
+    return {"items": {}, "tokens": {}, "sweeps": {}, "log": []}
+
+
+# ---------- SerpApi ----------
+
+def serpapi(params):
+    params = dict(params, api_key=os.environ["SERPAPI_KEY"])
+    url = SERP + "?" + urllib.parse.urlencode(params)
+    try:
+        with urllib.request.urlopen(url, timeout=90) as r:
+            data = json.loads(r.read().decode())
+    except urllib.error.HTTPError as e:
+        if e.code == 429:
+            raise OutOfSearches("SerpApi free searches are used up")
+        raise RuntimeError(f"SerpApi HTTP {e.code}")
+    err = data.get("error")
+    if err:
+        low = err.lower()
+        if "run out of searches" in low or "searches limit" in low or "hourly" in low:
+            raise OutOfSearches(err)
+        if "hasn't returned any results" in low or "no results" in low:
+            return {"products": [], "filters": data.get("filters", [])}
+        raise RuntimeError(err)
+    return data
+
+
+def find_discount_tokens(data):
+    """Look through the filters SerpApi returned and pick the token for the
+    deepest 'NN% off or more' filter that meets config min_percent_off."""
+    want = CONFIG.get("min_percent_off", 40)
+    found = []
+
+    def walk(node):
+        if isinstance(node, dict):
+            name, token = node.get("name"), node.get("value")
+            if isinstance(name, str) and isinstance(token, str) and "%" in name and "off" in name.lower():
+                digits = "".join(c for c in name.split("%")[0] if c.isdigit())
+                if digits:
+                    found.append((int(digits), token))
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+
+    walk(data.get("filters", []))
+    ok = sorted(t for t in found if t[0] >= want)
+    if ok:
+        return ok[0][1]
+    return sorted(found)[-1][1] if found else None
+
+
+def search(store, dept, token=None):
+    params = {"engine": "home_depot", "q": dept, "store_id": store["id"], "ps": PAGE_SIZE}
     if CONFIG.get("min_price"):
-        params["lowerbound"] = CONFIG["min_price"]   # ask Home Depot for $X and up only
-    data = serpapi(params)
-    if data.get("error"):
-        raise RuntimeError(data["error"])
-    return data.get("products", [])
+        params["lowerbound"] = CONFIG["min_price"]
+    if token:
+        params["hd_filter_tokens"] = token
+        params["hd_sort"] = "price_low_to_high"
+    return serpapi(params)
 
 
-def sold_in_store(p):
-    """True = sold in the store, False = online only, None = can't tell (kept, to be safe)."""
+def in_store(p):
+    """True = on the shelf at the store, False = online only, None = unknown."""
     pickup = p.get("pickup")
     if not pickup:
         return None
     if isinstance(pickup, dict):
-        if pickup.get("quantity") is not None or pickup.get("store_name") or pickup.get("out_of_stock"):
+        if pickup.get("quantity") is not None or pickup.get("store_name"):
             return True
         if pickup.get("free_ship_to_store"):
             return False
@@ -80,332 +169,365 @@ def sold_in_store(p):
     return True
 
 
-def too_cheap(price):
-    """True if under min_price. Items with no price shown are kept, to be safe."""
-    try:
-        return float(price) < float(CONFIG.get("min_price") or 0)
-    except (TypeError, ValueError):
-        return False
+def parse_product(p, store, dept):
+    pid = str(p.get("product_id") or "")
+    price = num(p.get("price"))
+    if not pid or price is None:
+        return None
+    if price < float(CONFIG.get("min_price") or 0):
+        return None
+    if CONFIG.get("skip_online_only", True) and in_store(p) is False:
+        return None
+    was = num(p.get("price_was"))
+    pct = num(p.get("percentage_off"))
+    if pct is None and was and was > price:
+        pct = round((was - price) / was * 100)
+    pickup = p.get("pickup") if isinstance(p.get("pickup"), dict) else {}
+    thumb = ""
+    t = p.get("thumbnails") or p.get("thumbnail")
+    while isinstance(t, list) and t:
+        t = t[0]
+    if isinstance(t, str):
+        thumb = t
+    return {"pid": pid, "store_id": store["id"], "title": p.get("title", ""),
+            "brand": p.get("brand", "") or "", "model": p.get("model_number", "") or "",
+            "price": price, "was": was if was and was > price else None,
+            "pct": int(pct) if pct else None, "badge": p.get("price_badge") or "",
+            "qty": num(pickup.get("quantity")), "thumb": thumb,
+            "link": clean_link(p.get("link", ""), pid), "dept": dept}
 
 
-def settings_fingerprint():
-    """Changes when departments, stores or the price floor change."""
-    return json.dumps({"searches": CONFIG["searches"], "fallbacks": CONFIG.get("fallbacks", {}),
-                       "min_price": CONFIG.get("min_price"),
-                       "stores": [s["id"] for s in stores()]}, sort_keys=True)
-
-
-def ends_in_03(price):
-    try:
-        return f"{float(price):.2f}".endswith(".03")
-    except (TypeError, ValueError):
-        return False
-
-
-def fetch_listings():
-    """Returns {"STOREID:PRODUCTID": item} — each store tracked separately.
-    If a search word gives nothing (Home Depot sometimes treats words like
-    "garden" or "clearance" as special pages), it tries the backup words in
-    config.json "fallbacks"."""
-    items = {}
-    searches_used = 0
-    run_log = []
-    skip_online = CONFIG.get("skip_online_only", True)
-    fallbacks = CONFIG.get("fallbacks", {})
-    for store in stores():
-        for dept in CONFIG["searches"]:
-            got, tried, last_err = 0, [], ""
-            for query in [dept] + fallbacks.get(dept, []):
-                tried.append(query)
-                for page in range(CONFIG["pages_per_search"]):
-                    try:
-                        products = fetch_page(store, query, page)
-                        searches_used += 1
-                    except Exception as e:
-                        last_err = str(e)
-                        print(f"  ! {store['name']} '{query}' page {page + 1} failed: {e}")
-                        break
-                    for p in products:
-                        pid = str(p.get("product_id") or "")
-                        if not pid:
-                            continue
-                        if skip_online and sold_in_store(p) is False:
-                            continue
-                        if too_cheap(p.get("price")):
-                            continue
-                        got += 1
-                        items[f"{store['id']}:{pid}"] = {
-                            "pid": pid,
-                            "store": store["name"],
-                            "store_id": store["id"],
-                            "title": p.get("title", ""),
-                            "brand": p.get("brand", ""),
-                            "model": p.get("model_number", ""),
-                            "price": p.get("price"),
-                            "link": p.get("link", ""),
-                            "search": dept,
-                        }
-                    print(f"  {store['name']} '{query}' page {page + 1}: {len(products)} items")
-                    if len(products) < PAGE_SIZE:
-                        break
-                if got:
-                    break
-            run_log.append({"store": store["name"], "dept": dept, "count": got,
-                            "used": tried[-1], "error": "" if got else (last_err or "no results")})
-    return items, searches_used, run_log
-
-
-def check_product(pid, store_id):
-    """Ask Home Depot (via SerpApi) about one product at one store. Returns a status label."""
-    try:
-        data = serpapi({"engine": "home_depot_product", "product_id": pid, "store_id": store_id})
-    except Exception as e:
-        return "Couldn't check", str(e)
-    text = json.dumps(data).lower()
-    if data.get("error"):
-        return "Gone from site", data["error"]
-    if any(w in text for w in DEAD_WORDS):
-        return "Discontinued", "Home Depot marks it no longer available"
-    return "Still listed", "Dropped from search results but product page still exists"
-
-
-# ---------- demo data (no key needed) ----------
-
-def demo_listings(day_offset):
-    random.seed(42)
-    base = {}
-    for s in stores():
-        for i in range(20):
-            pid = str(300000000 + i)
-            base[f"{s['id']}:{pid}"] = {
-                "pid": pid, "store": s["name"], "store_id": s["id"],
-                "title": f"Demo Product {i}", "brand": random.choice(["RYOBI", "DEWALT", "Milwaukee", "HDX"]),
-                "model": f"M{i:04d}",
-                "price": (int(random.uniform(9, 99)) + 0.03) if i % 7 == 0 else round(random.uniform(9, 399), 2),
-                "link": "https://www.homedepot.com", "search": "demo"}
-    if day_offset == 1:            # "today": a few items vanished, a few new
-        for key in random.sample(sorted(base), 6):
-            del base[key]
-        s = stores()[0]
-        base[f"{s['id']}:300000099"] = dict(base.get(f"{s['id']}:300000001", {}) or {},
-                                           pid="300000099", store=s["name"], store_id=s["id"],
-                                           title="New Demo Product 99", brand="RYOBI", model="M0099",
-                                           price=49.97, link="https://www.homedepot.com", search="demo")
-    return base
-
-
-# ---------- saving + comparing ----------
-
-def load_json(path, default):
-    return json.loads(path.read_text()) if path.exists() else default
-
-
-def previous_snapshot(today_str):
-    snaps = sorted(p for p in SNAP_DIR.glob("*.json") if p.stem < today_str)
-    return (snaps[-1].stem, load_json(snaps[-1], {})) if snaps else (None, None)
-
-
-def main():
-    demo = "--demo" in sys.argv
-    if not demo and not os.environ.get("SERPAPI_KEY"):
-        sys.exit("SERPAPI_KEY is not set.")
-    SNAP_DIR.mkdir(parents=True, exist_ok=True)
-    REPORT.parent.mkdir(parents=True, exist_ok=True)
-
-    today = datetime.now(TZ).date()
-    if demo:   # make a fake "yesterday" first so there is something to compare
-        (SNAP_DIR / f"{today - timedelta(days=1)}.json").write_text(json.dumps(demo_listings(0)))
-        items, used, run_log = demo_listings(1), 0, []
-    else:
-        print("Pulling today's listings...")
-        items, used, run_log = fetch_listings()
-
-    today_str = today.isoformat()
-    if not items:
-        sys.exit("Got zero items today — not saving (probably an API problem).")
-    (SNAP_DIR / f"{today_str}.json").write_text(json.dumps(items, indent=1))
-
-    prev_day, prev = previous_snapshot(today_str)
-    log = load_json(LOG_FILE, [])
-    fp_file = ROOT / "data" / "settings.txt"
-    fresh_start = False
-    if not demo:
-        fp = settings_fingerprint()
-        if prev is not None and (not fp_file.exists() or fp_file.read_text() != fp):
-            # Settings changed: yesterday's list isn't comparable, so start a new baseline today.
-            print("  Settings changed since last run — starting fresh, no comparison today.")
-            prev, prev_day, fresh_start = None, None, True
-        fp_file.write_text(fp)
-    gone, new = [], []
-
-    if prev is not None and not demo:
-        # Only compare departments we still track, so changing the list doesn't look like a mass discontinue.
-        prev = {k: v for k, v in prev.items() if v.get("search") in CONFIG["searches"]}
-
-    # Prices ending in .03 — often the last markdown before a penny.
-    point03 = []
-    for key, it in items.items():
-        if ends_in_03(it.get("price")):
-            was = (prev or {}).get(key)
-            fresh = not (was and ends_in_03(was.get("price")))
-            point03.append(dict(it, id=key, status="New .03 today" if fresh else ".03"))
-    point03.sort(key=lambda r: (r["status"] != "New .03 today", r["store"], r["title"]))
-
-    if prev is not None:
-        # A store that returned nothing today had a failed pull — don't count its items as gone.
-        stores_ok = {it["store_id"] for it in items.values()}
-        gone_ids = [k for k in prev if k not in items and prev[k].get("store_id") in stores_ok]
-        new = [dict(items[pid], id=pid) for pid in items if pid not in prev]
-        # If more than half vanished at once, it's almost surely a bad pull, not real.
-        if prev and len(gone_ids) > 0.5 * len(prev):
-            print(f"  ! {len(gone_ids)} of {len(prev)} items missing — looks like a bad pull, skipping.")
-            gone_ids = []
-        limit = CONFIG["double_check_limit"]
-        checked = 0
-        for key in gone_ids:
-            item = prev[key]
-            if demo:
-                status, note = random.choice([("Discontinued", "Demo"), ("Still listed", "Demo")])
-            elif checked < limit:
-                status, note = check_product(item["pid"], item["store_id"])
-                checked += 1
+def sweep_store(ledger, store, day):
+    """Scan every department at one store. Returns (items_seen, searches_used, per-dept log)."""
+    seen, used, log = {}, 0, []
+    tokens = ledger.setdefault("tokens", {})
+    for dept in CONFIG["searches"]:
+        entry = {"dept": dept, "count": 0, "filtered": False, "error": ""}
+        try:
+            known = tokens.get(dept)
+            if isinstance(known, str):               # older format
+                known = {"t": known, "on": day}
+            if known and days_between(known.get("on", day), day) > 30:
+                known = None                         # relearn the filter code monthly
+            products = []
+            if known:
+                token = known["t"]
+                products = search(store, dept, token).get("products", [])
                 used += 1
             else:
-                status, note = "Not checked", "Over the daily double-check limit"
-            row = dict(item, id=key, status=status, note=note,
-                       last_seen=prev_day, noticed=today_str)
-            gone.append(row)
-            if status in ("Discontinued", "Gone from site"):
-                log.append(row)
-        LOG_FILE.write_text(json.dumps(log, indent=1))
+                base = search(store, dept)           # plain search: also tells us the filter codes
+                used += 1
+                products = list(base.get("products", []))
+                token = find_discount_tokens(base)
+                if token:
+                    tokens[dept] = {"t": token, "on": day}
+                    products += search(store, dept, token).get("products", [])
+                    used += 1
+            data = {"products": products}
+            entry["filtered"] = bool(token)
+            for p in data.get("products", []):
+                item = parse_product(p, store, dept)
+                if item:
+                    seen[f"{store['id']}:{item['pid']}"] = item
+                    entry["count"] += 1
+        except OutOfSearches:
+            raise
+        except Exception as e:
+            entry["error"] = str(e)[:140]
+        print(f"  {store['name']} / {dept}: {entry['count']} items"
+              + (" (discount filter)" if entry["filtered"] else "")
+              + (f"  ! {entry['error']}" if entry["error"] else ""))
+        log.append(entry)
+    return seen, used, log
 
-    write_report(today_str, prev_day, items, gone, new, log, used, demo, point03, run_log, fresh_start)
-    print(f"Done. {len(items)} items today, {len(gone)} disappeared, {len(new)} new, "
-          f"{len(point03)} priced .03. "
-          f"SerpApi searches used: {used}")
+
+def update_ledger(ledger, store, seen, dept_log, day):
+    items = ledger["items"]
+    ok_depts = {d["dept"] for d in dept_log if not d["error"]}
+    for key, new in seen.items():
+        old = items.get(key)
+        if not old:
+            old = items[key] = {"first_seen": day, "history": [], "missed": 0}
+        hist = old.setdefault("history", [])
+        if not hist or hist[-1][1] != new["price"]:
+            if hist:
+                old["prev_price"], old["price_changed_on"] = hist[-1][1], day
+            hist.append([day, new["price"]])
+        if new["pct"] and not old.get("first_clearance"):
+            old["first_clearance"] = day
+        if new["was"] is None and old.get("was") and old["was"] > new["price"]:
+            new["was"] = old["was"]              # keep the last known regular price
+        for k in ("thumb", "brand", "model"):
+            if not new[k] and old.get(k):
+                new[k] = old[k]
+        old.update(new)
+        old["last_seen"], old["missed"] = day, 0
+    for key, old in items.items():
+        if old.get("store_id") == store["id"] and key not in seen \
+                and old.get("dept") in ok_depts and old.get("last_seen") != day:
+            old["missed"] = old.get("missed", 0) + 1
 
 
-# ---------- the page ----------
+# ---------- Bright Data: is it discontinued? ----------
 
-def money(v):
+def bright(method, path, params=None, body=None):
+    url = BRIGHT + path + ("?" + urllib.parse.urlencode(params) if params else "")
+    req = urllib.request.Request(
+        url, data=json.dumps(body).encode() if body is not None else None, method=method,
+        headers={"Authorization": "Bearer " + os.environ["BRIGHTDATA_KEY"].strip(),
+                 "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        return r.read().decode("utf-8", "replace")
+
+
+def discontinued_candidates(ledger, day):
+    """Items worth a discontinued check: deep clearance that has gone missing,
+    then the deepest clearance not checked in the last 3 weeks."""
+    limit = CONFIG.get("discontinued_checks_per_run", 12)
+    pool = []
+    for key, it in ledger["items"].items():
+        if it.get("discontinued") or not (it.get("pct") or 0) >= 40:
+            continue
+        last = it.get("disc_checked")
+        if last and days_between(last, day) < 21:
+            continue
+        missing = it.get("missed", 0) >= 2
+        pool.append((0 if missing else 1, -(it.get("pct") or 0), key))
+    return [k for _, _, k in sorted(pool)[:limit]]
+
+
+def check_discontinued(ledger, day):
+    if not os.environ.get("BRIGHTDATA_KEY", "").strip():
+        return "Bright Data key not set", 0
+    keys = discontinued_candidates(ledger, day)
+    if not keys:
+        return "nothing to check", 0
+    by_pid = {}
+    for k in keys:
+        by_pid.setdefault(ledger["items"][k]["pid"], []).append(k)
+    inputs = [{"url": ledger["items"][ks[0]]["link"], "zipcode": ""} for ks in by_pid.values()]
     try:
-        return f"${float(v):,.2f}"
-    except (TypeError, ValueError):
-        return ""
+        snap = json.loads(bright("POST", "/datasets/v3/trigger",
+                                 {"dataset_id": BRIGHT_DATASET, "include_errors": "true",
+                                  "format": "json"}, inputs))["snapshot_id"]
+        for _ in range(40):                       # up to 10 minutes
+            time.sleep(15)
+            status = json.loads(bright("GET", f"/datasets/v3/progress/{snap}")).get("status")
+            if status in ("ready", "failed"):
+                break
+        text = bright("GET", f"/datasets/v3/snapshot/{snap}", {"format": "json"}).strip()
+        try:
+            rows = json.loads(text)
+        except ValueError:
+            rows = [json.loads(l) for l in text.splitlines() if l.strip().startswith("{")]
+        if isinstance(rows, dict):
+            rows = [rows]
+    except Exception as e:
+        return f"Bright Data problem: {str(e)[:120]}", 0
+    done = 0
+    for row in rows:
+        pid = str(row.get("product_id") or "")
+        if not pid or row.get("error") or pid not in by_pid:
+            continue
+        for k in by_pid[pid]:
+            it = ledger["items"][k]
+            it["disc_checked"] = day
+            if row.get("discontinued") is True:
+                it["discontinued"] = True
+                it.setdefault("discontinued_on", day)
+            if row.get("upc") and not it.get("upc"):
+                it["upc"] = str(row["upc"])
+            if row.get("sku") and not it.get("sku"):
+                it["sku"] = str(row["sku"])
+            if not it.get("thumb") and row.get("main_image"):
+                it["thumb"] = row["main_image"]
+        done += 1
+    return f"checked {done} items", done
 
 
-def rows(items, show_status=True, date_key=None):
-    if not items:
-        return '<p class="empty">Nothing here.</p>'
-    out = []
-    for it in items:
-        badge = ""
-        if show_status:
-            cls = {"Discontinued": "bad", "Gone from site": "bad", "New .03 today": "bad",
-                   "Still listed": "ok"}.get(it.get("status"), "meh")
-            badge = f'<span class="badge {cls}">{html.escape(it.get("status", ""))}</span>'
-        when = f'<span class="when">{html.escape(it.get(date_key, ""))}</span>' if date_key else ""
-        store = f'<span class="store">{html.escape(it.get("store", ""))}</span>'
-        out.append(
-            f'<a class="item" href="{html.escape(it.get("link") or "#")}" target="_blank" rel="noopener">'
-            f'<div class="t">{html.escape(it.get("title", ""))}</div>'
-            f'<div class="m">{html.escape(it.get("brand") or "")} · Model {html.escape(it.get("model") or "?")}'
-            f' · {money(it.get("price"))}</div>'
-            f'<div class="b">{store}{badge}{when}</div></a>')
-    return "\n".join(out)
+# ---------- scoring ----------
+
+def score(it, day):
+    """0-100: how close this looks to a penny. Returns (score, reasons)."""
+    pts, why = 0, []
+    pct = it.get("pct") or 0
+    if pct:
+        pts += min(35, round(pct * 35 / 90))
+        why.append(f"{pct}% off")
+    start = it.get("first_clearance")
+    if start:
+        weeks = days_between(start, day) / 7
+        pts += min(25, round(weeks * 25 / 12))
+        if weeks >= 1:
+            why.append(f"{int(weeks)} wk on clearance")
+    end = ending(it.get("price"))
+    if end in (2, 3):
+        pts += 10
+        why.append(f"price ends .0{end}")
+    elif end in (4, 6):
+        pts += 5
+        why.append(f"price ends .0{end}")
+    if it.get("discontinued"):
+        pts += 15
+        why.append("discontinued")
+    qty = it.get("qty")
+    if qty is not None and 1 <= qty <= 5:
+        pts += 10
+        why.append(f"only {int(qty)} left")
+    if it.get("price_changed_on") and it.get("prev_price") and it["prev_price"] > it["price"] \
+            and days_between(it["price_changed_on"], day) <= 8:
+        pts += 5
+        why.append("price just dropped")
+    return min(100, pts), why
 
 
-def run_table(run_log):
-    if not run_log:
-        return '<p class="empty">Nothing here.</p>'
-    out = []
-    for r in run_log:
-        if r["count"]:
-            note = f'{r["count"]} items' + (f' (used "{html.escape(r["used"])}")' if r["used"] != r["dept"] else "")
-        else:
-            note = f'<span style="color:var(--bad)">nothing: {html.escape(r["error"][:120])}</span>'
-        out.append(f'<div class="m">{html.escape(r["store"])} · {html.escape(r["dept"])} · {note}</div>')
-    return "\n".join(out)
+# ---------- output for the app ----------
+
+def write_output(ledger, day, status):
+    names = {s["id"]: s["name"] for s in CONFIG["stores"]}
+    items = []
+    for key, it in ledger["items"].items():
+        if it.get("store_id") not in names or it.get("price") is None:
+            continue
+        sc, why = score(it, day)
+        end = ending(it["price"])
+        items.append({
+            "id": key, "pid": it["pid"], "store_id": it["store_id"],
+            "title": it.get("title", ""), "brand": it.get("brand", ""), "model": it.get("model", ""),
+            "sku": it.get("sku", ""), "upc": it.get("upc", ""),
+            "price": it["price"], "was": it.get("was"), "pct": it.get("pct"),
+            "prev_price": it.get("prev_price"), "price_changed_on": it.get("price_changed_on"),
+            "ending": end, "qty": it.get("qty"), "thumb": it.get("thumb", ""),
+            "link": it.get("link", ""), "dept": it.get("dept", ""),
+            "first_seen": it.get("first_seen"), "first_clearance": it.get("first_clearance"),
+            "last_seen": it.get("last_seen"), "missed": it.get("missed", 0),
+            "discontinued": bool(it.get("discontinued")), "discontinued_on": it.get("discontinued_on"),
+            "history": it.get("history", [])[-12:], "score": sc, "why": why,
+        })
+    items.sort(key=lambda x: -x["score"])
+    out = {
+        "app": "Penny Run",
+        "generated_at": datetime.now(TZ).isoformat(timespec="minutes"),
+        "status": status,
+        "stores": [{"id": s["id"], "name": s["name"], "short": s.get("short", s["name"]),
+                    "maps": s.get("maps", ""), "last_scan": ledger.get("sweeps", {}).get(s["id"])}
+                   for s in stores()],
+        "departments": CONFIG["searches"],
+        "log": ledger.get("log", [])[-12:],
+        "items": items,
+    }
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(json.dumps(out, separators=(",", ":")))
+    print(f"Wrote {OUT.name}: {len(items)} items")
 
 
-def write_report(today, prev_day, items, gone, new, log, used, demo, point03, run_log, fresh_start=False):
-    confirmed = [g for g in gone if g["status"] in ("Discontinued", "Gone from site")]
-    other = [g for g in gone if g not in confirmed]
-    if prev_day:
-        compare = f"Compared with {prev_day}"
-    elif fresh_start:
-        compare = "Settings changed — starting fresh today. Check back tomorrow."
+# ---------- one-time: carry over the old daily snapshots ----------
+
+def seed_from_snapshots(ledger):
+    if ledger["items"] or not SNAP_DIR.exists():
+        return
+    for f in sorted(SNAP_DIR.glob("*.json")):
+        day = f.stem
+        for key, it in json.loads(f.read_text()).items():
+            price = num(it.get("price"))
+            if price is None:
+                continue
+            old = ledger["items"].setdefault(key, {"first_seen": day, "history": [], "missed": 0})
+            if not old["history"] or old["history"][-1][1] != price:
+                if old["history"]:
+                    old["prev_price"], old["price_changed_on"] = old["history"][-1][1], day
+                old["history"].append([day, price])
+            old.update({"pid": it["pid"], "store_id": it["store_id"], "title": it.get("title", ""),
+                        "brand": it.get("brand", ""), "model": it.get("model", ""), "price": price,
+                        "link": clean_link(it.get("link", ""), it["pid"]),
+                        "dept": it.get("search", ""), "last_seen": day})
+        for s in stores():
+            if any(k.startswith(s["id"] + ":") for k in ledger["items"]):
+                ledger.setdefault("sweeps", {})[s["id"]] = day
+    print(f"Carried over {len(ledger['items'])} items from the old snapshots")
+
+
+# ---------- demo data (for testing the app only; never committed by the daily job) ----------
+
+def demo_ledger():
+    random.seed(7)
+    day = today().isoformat()
+    led = {"items": {}, "tokens": {}, "sweeps": {}, "log": []}
+    names = ["18V Cordless Drill Kit", "LED Flush Mount Ceiling Light", "Brass Ball Valve 3/4 in.",
+             "Garden Hose 50 ft. Heavy Duty", "Smart Dimmer Switch", "Countertop Microwave 1.1 cu. ft.",
+             "Tool Bag 16 in.", "Pendant Light Matte Black", "PEX Crimp Tool", "Raised Garden Bed Cedar"]
+    for s in stores():
+        led["sweeps"][s["id"]] = day
+        for i in range(14):
+            was = random.choice([19.98, 29.97, 49.97, 79.0, 129.0, 199.0])
+            pct = random.choice([None, None, 25, 50, 50, 75, 75, 90])
+            price = was if not pct else round(was * (100 - pct) / 100) + random.choice([0.03, 0.06, 0.02, 0.0])
+            pid = str(300000000 + i)
+            led["items"][f"{s['id']}:{pid}"] = {
+                "pid": pid, "store_id": s["id"], "title": f"{names[i % 10]} (demo {i})",
+                "brand": random.choice(["RYOBI", "DEWALT", "Husky", "Hampton Bay"]), "model": f"DM-{i:04d}",
+                "price": price, "was": was if pct else None, "pct": pct, "badge": "",
+                "qty": random.choice([None, 1, 2, 4, 9, 23]), "thumb": "",
+                "link": "https://www.homedepot.com", "dept": random.choice(CONFIG["searches"]),
+                "first_seen": "2026-08-20", "first_clearance": "2026-09-01" if pct else None,
+                "last_seen": day, "missed": random.choice([0, 0, 0, 2]),
+                "history": [["2026-08-20", was], [day, price]] if pct else [["2026-08-20", was]],
+                "prev_price": was if pct else None, "price_changed_on": day if pct else None,
+                "discontinued": pct == 90, "discontinued_on": day if pct == 90 else None}
+    led["log"] = [{"date": day, "store": stores()[0]["name"], "searches": 9, "items": 96, "note": "demo data"}]
+    return led
+
+
+# ---------- main ----------
+
+def main():
+    day = today().isoformat()
+    if "--demo" in sys.argv:
+        global OUT
+        OUT = Path(sys.argv[sys.argv.index("--demo") + 1]) if len(sys.argv) > sys.argv.index("--demo") + 1 \
+            else ROOT / "demo-data.json"
+        write_output(demo_ledger(), day, {"ok": True, "note": "Demo data"})
+        return
+
+    ledger = load_ledger()
+    seed_from_snapshots(ledger)
+    status = {"ok": True, "note": ""}
+
+    if "--rebuild" in sys.argv or not os.environ.get("SERPAPI_KEY"):
+        status = ledger.get("last_status") or {
+            "ok": False, "note": "Scanning is paused until SerpApi's free searches reset. "
+                                 "Prices shown are from the last scan."}
     else:
-        compare = "First day — nothing to compare yet. Check back tomorrow."
-    page = f"""<!doctype html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HD Discontinued</title>
-<style>
-:root {{ --bg:#f6f4f1; --card:#fff; --ink:#1d1b19; --mute:#6b655e; --line:#e4dfd8;
-        --orange:#f96302; --bad:#b3261e; --ok:#2e7d32; --meh:#7a6a00; }}
-@media (prefers-color-scheme: dark) {{
-  :root {{ --bg:#141210; --card:#1f1c19; --ink:#f1ece6; --mute:#a69e95; --line:#332e29; }} }}
-* {{ box-sizing:border-box; }}
-body {{ margin:0; background:var(--bg); color:var(--ink);
-       font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }}
-header {{ background:var(--orange); color:#fff; padding:18px 16px 14px; }}
-header h1 {{ margin:0; font-size:20px; }}
-header p {{ margin:4px 0 0; opacity:.9; font-size:13px; }}
-main {{ max-width:720px; margin:0 auto; padding:12px 16px 40px; }}
-.stats {{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:4px 0 16px; }}
-.stat {{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px; text-align:center; }}
-.stat b {{ display:block; font-size:22px; }}
-.stat span {{ font-size:12px; color:var(--mute); }}
-h2 {{ font-size:16px; margin:22px 0 8px; }}
-h2 small {{ color:var(--mute); font-weight:400; }}
-.item {{ display:block; background:var(--card); border:1px solid var(--line); border-radius:10px;
-        padding:10px 12px; margin:6px 0; color:inherit; text-decoration:none; }}
-.t {{ font-weight:600; }}
-.m {{ color:var(--mute); font-size:13px; margin-top:2px; }}
-.b {{ margin-top:6px; display:flex; gap:8px; align-items:center; }}
-.badge {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:99px; color:#fff; }}
-.bad {{ background:var(--bad); }} .ok {{ background:var(--ok); }} .meh {{ background:var(--meh); }}
-.when {{ font-size:12px; color:var(--mute); }}
-.store {{ font-size:12px; font-weight:600; padding:2px 8px; border-radius:99px;
-         border:1px solid var(--orange); color:var(--orange); }}
-.empty {{ color:var(--mute); font-style:italic; }}
-details {{ margin-top:8px; }} summary {{ cursor:pointer; font-weight:600; }}
-.demo {{ background:#fff3cd; color:#5c4400; padding:8px 12px; border-radius:8px; margin-bottom:10px; font-size:13px; }}
-footer {{ color:var(--mute); font-size:12px; margin-top:28px; }}
-</style></head><body>
-<header><h1>Jacksonville Home Depot — Discontinued Watch</h1>
-<p>{today} · {compare}</p></header>
-<main>
-{'<div class="demo">DEMO DATA — not real Home Depot items.</div>' if demo else ''}
-<div class="stats">
-  <div class="stat"><b>{len(items)}</b><span>tracked today</span></div>
-  <div class="stat"><b>{len(confirmed)}</b><span>discontinued today</span></div>
-  <div class="stat"><b>{len(point03)}</b><span>priced .03</span></div>
-  <div class="stat"><b>{len(new)}</b><span>new today</span></div>
-</div>
+        order = sorted(stores(), key=lambda s: ledger.get("sweeps", {}).get(s["id"]) or "")
+        store = order[0]
+        print(f"Scanning {store['name']} ({day})")
+        entry = {"date": day, "store": store["name"], "searches": 0, "items": 0, "note": ""}
+        try:
+            seen, used, dept_log = sweep_store(ledger, store, day)
+            entry["searches"], entry["items"] = used, len(seen)
+            if seen:
+                update_ledger(ledger, store, seen, dept_log, day)
+                ledger.setdefault("sweeps", {})[store["id"]] = day
+            bad = [d["dept"] for d in dept_log if d["error"]]
+            if bad:
+                entry["note"] = "Couldn't read: " + ", ".join(bad)
+            if not seen:
+                status = {"ok": False, "note": f"{store['name']} returned nothing today"}
+        except OutOfSearches:
+            entry["note"] = "Out of free searches"
+            status = {"ok": False, "note": "SerpApi's free searches are used up. "
+                                           "Scanning starts again when they reset."}
+            print("  ! " + status["note"])
+        note, _ = check_discontinued(ledger, day)
+        entry["discontinued_check"] = note
+        print("  Discontinued check:", note)
+        ledger.setdefault("log", []).append(entry)
+        ledger["log"] = ledger["log"][-60:]
+        ledger["last_status"] = status
 
-<h2>Discontinued since yesterday</h2>
-{rows(confirmed)}
-
-<h2>Prices ending in .03 <small>(often next stop is a penny)</small></h2>
-{rows(point03)}
-
-<h2>Disappeared, not confirmed <small>({len(other)})</small></h2>
-{rows(other)}
-
-<details><summary>New items today ({len(new)})</summary>{rows(new, show_status=False)}</details>
-<details><summary>Search results by store ({sum(1 for r in run_log if not r["count"])} with nothing)</summary>
-{run_table(run_log)}</details>
-<details><summary>All discontinued, every day ({len(log)})</summary>
-{rows(list(reversed(log)), date_key="noticed")}</details>
-
-<footer>Stores: {html.escape(", ".join(s["name"] for s in stores()))} ·
-Searches tracked: {html.escape(", ".join(CONFIG["searches"]))} ·
-{f"Items ${CONFIG['min_price']}+ only · " if CONFIG.get("min_price") else ""}
-SerpApi searches used this run: {used} · Updated {datetime.now(TZ):%b %d, %Y %I:%M %p}</footer>
-</main></body></html>"""
-    REPORT.write_text(page)
+    DATA.mkdir(exist_ok=True)
+    LEDGER.write_text(json.dumps(ledger, separators=(",", ":")))
+    write_output(ledger, day, status)
 
 
 if __name__ == "__main__":

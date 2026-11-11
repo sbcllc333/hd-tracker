@@ -1,17 +1,45 @@
 {
-  "searches": ["plumbing", "electrical", "garden", "clearance", "appliances", "lighting", "tools"],
-  "pages_per_search": 1,
-  "double_check_limit": 3,
-  "skip_online_only": true,
+  "searches": [
+    "plumbing",
+    "electrical",
+    "garden",
+    "clearance",
+    "appliances",
+    "lighting",
+    "tools"
+  ],
   "min_price": 10,
-  "fallbacks": {
-    "garden": ["lawn and garden", "garden supplies"],
-    "clearance": ["clearance items", "clearance sale"]
-  },
+  "min_percent_off": 40,
+  "skip_online_only": true,
+  "discontinued_checks_per_run": 12,
   "stores": [
-    {"id": "0275", "name": "Orange Park (Wells Rd)",   "on": true},
-    {"id": "6346", "name": "Lane Ave / Normandy",      "on": true},
-    {"id": "6351", "name": "North Jax (Lem Turner)",   "on": true},
-    {"id": "0226", "name": "Southside Blvd",           "on": true}
+    {
+      "id": "0275",
+      "name": "Orange Park (Wells Rd)",
+      "short": "Orange Park",
+      "on": true,
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Wells+Rd+Orange+Park+FL"
+    },
+    {
+      "id": "6346",
+      "name": "Lane Ave / Normandy",
+      "short": "Normandy",
+      "on": true,
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Lane+Ave+Jacksonville+FL"
+    },
+    {
+      "id": "6351",
+      "name": "North Jax (Lem Turner)",
+      "short": "Lem Turner",
+      "on": true,
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Lem+Turner+Rd+Jacksonville+FL"
+    },
+    {
+      "id": "0226",
+      "name": "Southside Blvd",
+      "short": "Southside",
+      "on": true,
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Southside+Blvd+Jacksonville+FL"
+    }
   ]
 }
