@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "17 11 * * *"   # about 6:17 AM Jacksonville time
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/run-now.txt"]   # touching this file starts an extra scan
 
 permissions:
   contents: write
@@ -13,7 +16,7 @@ concurrency: penny-run
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,6 +24,7 @@ jobs:
           python-version: "3.12"
       - name: Scan one store
         env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           BRIGHTDATA_KEY: ${{ secrets.BRIGHTDATA_KEY }}
         run: python tracker.py

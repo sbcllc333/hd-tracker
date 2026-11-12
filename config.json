@@ -18,28 +18,36 @@
       "name": "Orange Park (Wells Rd)",
       "short": "Orange Park",
       "on": true,
-      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Wells+Rd+Orange+Park+FL"
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Wells+Rd+Orange+Park+FL",
+      "zip": "32073"
     },
     {
       "id": "6346",
       "name": "Lane Ave / Normandy",
       "short": "Normandy",
       "on": true,
-      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Lane+Ave+Jacksonville+FL"
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Lane+Ave+Jacksonville+FL",
+      "zip": "32205"
     },
     {
       "id": "6351",
       "name": "North Jax (Lem Turner)",
       "short": "Lem Turner",
       "on": true,
-      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Lem+Turner+Rd+Jacksonville+FL"
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Lem+Turner+Rd+Jacksonville+FL",
+      "zip": "32218"
     },
     {
       "id": "0226",
       "name": "Southside Blvd",
       "short": "Southside",
       "on": true,
-      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Southside+Blvd+Jacksonville+FL"
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Southside+Blvd+Jacksonville+FL",
+      "zip": "32216"
     }
-  ]
+  ],
+  "apify": {
+    "products_per_department": 480,
+    "max_cost_per_run": 0.16
+  }
 }

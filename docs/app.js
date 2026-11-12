@@ -72,7 +72,8 @@
     if (i.ending === 3 || i.ending === 2) t.push(`<span class="tag warn">Ends .0${i.ending}</span>`);
     else if (i.ending === 6 || i.ending === 4) t.push(`<span class="tag plain">Ends .0${i.ending}</span>`);
     if (i.qty != null && i.qty > 0 && i.qty <= 5) t.push(`<span class="tag warn">${i.qty} left</span>`);
-    if (i.missed >= 2) t.push('<span class="tag plain">Not in last scans</span>');
+    else if (i.qty === 0 && i.clearance && !i.missed) t.push('<span class="tag warn">0 in system</span>');
+    if (i.missed >= 1) t.push('<span class="tag drop">Off clearance list</span>');
     if (S.store === 'all') t.push(`<span class="tag plain">${esc(storeName(i.store_id))}</span>`);
     if (S.run[i.id]) t.push('<span class="tag ok">On run list</span>');
     return t.join('');
@@ -82,7 +83,7 @@
     const was = i.was || (i.prev_price > i.price ? i.prev_price : null);
     return `<button class="card" data-item="${esc(i.id)}">${thumb(i)}
       <div class="body"><div class="title">${esc(i.title)}</div>
-        <div class="meta">${esc(i.brand || cap(i.dept))}${i.model ? ' · <b>' + esc(i.model) + '</b>' : ''}</div>
+        <div class="meta">${esc(i.brand || i.cat || cap(i.dept))}${i.model ? ' · <b>' + esc(i.model) + '</b>' : ''}</div>
         <div class="tags">${tags(i)}</div></div>
       <div class="side"><div class="price">${money(i.price)}</div>
         ${was ? `<div class="was">${money(was)}</div>` : ''}
@@ -96,22 +97,26 @@
 
   // ---------- tabs ----------
   function today() {
-    const all = items();
+    const everything = items();
+    const gone = everything.filter(i => i.missed >= 1 && i.missed <= 3).sort((a, b) => (b.missing_since || '').localeCompare(a.missing_since || '') || b.score - a.score);
+    const all = everything.filter(i => !i.missed);
     const hot = all.filter(i => i.score >= 45);
     const drops = all.filter(i => i.prev_price > i.price && daysAgo(i.price_changed_on) <= 8).sort((a, b) => (b.prev_price - b.price) / b.prev_price - (a.prev_price - a.price) / a.prev_price);
     const disc = all.filter(i => i.discontinued);
     const low = all.filter(i => (i.ending === 3 || i.ending === 2) && i.score < 45);
     const deep = all.filter(i => i.pct >= 40 && i.score < 45 && !(i.ending === 3 || i.ending === 2)).sort((a, b) => b.pct - a.pct);
-    let h = section('Closest to a penny', hot, 'Deep discount, long on clearance, low stock.') +
+    let h = section('Just left the clearance list', gone, 'Gone since the last scan. Sold out, or marked to a penny. Worth a shelf check.') +
+      section('Closest to a penny', hot, 'Deep discount, long on clearance, low or zero stock in the system.') +
       section('Price drops', drops, 'Marked down since the last scan.') +
       section('Confirmed discontinued', disc, 'No longer sold. Still on the shelf? Scan it.') +
       section('Ends in .03 or .02', low, 'Often the last markdown before a penny.') +
-      section('Deep clearance', deep, '40% off or more.');
+      section('Deep clearance', deep, '40% off or more.') +
+      section('Other clearance', all.filter(i => i.clearance && i.score < 45 && !(i.pct >= 40) && !(i.ending === 3 || i.ending === 2)), 'On clearance at a smaller discount.');
     if (!h) {
       const where = S.store === 'all' ? 'your stores' : storeName(S.store);
       h = `<div class="empty"><h3>No clearance finds at ${esc(where)} yet</h3>
         <p>Deep discounts, price drops and discontinued items show up here after each store scan.</p>
-        <button class="btn tonal" data-tab="browse">Browse all ${all.length} tracked items</button></div>`;
+        ${everything.length ? `<button class="btn tonal" data-tab="browse">Browse all ${everything.length} tracked items</button>` : ''}</div>`;
     }
     h += `<div class="tip"><b>In the store:</b> scan the barcode on the box at self-checkout, not the shelf tag. The register price is the only proof of a penny.</div>`;
     return h;
@@ -167,8 +172,8 @@
     h += '<div class="sec"><h2>Store scans</h2></div><div class="log">' + d.stores.map(s =>
       `<div><span>${esc(s.name)}</span><span>${esc(ago(s.last_scan))}</span></div>`).join('') + '</div>';
     if (d.log && d.log.length) h += '<div class="sec"><h2>Recent runs</h2></div><div class="log">' + d.log.slice().reverse().map(l =>
-      `<div><span>${esc(niceDate(l.date))} · ${esc(l.store)}<small>${esc(l.note || (l.items + ' items'))}${l.discontinued_check ? ' · ' + esc(l.discontinued_check) : ''}</small></span><span>${l.searches} searches</span></div>`).join('') + '</div>';
-    h += `<div class="tip">One store is scanned each day, so every store is refreshed about every 4 days. Scores run 0 to 100: discount depth, weeks on clearance, low stock, price ending and discontinued status.</div>
+      `<div><span>${esc(niceDate(l.date))} · ${esc(l.store)}<small>${esc(l.note || (l.items + ' clearance items'))}${l.discontinued_check ? ' · discontinued: ' + esc(l.discontinued_check) : ''}</small></span><span>${esc(l.source || '')}</span></div>`).join('') + '</div>';
+    h += `<div class="tip">One store is scanned each day, so every store is refreshed about every 4 days. Scores run 0 to 100: discount depth, weeks on clearance, low or zero stock, price ending and discontinued status.</div>
       <a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Open PennyCentral's penny list</a>`;
     return h;
   }
@@ -185,7 +190,7 @@
     const was = i.was || (i.prev_price > i.price ? i.prev_price : null);
     const box = (label, val) => val ? `<button class="idbox" data-copy="${esc(val)}"><small>${label} · tap to copy</small><b>${esc(val)}</b></button>` : '';
     $('#sheet').innerHTML = `<div class="grab"></div><h2>${esc(i.title)}</h2>
-      <div class="meta">${esc(i.brand)}${i.brand ? ' · ' : ''}${esc(st.name || '')}</div>
+      <div class="meta">${esc([i.brand, i.cat, st.name].filter(Boolean).join(' · '))}</div>
       <div class="big"><span class="price">${money(i.price)}</span>${was ? `<span class="was">${money(was)}</span>` : ''}${i.pct ? `<span class="pct">−${i.pct}%</span>` : ''}</div>
       <ul class="why">${i.score ? `<li class="tag">Score ${i.score}</li>` : ''}${(i.why || []).map(w => `<li class="tag plain">${esc(w)}</li>`).join('')}</ul>
       <div class="ids">${box('Model', i.model)}${box('Internet #', i.pid)}${box('Store SKU', i.sku)}${box('UPC', i.upc)}</div>
@@ -197,7 +202,8 @@
       <div class="hist"><div><span>First tracked</span><span>${esc(niceDate(i.first_seen))}</span></div>
         ${i.first_clearance ? `<div><span>On clearance since</span><span>${esc(niceDate(i.first_clearance))}</span></div>` : ''}
         <div><span>Last seen in a scan</span><span>${esc(ago(i.last_seen))}</span></div>
-        ${i.qty != null ? `<div><span>In stock at last scan</span><span>${i.qty}</span></div>` : ''}
+        ${i.qty != null ? `<div><span>Store system count</span><span>${i.qty}</span></div>` : ''}
+        ${i.missed ? `<div><span>Left the clearance list</span><span>${esc(niceDate(i.missing_since))}</span></div>` : ''}
         ${(i.history || []).slice().reverse().map(([d, p]) => `<div><span>${esc(niceDate(d))}</span><span>${money(p)}</span></div>`).join('')}</div>`;
     $('#sheet').hidden = $('#scrim').hidden = false;
     window.history.pushState({ sheet: 1 }, '');

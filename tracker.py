@@ -5,14 +5,15 @@ Runs once a day (GitHub Actions). Each day it scans ONE store, so every store
 is scanned every 4 days and the whole thing fits in SerpApi's free plan.
 
   1. Picks the store that was scanned longest ago.
-  2. For each department, asks SerpApi for that store's deep-discount items.
+  2. Asks Apify for that store's clearance items in each department
+     (falls back to SerpApi if Apify can't run).
   3. Updates data/ledger.json: a running history per item per store
      (first seen on clearance, every price change, stock count).
   4. Asks Bright Data whether the most promising items are discontinued.
   5. Scores every item 0-100 for how close it looks to a penny.
   6. Writes docs/data.json, which the app (docs/index.html) reads.
 
-Secrets: SERPAPI_KEY (needed), BRIGHTDATA_KEY (optional).
+Secrets: APIFY_TOKEN (main source), SERPAPI_KEY (backup), BRIGHTDATA_KEY (optional).
 Run:  python tracker.py           real run
       python tracker.py --demo    fake data, no keys, for testing the app
       python tracker.py --rebuild only rewrite docs/data.json from the ledger
@@ -37,6 +38,8 @@ LEDGER = DATA / "ledger.json"
 SNAP_DIR = DATA / "snapshots"          # old daily snapshots, used once to seed the ledger
 OUT = ROOT / "docs" / "data.json"
 SERP = "https://serpapi.com/search.json"
+APIFY = "https://api.apify.com/v2"
+APIFY_ACTOR = "s_actors~home-depot-scraper"
 BRIGHT = "https://api.brightdata.com"
 BRIGHT_DATASET = "gd_lmusivh019i7g97q2n"   # Bright Data "Home Depot US"
 TZ = ZoneInfo("America/New_York")
@@ -253,19 +256,84 @@ def update_ledger(ledger, store, seen, dept_log, day):
             if hist:
                 old["prev_price"], old["price_changed_on"] = hist[-1][1], day
             hist.append([day, new["price"]])
-        if new["pct"] and not old.get("first_clearance"):
+        if (new["pct"] or new.get("clearance")) and not old.get("first_clearance"):
             old["first_clearance"] = day
         if new["was"] is None and old.get("was") and old["was"] > new["price"]:
             new["was"] = old["was"]              # keep the last known regular price
-        for k in ("thumb", "brand", "model"):
-            if not new[k] and old.get(k):
+        for k in ("thumb", "brand", "model", "sku", "upc"):
+            if not new.get(k) and old.get(k):
                 new[k] = old[k]
         old.update(new)
+        if old.get("missed"):
+            old["returned_on"] = day
         old["last_seen"], old["missed"] = day, 0
     for key, old in items.items():
         if old.get("store_id") == store["id"] and key not in seen \
                 and old.get("dept") in ok_depts and old.get("last_seen") != day:
             old["missed"] = old.get("missed", 0) + 1
+            if old["missed"] == 1:
+                old["missing_since"] = day
+
+
+# ---------- Apify: store clearance (main source) ----------
+
+def apify(method, path, params=None, body=None):
+    url = APIFY + path + ("?" + urllib.parse.urlencode(params) if params else "")
+    req = urllib.request.Request(
+        url, data=json.dumps(body).encode() if body is not None else None, method=method,
+        headers={"Authorization": "Bearer " + os.environ["APIFY_TOKEN"].strip(),
+                 "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        return json.loads(r.read().decode("utf-8", "replace"))
+
+
+def apify_sweep(store):
+    """One run = every department at one store, clearance items only.
+    Returns (items_seen, dept_log, cost_usd). Raises on failure."""
+    cfg = CONFIG.get("apify", {})
+    run = apify("POST", f"/acts/{APIFY_ACTOR}/runs",
+                {"timeout": 1200, "maxTotalChargeUsd": cfg.get("max_cost_per_run", 0.16)},
+                {"mode": "search", "keywords": CONFIG["searches"], "storeIds": [store["id"]],
+                 "zipCode": store.get("zip", ""), "maxStores": 1,
+                 "maxProductsPerSearch": cfg.get("products_per_department", 480),
+                 "onlyClearance": True, "minDiscountPercent": 0,
+                 "onlyChanges": False, "maxConcurrency": 3})["data"]
+    for _ in range(100):                               # up to ~20 minutes
+        time.sleep(12)
+        run = apify("GET", f"/actor-runs/{run['id']}")["data"]
+        if run.get("status") not in ("READY", "RUNNING"):
+            break
+    if run.get("status") != "SUCCEEDED":
+        raise RuntimeError(f"Apify run ended as {run.get('status')}")
+    rows = apify("GET", f"/datasets/{run['defaultDatasetId']}/items", {"limit": 5000, "clean": "true"})
+    floor = float(CONFIG.get("min_price") or 0)
+    seen, counts = {}, {d: 0 for d in CONFIG["searches"]}
+    for r in rows:
+        pid, price = str(r.get("itemId") or ""), num(r.get("price"))
+        if not pid or price is None or r.get("type", "product") != "product":
+            continue
+        reg = num(r.get("regularPrice"))
+        if max(price, reg or 0) < floor:                # skip items that were never worth $10
+            continue
+        key = f"{store['id']}:{pid}"
+        if key in seen:
+            continue
+        pct = num(r.get("discountPercent"))
+        dept = r.get("query") or ""
+        seen[key] = {"pid": pid, "store_id": store["id"], "title": r.get("title") or "",
+                     "brand": r.get("brand") or "", "model": r.get("model") or "",
+                     "sku": str(r.get("storeSku") or ""), "upc": str(r.get("upc") or ""),
+                     "price": price, "was": reg if reg and reg > price else None,
+                     "pct": int(round(pct)) if pct else None, "badge": "",
+                     "qty": num(r.get("storeQuantity")), "thumb": r.get("image") or "",
+                     "link": clean_link(r.get("url") or "", pid), "dept": dept,
+                     "cat": r.get("department") or "", "clearance": bool(r.get("isClearance")),
+                     "source": "apify"}
+        counts[dept] = counts.get(dept, 0) + 1
+    log = [{"dept": d, "count": counts.get(d, 0), "filtered": True, "error": ""} for d in CONFIG["searches"]]
+    for d in log:
+        print(f"  {store['name']} / {d['dept']}: {d['count']} clearance items")
+    return seen, log, run.get("usageTotalUsd") or 0
 
 
 # ---------- Bright Data: is it discontinued? ----------
@@ -374,6 +442,9 @@ def score(it, day):
     if qty is not None and 1 <= qty <= 5:
         pts += 10
         why.append(f"only {int(qty)} left")
+    elif qty == 0 and it.get("clearance"):
+        pts += 10
+        why.append("system shows 0 left")
     if it.get("price_changed_on") and it.get("prev_price") and it["prev_price"] > it["price"] \
             and days_between(it["price_changed_on"], day) <= 8:
         pts += 5
@@ -398,7 +469,8 @@ def write_output(ledger, day, status):
             "price": it["price"], "was": it.get("was"), "pct": it.get("pct"),
             "prev_price": it.get("prev_price"), "price_changed_on": it.get("price_changed_on"),
             "ending": end, "qty": it.get("qty"), "thumb": it.get("thumb", ""),
-            "link": it.get("link", ""), "dept": it.get("dept", ""),
+            "link": it.get("link", ""), "dept": it.get("dept", ""), "cat": it.get("cat", ""),
+            "clearance": bool(it.get("clearance")), "missing_since": it.get("missing_since") if it.get("missed") else None,
             "first_seen": it.get("first_seen"), "first_clearance": it.get("first_clearance"),
             "last_seen": it.get("last_seen"), "missed": it.get("missed", 0),
             "discontinued": bool(it.get("discontinued")), "discontinued_on": it.get("discontinued_on"),
@@ -419,32 +491,6 @@ def write_output(ledger, day, status):
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, separators=(",", ":")))
     print(f"Wrote {OUT.name}: {len(items)} items")
-
-
-# ---------- one-time: carry over the old daily snapshots ----------
-
-def seed_from_snapshots(ledger):
-    if ledger["items"] or not SNAP_DIR.exists():
-        return
-    for f in sorted(SNAP_DIR.glob("*.json")):
-        day = f.stem
-        for key, it in json.loads(f.read_text()).items():
-            price = num(it.get("price"))
-            if price is None:
-                continue
-            old = ledger["items"].setdefault(key, {"first_seen": day, "history": [], "missed": 0})
-            if not old["history"] or old["history"][-1][1] != price:
-                if old["history"]:
-                    old["prev_price"], old["price_changed_on"] = old["history"][-1][1], day
-                old["history"].append([day, price])
-            old.update({"pid": it["pid"], "store_id": it["store_id"], "title": it.get("title", ""),
-                        "brand": it.get("brand", ""), "model": it.get("model", ""), "price": price,
-                        "link": clean_link(it.get("link", ""), it["pid"]),
-                        "dept": it.get("search", ""), "last_seen": day})
-        for s in stores():
-            if any(k.startswith(s["id"] + ":") for k in ledger["items"]):
-                ledger.setdefault("sweeps", {})[s["id"]] = day
-    print(f"Carried over {len(ledger['items'])} items from the old snapshots")
 
 
 # ---------- demo data (for testing the app only; never committed by the daily job) ----------
@@ -490,34 +536,49 @@ def main():
         return
 
     ledger = load_ledger()
-    seed_from_snapshots(ledger)
+    # October's full-price listings from the old tracker are noise now; keep clearance finds only
+    ledger["items"] = {k: v for k, v in ledger["items"].items() if v.get("source") or v.get("pct")}
+    if not any(v.get("source") for v in ledger["items"].values()) and not ledger.get("log_v2"):
+        ledger["sweeps"], ledger["log"], ledger["log_v2"] = {}, [], True
     status = {"ok": True, "note": ""}
+    have_apify = bool(os.environ.get("APIFY_TOKEN", "").strip())
+    have_serp = bool(os.environ.get("SERPAPI_KEY", "").strip())
 
-    if "--rebuild" in sys.argv or not os.environ.get("SERPAPI_KEY"):
-        status = ledger.get("last_status") or {
-            "ok": False, "note": "Scanning is paused until SerpApi's free searches reset. "
-                                 "Prices shown are from the last scan."}
+    if "--rebuild" in sys.argv or not (have_apify or have_serp):
+        status = ledger.get("last_status") or {"ok": False, "note": "Waiting for the first scan."}
     else:
         order = sorted(stores(), key=lambda s: ledger.get("sweeps", {}).get(s["id"]) or "")
         store = order[0]
         print(f"Scanning {store['name']} ({day})")
-        entry = {"date": day, "store": store["name"], "searches": 0, "items": 0, "note": ""}
-        try:
-            seen, used, dept_log = sweep_store(ledger, store, day)
-            entry["searches"], entry["items"] = used, len(seen)
-            if seen:
-                update_ledger(ledger, store, seen, dept_log, day)
-                ledger.setdefault("sweeps", {})[store["id"]] = day
+        entry = {"date": day, "store": store["name"], "searches": 0, "items": 0, "note": "", "source": ""}
+        seen, dept_log, problems = None, [], []
+        if have_apify:
+            try:
+                seen, dept_log, cost = apify_sweep(store)
+                entry["source"], entry["cost"] = "Apify", round(cost, 3)
+            except Exception as e:
+                problems.append(f"Apify: {str(e)[:100]}")
+                print("  ! " + problems[-1])
+        if seen is None and have_serp:
+            try:
+                seen, entry["searches"], dept_log = sweep_store(ledger, store, day)
+                entry["source"] = "SerpApi"
+            except OutOfSearches:
+                problems.append("SerpApi: out of free searches")
+            except Exception as e:
+                problems.append(f"SerpApi: {str(e)[:100]}")
+        if seen is not None:
+            entry["items"] = len(seen)
+            update_ledger(ledger, store, seen, dept_log, day)
+            ledger.setdefault("sweeps", {})[store["id"]] = day
             bad = [d["dept"] for d in dept_log if d["error"]]
             if bad:
                 entry["note"] = "Couldn't read: " + ", ".join(bad)
-            if not seen:
-                status = {"ok": False, "note": f"{store['name']} returned nothing today"}
-        except OutOfSearches:
-            entry["note"] = "Out of free searches"
-            status = {"ok": False, "note": "SerpApi's free searches are used up. "
-                                           "Scanning starts again when they reset."}
-            print("  ! " + status["note"])
+        else:
+            entry["note"] = "; ".join(problems) or "No data source available"
+            status = {"ok": False, "note": f"Today's scan of {store['name']} didn't work. "
+                                           "It will try again tomorrow."}
+            print("  ! " + entry["note"])
         note, _ = check_discontinued(ledger, day)
         entry["discontinued_check"] = note
         print("  Discontinued check:", note)
