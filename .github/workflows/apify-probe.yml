@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/brightdata-test]
-    paths: ["probe/apify_probe.py", ".github/workflows/apify-probe.yml"]
+    paths: ["probe/apify2_probe.py", ".github/workflows/apify-probe.yml"]
 
 permissions:
   contents: read
@@ -21,4 +21,4 @@ jobs:
       - name: Test Apify
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-        run: python probe/apify_probe.py
+        run: python probe/apify2_probe.py
