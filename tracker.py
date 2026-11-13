@@ -307,6 +307,16 @@ def apify_sweep(store):
     if run.get("status") != "SUCCEEDED":
         raise RuntimeError(f"Apify run ended as {run.get('status')}")
     rows = apify("GET", f"/datasets/{run['defaultDatasetId']}/items", {"limit": 5000, "clean": "true"})
+    print(f"  Apify: {len(rows)} rows, cost ${run.get('usageTotalUsd') or 0:.3f}, "
+          f"events {json.dumps(run.get('chargedEventCounts'))}")
+    if not rows:
+        try:
+            req = urllib.request.Request(APIFY + f"/actor-runs/{run['id']}/log", headers={
+                "Authorization": "Bearer " + os.environ["APIFY_TOKEN"].strip()})
+            tail = urllib.request.urlopen(req, timeout=60).read().decode("utf-8", "replace").splitlines()[-12:]
+            print("  Apify log tail:\n    " + "\n    ".join(l[:220] for l in tail))
+        except Exception:
+            pass
     floor = float(CONFIG.get("min_price") or 0)
     seen, counts = {}, {d: 0 for d in CONFIG["searches"]}
     for r in rows:
@@ -563,6 +573,16 @@ def main():
             try:
                 seen, dept_log, cost = apify_sweep(store)
                 entry["source"], entry["cost"] = "Apify", round(cost, 3)
+                had = {}
+                for v in ledger["items"].values():
+                    if v.get("store_id") == store["id"] and not v.get("missed") and v.get("source") == "apify":
+                        had[v.get("dept")] = had.get(v.get("dept"), 0) + 1
+                if sum(had.values()) >= 5 and len(seen) < sum(had.values()) * 0.25:
+                    seen = None                         # the scraper came back (nearly) empty: a bad run
+                    raise RuntimeError("scan came back empty, so it was ignored")
+                for d in dept_log:                      # a whole department vanishing is a scraper miss
+                    if d["count"] == 0 and had.get(d["dept"], 0) >= 3:
+                        d["error"] = "came back empty"
             except Exception as e:
                 problems.append(f"Apify: {str(e)[:100]}")
                 print("  ! " + problems[-1])
