@@ -73,7 +73,9 @@
     else if (i.ending === 6 || i.ending === 4) t.push(`<span class="tag plain">Ends .0${i.ending}</span>`);
     if (i.qty != null && i.qty > 0 && i.qty <= 5) t.push(`<span class="tag warn">${i.qty} left</span>`);
     else if (i.qty === 0 && i.clearance && !i.missed) t.push('<span class="tag warn">0 in system</span>');
-    if (i.missed >= 1) t.push('<span class="tag drop">Off clearance list</span>');
+    if (i.gone === 'unlisted') t.push('<span class="tag drop">No longer listed</span>');
+    else if (i.gone === 'fullprice') t.push('<span class="tag plain">Back to full price</span>');
+    else if (i.missed >= 1) t.push('<span class="tag plain">Missed in last scan</span>');
     if (S.store === 'all') t.push(`<span class="tag plain">${esc(storeName(i.store_id))}</span>`);
     if (S.run[i.id]) t.push('<span class="tag ok">On run list</span>');
     return t.join('');
@@ -98,14 +100,14 @@
   // ---------- tabs ----------
   function today() {
     const everything = items();
-    const gone = everything.filter(i => i.missed >= 1 && i.missed <= 3).sort((a, b) => (b.missing_since || '').localeCompare(a.missing_since || '') || b.score - a.score);
+    const gone = everything.filter(i => i.gone === 'unlisted' && i.missed <= 4).sort((a, b) => (b.missing_since || '').localeCompare(a.missing_since || '') || b.score - a.score);
     const all = everything.filter(i => !i.missed);
     const hot = all.filter(i => i.score >= 45);
     const drops = all.filter(i => i.prev_price > i.price && daysAgo(i.price_changed_on) <= 8).sort((a, b) => (b.prev_price - b.price) / b.prev_price - (a.prev_price - a.price) / a.prev_price);
     const disc = all.filter(i => i.discontinued);
     const low = all.filter(i => (i.ending === 3 || i.ending === 2) && i.score < 45);
     const deep = all.filter(i => i.pct >= 40 && i.score < 45 && !(i.ending === 3 || i.ending === 2)).sort((a, b) => b.pct - a.pct);
-    let h = section('Just left the clearance list', gone, 'Gone since the last scan. Sold out, or marked to a penny. Worth a shelf check.') +
+    let h = section('No longer listed at the store', gone, 'Was on clearance, and a direct lookup no longer finds it at this store. Not proof of a penny, but the best lead. Scan it at the register.') +
       section('Closest to a penny', hot, 'Deep discount, long on clearance, low or zero stock in the system.') +
       section('Price drops', drops, 'Marked down since the last scan.') +
       section('Confirmed discontinued', disc, 'No longer sold. Still on the shelf? Scan it.') +
@@ -203,7 +205,8 @@
         ${i.first_clearance ? `<div><span>On clearance since</span><span>${esc(niceDate(i.first_clearance))}</span></div>` : ''}
         <div><span>Last seen in a scan</span><span>${esc(ago(i.last_seen))}</span></div>
         ${i.qty != null ? `<div><span>Store system count</span><span>${i.qty}</span></div>` : ''}
-        ${i.missed ? `<div><span>Left the clearance list</span><span>${esc(niceDate(i.missing_since))}</span></div>` : ''}
+        ${i.gone === 'unlisted' ? `<div><span>No longer listed since</span><span>${esc(niceDate(i.missing_since))}</span></div>` : ''}
+        ${i.gone === 'fullprice' ? `<div><span>Back to full price</span><span>${money(i.now_price)}</span></div>` : ''}
         ${(i.history || []).slice().reverse().map(([d, p]) => `<div><span>${esc(niceDate(d))}</span><span>${money(p)}</span></div>`).join('')}</div>`;
     $('#sheet').hidden = $('#scrim').hidden = false;
     window.history.pushState({ sheet: 1 }, '');

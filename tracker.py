@@ -18,6 +18,7 @@ Run:  python tracker.py           real run
       python tracker.py --demo    fake data, no keys, for testing the app
       python tracker.py --rebuild only rewrite docs/data.json from the ledger
       python tracker.py --store normandy   scan that store now instead of the next in line
+      python tracker.py --recheck  look up every dropped item directly, no full scan
 """
 
 import json
@@ -267,6 +268,8 @@ def update_ledger(ledger, store, seen, dept_log, day):
         old.update(new)
         if old.get("missed"):
             old["returned_on"] = day
+        old.pop("gone", None)
+        old.pop("missing_since", None)
         old["last_seen"], old["missed"] = day, 0
     for key, old in items.items():
         if old.get("store_id") == store["id"] and key not in seen \
@@ -345,6 +348,73 @@ def apify_sweep(store):
     for d in log:
         print(f"  {store['name']} / {d['dept']}: {d['count']} clearance items")
     return seen, log, run.get("usageTotalUsd") or 0
+
+
+def apify_recheck(ledger, day, only_store=None):
+    """Look up every item that dropped out of a scan, directly by item number at its store.
+    Still on clearance -> put it back. Back at full price -> say so. Not found -> 'unlisted'."""
+    todo = {}
+    for key, it in ledger["items"].items():
+        if it.get("missed") and it.get("source") == "apify" and it.get("gone_checked") != day \
+                and (only_store is None or it.get("store_id") == only_store):
+            todo.setdefault(it["store_id"], []).append(key)
+    notes = []
+    for sid, keys in todo.items():
+        keys = keys[:64]
+        st = next((x for x in CONFIG["stores"] if x["id"] == sid), {"id": sid})
+        try:
+            run = apify("POST", f"/acts/{APIFY_ACTOR}/runs", {"timeout": 600, "maxTotalChargeUsd": 0.08},
+                        {"mode": "stock_check", "productIds": [ledger["items"][k]["pid"] for k in keys],
+                         "storeIds": [sid], "zipCode": st.get("zip", ""), "maxStores": 1,
+                         "onlyChanges": False, "maxConcurrency": 3})["data"]
+            for _ in range(50):
+                time.sleep(10)
+                run = apify("GET", f"/actor-runs/{run['id']}")["data"]
+                if run.get("status") not in ("READY", "RUNNING"):
+                    break
+            if run.get("status") != "SUCCEEDED":
+                raise RuntimeError(f"run ended as {run.get('status')}")
+            rows = apify("GET", f"/datasets/{run['defaultDatasetId']}/items", {"limit": 1000, "clean": "true"})
+        except Exception as e:
+            notes.append(f"{st.get('short', sid)}: recheck failed ({str(e)[:60]})")
+            continue
+        if rows:
+            print("  recheck sample row:", json.dumps(rows[0])[:700])
+        if len(rows) < len(keys) * 0.5:              # lookup mostly failed: don't draw conclusions
+            notes.append(f"{st.get('short', sid)}: recheck came back short ({len(rows)} of {len(keys)})")
+            continue
+        found = {str(r.get("itemId")): r for r in rows if r.get("itemId")}
+        back = full = unlisted = 0
+        for k in keys:
+            it, r = ledger["items"][k], found.get(ledger["items"][k]["pid"])
+            it["gone_checked"] = day
+            price = num(r.get("price")) if r else None
+            if r is None or price is None:
+                it["gone"] = "unlisted"
+                unlisted += 1
+                continue
+            reg = num(r.get("regularPrice"))
+            it["qty"] = num(r.get("storeQuantity"))
+            if r.get("isClearance") or (reg and price < reg * 0.97):
+                hist = it.setdefault("history", [])
+                if not hist or hist[-1][1] != price:
+                    if hist:
+                        it["prev_price"], it["price_changed_on"] = hist[-1][1], day
+                    hist.append([day, price])
+                pct = num(r.get("discountPercent"))
+                it.update({"price": price, "pct": int(round(pct)) if pct else it.get("pct"),
+                           "missed": 0, "last_seen": day, "clearance": bool(r.get("isClearance"))})
+                it.pop("gone", None)
+                it.pop("missing_since", None)
+                back += 1
+            else:
+                it["gone"], it["now_price"] = "fullprice", price
+                full += 1
+        notes.append(f"{st.get('short', sid)}: {back} still on clearance, {full} back to full price, "
+                     f"{unlisted} no longer listed")
+    for n in notes:
+        print("  Recheck:", n)
+    return "; ".join(notes)
 
 
 # ---------- Bright Data: is it discontinued? ----------
@@ -482,6 +552,7 @@ def write_output(ledger, day, status):
             "ending": end, "qty": it.get("qty"), "thumb": it.get("thumb", ""),
             "link": it.get("link", ""), "dept": it.get("dept", ""), "cat": it.get("cat", ""),
             "clearance": bool(it.get("clearance")), "missing_since": it.get("missing_since") if it.get("missed") else None,
+            "gone": it.get("gone") if it.get("missed") else None, "now_price": it.get("now_price") if it.get("missed") else None,
             "first_seen": it.get("first_seen"), "first_clearance": it.get("first_clearance"),
             "last_seen": it.get("last_seen"), "missed": it.get("missed", 0),
             "discontinued": bool(it.get("discontinued")), "discontinued_on": it.get("discontinued_on"),
@@ -555,7 +626,12 @@ def main():
     have_apify = bool(os.environ.get("APIFY_TOKEN", "").strip())
     have_serp = bool(os.environ.get("SERPAPI_KEY", "").strip())
 
-    if "--rebuild" in sys.argv or not (have_apify or have_serp):
+    if "--recheck" in sys.argv and have_apify:
+        note = apify_recheck(ledger, day)
+        ledger.setdefault("log", []).append({"date": day, "store": "Recheck of dropped items", "searches": 0,
+                                             "items": 0, "note": note or "nothing to recheck", "source": "Apify"})
+        status = ledger.get("last_status") or status
+    elif "--rebuild" in sys.argv or not (have_apify or have_serp):
         status = ledger.get("last_status") or {"ok": False, "note": "Waiting for the first scan."}
     else:
         order = sorted(stores(), key=lambda s: ledger.get("sweeps", {}).get(s["id"]) or "")
@@ -606,6 +682,11 @@ def main():
             status = {"ok": False, "note": f"Today's scan of {store['name']} didn't work. "
                                            "It will try again tomorrow."}
             print("  ! " + entry["note"])
+        if seen is not None and entry["source"] == "Apify":
+            try:
+                entry["recheck"] = apify_recheck(ledger, day, store["id"])
+            except Exception as e:
+                print("  ! recheck:", str(e)[:120])
         note, _ = check_discontinued(ledger, day)
         entry["discontinued_check"] = note
         print("  Discontinued check:", note)

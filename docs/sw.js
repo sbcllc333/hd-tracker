@@ -1,5 +1,5 @@
 // Penny Run service worker: app shell from cache, data fresh from the network when possible.
-const VERSION = 'penny-run-v3';
+const VERSION = 'penny-run-v4';
 const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png'];
 self.addEventListener('install', e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(

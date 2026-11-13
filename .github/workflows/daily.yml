@@ -36,7 +36,9 @@ jobs:
         run: |
           # an extra scan can name a store on a "store=" line in .github/run-now.txt
           if [ "$EVENT" = "push" ]; then PICK=$(sed -n 's/^store=//p' .github/run-now.txt | head -1 | tr -cd 'A-Za-z0-9 '); fi
-          if [ -n "$PICK" ]; then python tracker.py --store "$PICK"; else python tracker.py; fi
+          MODE=""; if [ "$EVENT" = "push" ]; then MODE=$(sed -n 's/^mode=//p' .github/run-now.txt | head -1); fi
+          if [ "$MODE" = "recheck" ]; then python tracker.py --recheck
+          elif [ -n "$PICK" ]; then python tracker.py --store "$PICK"; else python tracker.py; fi
       - name: Save results
         run: |
           git config user.name "penny-run-bot"
