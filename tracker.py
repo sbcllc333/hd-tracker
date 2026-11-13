@@ -17,6 +17,7 @@ Secrets: APIFY_TOKEN (main source), SERPAPI_KEY (backup), BRIGHTDATA_KEY (option
 Run:  python tracker.py           real run
       python tracker.py --demo    fake data, no keys, for testing the app
       python tracker.py --rebuild only rewrite docs/data.json from the ledger
+      python tracker.py --store normandy   scan that store now instead of the next in line
 """
 
 import json
@@ -549,6 +550,12 @@ def main():
     else:
         order = sorted(stores(), key=lambda s: ledger.get("sweeps", {}).get(s["id"]) or "")
         store = order[0]
+        if "--store" in sys.argv:                      # scan one particular store on request
+            want = sys.argv[sys.argv.index("--store") + 1].lower()
+            picked = [x for x in stores() if want in (x["id"], x["id"].lstrip("0"))
+                      or want in x["name"].lower() or want in x.get("short", "").lower()]
+            if picked:
+                store = picked[0]
         print(f"Scanning {store['name']} ({day})")
         entry = {"date": day, "store": store["name"], "searches": 0, "items": 0, "note": "", "source": ""}
         seen, dept_log, problems = None, [], []

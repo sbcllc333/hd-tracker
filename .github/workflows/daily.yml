@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "17 11 * * *"   # about 6:17 AM Jacksonville time
   workflow_dispatch:
+    inputs:
+      store:
+        description: "Store to scan (blank = next in line)"
+        required: false
   push:
     branches: [main]
     paths: [".github/run-now.txt"]   # touching this file starts an extra scan
@@ -27,7 +31,12 @@ jobs:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           BRIGHTDATA_KEY: ${{ secrets.BRIGHTDATA_KEY }}
-        run: python tracker.py
+          EVENT: ${{ github.event_name }}
+          PICK: ${{ inputs.store }}
+        run: |
+          # an extra scan can name a store on a "store=" line in .github/run-now.txt
+          if [ "$EVENT" = "push" ]; then PICK=$(sed -n 's/^store=//p' .github/run-now.txt | head -1 | tr -cd 'A-Za-z0-9 '); fi
+          if [ -n "$PICK" ]; then python tracker.py --store "$PICK"; else python tracker.py; fi
       - name: Save results
         run: |
           git config user.name "penny-run-bot"
