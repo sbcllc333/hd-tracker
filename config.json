@@ -48,6 +48,9 @@
   ],
   "apify": {
     "products_per_department": 480,
-    "max_cost_per_run": 0.16
+    "max_cost_per_run": 0.18
+  },
+  "extra_searches": {
+    "hand tools": "tools"
   }
 }

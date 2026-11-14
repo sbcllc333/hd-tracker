@@ -1,2 +1,2 @@
-2026-11-13T23:38:22Z
-mode=recheck
+2026-11-14T00:21:07Z
+store=orange park,lem turner,southside

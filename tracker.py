@@ -295,9 +295,10 @@ def apify_sweep(store):
     """One run = every department at one store, clearance items only.
     Returns (items_seen, dept_log, cost_usd). Raises on failure."""
     cfg = CONFIG.get("apify", {})
+    extra = CONFIG.get("extra_searches", {})          # e.g. {"hand tools": "tools"}
     run = apify("POST", f"/acts/{APIFY_ACTOR}/runs",
                 {"timeout": 1200, "maxTotalChargeUsd": cfg.get("max_cost_per_run", 0.16)},
-                {"mode": "search", "keywords": CONFIG["searches"], "storeIds": [store["id"]],
+                {"mode": "search", "keywords": CONFIG["searches"] + list(extra), "storeIds": [store["id"]],
                  "zipCode": store.get("zip", ""), "maxStores": 1,
                  "maxProductsPerSearch": cfg.get("products_per_department", 480),
                  "onlyClearance": True, "minDiscountPercent": 0,
@@ -333,7 +334,7 @@ def apify_sweep(store):
         if key in seen:
             continue
         pct = num(r.get("discountPercent"))
-        dept = r.get("query") or ""
+        dept = extra.get(r.get("query"), r.get("query") or "")
         seen[key] = {"pid": pid, "store_id": store["id"], "title": r.get("title") or "",
                      "brand": r.get("brand") or "", "model": r.get("model") or "",
                      "sku": str(r.get("storeSku") or ""), "upc": str(r.get("upc") or ""),
@@ -608,6 +609,57 @@ def demo_ledger():
 
 # ---------- main ----------
 
+def scan_one(ledger, store, day, have_apify, have_serp, status):
+    """Scan one store and fold the results into the ledger."""
+    print(f"Scanning {store['name']} ({day})")
+    entry = {"date": day, "store": store["name"], "searches": 0, "items": 0, "note": "", "source": ""}
+    seen, dept_log, problems = None, [], []
+    if have_apify:
+        try:
+            seen, dept_log, cost = apify_sweep(store)
+            entry["source"], entry["cost"] = "Apify", round(cost, 3)
+            had = {}
+            for v in ledger["items"].values():
+                if v.get("store_id") == store["id"] and not v.get("missed") and v.get("source") == "apify":
+                    had[v.get("dept")] = had.get(v.get("dept"), 0) + 1
+            if sum(had.values()) >= 5 and len(seen) < sum(had.values()) * 0.25:
+                seen = None                         # the scraper came back (nearly) empty: a bad run
+                raise RuntimeError("scan came back empty, so it was ignored")
+            for d in dept_log:                      # a whole department vanishing is a scraper miss
+                if d["count"] == 0 and had.get(d["dept"], 0) >= 3:
+                    d["error"] = "came back empty"
+        except Exception as e:
+            problems.append(f"Apify: {str(e)[:100]}")
+            print("  ! " + problems[-1])
+    if seen is None and have_serp:
+        try:
+            seen, entry["searches"], dept_log = sweep_store(ledger, store, day)
+            entry["source"] = "SerpApi"
+        except OutOfSearches:
+            problems.append("SerpApi: out of free searches")
+        except Exception as e:
+            problems.append(f"SerpApi: {str(e)[:100]}")
+    if seen is not None:
+        entry["items"] = len(seen)
+        update_ledger(ledger, store, seen, dept_log, day)
+        ledger.setdefault("sweeps", {})[store["id"]] = day
+        bad = [d["dept"] for d in dept_log if d["error"]]
+        if bad:
+            entry["note"] = "Couldn't read: " + ", ".join(bad)
+    else:
+        entry["note"] = "; ".join(problems) or "No data source available"
+        status.update(ok=False, note=f"Today's scan of {store['name']} didn't work. "
+                                     "It will try again tomorrow.")
+        print("  ! " + entry["note"])
+    if seen is not None and entry["source"] == "Apify":
+        try:
+            entry["recheck"] = apify_recheck(ledger, day, store["id"])
+        except Exception as e:
+            print("  ! recheck:", str(e)[:120])
+    ledger.setdefault("log", []).append(entry)
+
+
+
 def main():
     day = today().isoformat()
     if "--demo" in sys.argv:
@@ -635,62 +687,22 @@ def main():
         status = ledger.get("last_status") or {"ok": False, "note": "Waiting for the first scan."}
     else:
         order = sorted(stores(), key=lambda s: ledger.get("sweeps", {}).get(s["id"]) or "")
-        store = order[0]
-        if "--store" in sys.argv:                      # scan one particular store on request
-            want = sys.argv[sys.argv.index("--store") + 1].lower()
-            picked = [x for x in stores() if want in (x["id"], x["id"].lstrip("0"))
-                      or want in x["name"].lower() or want in x.get("short", "").lower()]
-            if picked:
-                store = picked[0]
-        print(f"Scanning {store['name']} ({day})")
-        entry = {"date": day, "store": store["name"], "searches": 0, "items": 0, "note": "", "source": ""}
-        seen, dept_log, problems = None, [], []
-        if have_apify:
-            try:
-                seen, dept_log, cost = apify_sweep(store)
-                entry["source"], entry["cost"] = "Apify", round(cost, 3)
-                had = {}
-                for v in ledger["items"].values():
-                    if v.get("store_id") == store["id"] and not v.get("missed") and v.get("source") == "apify":
-                        had[v.get("dept")] = had.get(v.get("dept"), 0) + 1
-                if sum(had.values()) >= 5 and len(seen) < sum(had.values()) * 0.25:
-                    seen = None                         # the scraper came back (nearly) empty: a bad run
-                    raise RuntimeError("scan came back empty, so it was ignored")
-                for d in dept_log:                      # a whole department vanishing is a scraper miss
-                    if d["count"] == 0 and had.get(d["dept"], 0) >= 3:
-                        d["error"] = "came back empty"
-            except Exception as e:
-                problems.append(f"Apify: {str(e)[:100]}")
-                print("  ! " + problems[-1])
-        if seen is None and have_serp:
-            try:
-                seen, entry["searches"], dept_log = sweep_store(ledger, store, day)
-                entry["source"] = "SerpApi"
-            except OutOfSearches:
-                problems.append("SerpApi: out of free searches")
-            except Exception as e:
-                problems.append(f"SerpApi: {str(e)[:100]}")
-        if seen is not None:
-            entry["items"] = len(seen)
-            update_ledger(ledger, store, seen, dept_log, day)
-            ledger.setdefault("sweeps", {})[store["id"]] = day
-            bad = [d["dept"] for d in dept_log if d["error"]]
-            if bad:
-                entry["note"] = "Couldn't read: " + ", ".join(bad)
-        else:
-            entry["note"] = "; ".join(problems) or "No data source available"
-            status = {"ok": False, "note": f"Today's scan of {store['name']} didn't work. "
-                                           "It will try again tomorrow."}
-            print("  ! " + entry["note"])
-        if seen is not None and entry["source"] == "Apify":
-            try:
-                entry["recheck"] = apify_recheck(ledger, day, store["id"])
-            except Exception as e:
-                print("  ! recheck:", str(e)[:120])
+        targets = [order[0]]
+        if "--store" in sys.argv:                      # scan particular stores on request: "a,b,c"
+            targets = []
+            for want in sys.argv[sys.argv.index("--store") + 1].lower().split(","):
+                want = want.strip()
+                for x in stores():
+                    if want and x not in targets and (want in (x["id"], x["id"].lstrip("0"))
+                                                      or want in x["name"].lower()
+                                                      or want in x.get("short", "").lower()):
+                        targets.append(x)
+            targets = targets or [order[0]]
+        for store in targets:
+            scan_one(ledger, store, day, have_apify, have_serp, status)
         note, _ = check_discontinued(ledger, day)
-        entry["discontinued_check"] = note
+        ledger["log"][-1]["discontinued_check"] = note
         print("  Discontinued check:", note)
-        ledger.setdefault("log", []).append(entry)
         ledger["log"] = ledger["log"][-60:]
         ledger["last_status"] = status
 
