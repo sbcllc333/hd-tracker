@@ -8,7 +8,7 @@
   };
   const S = {
     data: null, tab: 'today', store: store.get('store', 'all'), dept: 'all', sort: 'score', q: '',
-    run: store.get('run', {}), limit: 30, offline: false
+    run: store.get('run', {}), limit: 30, offline: false, stock: store.get('stock', true)
   };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const money = v => v == null ? '' : '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -42,7 +42,8 @@
     if (S.store !== 'all' && !S.data.stores.some(s => s.id === S.store)) S.store = 'all';
     draw();
   }
-  const items = () => S.data.items.filter(i => S.store === 'all' || i.store_id === S.store);
+  const inStore = () => S.data.items.filter(i => S.store === 'all' || i.store_id === S.store);
+  const items = () => inStore().filter(i => !S.stock || i.qty !== 0);
 
   // ---------- pieces ----------
   function header() {
@@ -61,6 +62,10 @@
     b.textContent = msg; b.hidden = !msg;
     $('#stores').innerHTML = [{ id: 'all', short: 'All stores' }, ...d.stores].map(s =>
       `<button class="chip ${S.store === s.id ? 'on' : ''}" data-store="${esc(s.id)}">${esc(s.short)}</button>`).join('');
+    const hidden = inStore().filter(i => i.qty === 0).length;
+    $('#stockrow').hidden = S.tab === 'run' || S.tab === 'history';
+    $('#stock').setAttribute('aria-checked', S.stock);
+    $('#stocknote').textContent = S.stock ? (hidden ? hidden + ' with 0 in the system hidden' : 'Nothing hidden') : 'Showing everything';
     const n = Object.keys(S.run).length, rc = $('#runcount');
     rc.hidden = !n; rc.textContent = n;
     document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
@@ -167,7 +172,7 @@
   }
 
   function history() {
-    const disc = items().filter(i => i.discontinued).sort((a, b) => (b.discontinued_on || '').localeCompare(a.discontinued_on || ''));
+    const disc = inStore().filter(i => i.discontinued).sort((a, b) => (b.discontinued_on || '').localeCompare(a.discontinued_on || ''));
     const d = S.data;
     let h = disc.length ? section('Discontinued log', disc, 'Newest first.', 50) :
       '<div class="sec"><h2>Discontinued log</h2></div><p class="sub">Nothing confirmed discontinued yet. Items land here once a check confirms it.</p>';
@@ -220,9 +225,10 @@
 
   // ---------- events ----------
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim');
+    const t = e.target.closest('[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim,#stock');
     if (!t) return;
     if (t.id === 'scrim') return closeSheet();
+    if (t.id === 'stock') { S.stock = !S.stock; store.set('stock', S.stock); S.limit = 30; return draw(); }
     if (t.dataset.store) { S.store = t.dataset.store; store.set('store', S.store); S.limit = 30; return draw(); }
     if (t.dataset.tab) { S.tab = t.dataset.tab; S.limit = 30; draw(); return window.scrollTo(0, 0); }
     if (t.dataset.goto) { S.tab = 'browse'; S.sort = t.dataset.goto === 'Deep clearance' ? 'pct' : 'score'; draw(); return window.scrollTo(0, 0); }
