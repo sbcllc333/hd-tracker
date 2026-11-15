@@ -317,9 +317,25 @@ def walmart_sweep(store, ledger, day, budget):
             st["cycle"] = day
         kept = 0
         while used < budget:
-            data = serpapi({"engine": "walmart", "cat_id": d["cat_id"], "store_id": store["number"],
-                            "facet": WALMART_FACET, "page": page})
-            used += 1
+            try:
+                data = serpapi({"engine": "walmart", "cat_id": d["cat_id"], "store_id": store["number"],
+                                "facet": WALMART_FACET, "page": page})
+                used += 1
+            except OutOfSearches:
+                if not seen:
+                    raise
+                notes.append("ran out of free searches")
+                budget = 0
+                break
+            except RuntimeError as e:                  # Walmart had nothing more (or nothing) for this page
+                used += 1
+                if page > 1:
+                    data = {"search_information": {"total_results": st.get("total")}, "organic_results": [], "cut": True}
+                else:
+                    st.update(next=1, done=day, error=str(e)[:80])
+                    notes.append(f"{d['name']}: couldn't read ({str(e)[:50]})")
+                    print(f"  Walmart / {d['name']}: couldn't read ({str(e)[:80]})")
+                    break
             info = data.get("search_information") or {}
             where = info.get("location") or {}
             if str(where.get("store_id") or store["number"]) != str(store["number"]):
@@ -344,10 +360,14 @@ def walmart_sweep(store, ledger, day, budget):
             last_page = min(100, -(-st["total"] // 40)) if st["total"] else page
             if len(rows) < 15 or page >= last_page:
                 st.update(next=1, done=day)
-                finished.append((d["name"].lower(), st.get("cycle", day)))
+                if not data.get("cut"):                # a pass cut short can't tell us what dropped off
+                    finished.append((d["name"].lower(), st.get("cycle", day)))
                 break
             page += 1
             st["next"] = page
+        if st.get("error") and st.get("done") == day and not kept:
+            continue
+        st.pop("error", None)
         pages = -(-st.get("total", 0) // 40) or 1
         where_at = "finished" if st.get("next", 1) == 1 and st.get("done") == day else f"stopped at page {st.get('next')} of {pages}"
         notes.append(f"{d['name']}: {kept} kept ({where_at})")
