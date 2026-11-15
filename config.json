@@ -44,6 +44,17 @@
       "on": true,
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Southside+Blvd+Jacksonville+FL",
       "zip": "32216"
+    },
+    {
+      "id": "wm1083",
+      "number": "1083",
+      "retailer": "walmart",
+      "name": "Walmart (Normandy Blvd)",
+      "short": "Walmart",
+      "on": true,
+      "every_days": 2,
+      "maps": "https://www.google.com/maps/search/?api=1&query=Walmart+Supercenter+6830+Normandy+Blvd+Jacksonville+FL",
+      "zip": "32205"
     }
   ],
   "apify": {
@@ -52,5 +63,9 @@
   },
   "extra_searches": {
     "hand tools": "tools"
+  },
+  "walmart": {
+    "query": "clearance",
+    "max_pages": 12
   }
 }

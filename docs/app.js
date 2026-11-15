@@ -184,7 +184,7 @@
       `<div><span>${esc(s.name)}</span><span>${esc(ago(s.last_scan))}</span></div>`).join('') + '</div>';
     if (d.log && d.log.length) h += '<div class="sec"><h2>Recent runs</h2></div><div class="log">' + d.log.slice().reverse().map(l =>
       `<div><span>${esc(niceDate(l.date))} · ${esc(l.store)}<small>${esc(l.note || (l.items + ' clearance items'))}${l.discontinued_check ? ' · discontinued: ' + esc(l.discontinued_check) : ''}</small></span><span>${esc(l.source || '')}</span></div>`).join('') + '</div>';
-    h += `<div class="tip">One store is scanned each day, so every store is refreshed about every 4 days. Scores run 0 to 100: discount depth, weeks on clearance, low or zero stock, price ending and discontinued status.</div>
+    h += `<div class="tip">One Home Depot store is scanned each day, so each is refreshed about every 4 days. Walmart is scanned every 2 days. Scores run 0 to 100: discount depth, weeks on clearance, low or zero stock, price ending and discontinued status.</div>
       <a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Open PennyCentral's penny list</a>`;
     return h;
   }
@@ -204,11 +204,11 @@
       <div class="meta">${esc([i.brand, i.cat, st.name].filter(Boolean).join(' · '))}</div>
       <div class="big"><span class="price">${money(i.price)}</span>${was ? `<span class="was">${money(was)}</span>` : ''}${i.pct ? `<span class="pct">−${i.pct}%</span>` : ''}</div>
       <ul class="why">${i.score ? `<li class="tag">Score ${i.score}</li>` : ''}${(i.why || []).map(w => `<li class="tag plain">${esc(w)}</li>`).join('')}</ul>
-      <div class="ids">${box('Model', i.model)}${box('Internet #', i.pid)}${box('Store SKU', i.sku)}${box('UPC', i.upc)}</div>
+      <div class="ids">${box('Model', i.model)}${box(i.retailer === 'walmart' ? 'Walmart item #' : 'Internet #', i.pid)}${box('Store SKU', i.sku)}${box('UPC', i.upc)}</div>
       <button class="btn ${S.run[i.id] ? 'tonal' : 'fill'}" data-run="${esc(i.id)}">${S.run[i.id] ? 'Remove from run list' : 'Add to run list'}</button>
       <div class="two"><a class="btn out" href="${esc(i.link)}" target="_blank" rel="noopener">Product page</a>
         ${st.maps ? `<a class="btn out" href="${esc(st.maps)}" target="_blank" rel="noopener">Directions</a>` : '<span></span>'}</div>
-      <div class="two"><a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Penny list</a>
+      <div class="two">${i.retailer === 'walmart' ? '<span></span>' : '<a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Penny list</a>'}
         <button class="btn out" data-share="${esc(i.id)}">Share</button></div>
       <div class="hist"><div><span>First tracked</span><span>${esc(niceDate(i.first_seen))}</span></div>
         ${i.first_clearance ? `<div><span>On clearance since</span><span>${esc(niceDate(i.first_clearance))}</span></div>` : ''}

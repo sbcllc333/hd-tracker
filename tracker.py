@@ -7,6 +7,7 @@ is scanned every 4 days and the whole thing fits in SerpApi's free plan.
   1. Picks the store that was scanned longest ago.
   2. Asks Apify for that store's clearance items in each department
      (falls back to SerpApi if Apify can't run).
+     Walmart stores are scanned through SerpApi every couple of days.
   3. Updates data/ledger.json: a running history per item per store
      (first seen on clearance, every price change, stock count).
   4. Asks Bright Data whether the most promising items are discontinued.
@@ -88,8 +89,10 @@ def clean_link(link, pid):
     return f"https://www.homedepot.com/p/{pid}"
 
 
-def stores():
-    return [s for s in CONFIG["stores"] if s.get("on", True)]
+def stores(retailer="homedepot"):
+    """Stores that are switched on. retailer=None gives every store."""
+    return [s for s in CONFIG["stores"] if s.get("on", True)
+            and (retailer is None or s.get("retailer", "homedepot") == retailer)]
 
 
 def load_ledger():
@@ -279,6 +282,45 @@ def update_ledger(ledger, store, seen, dept_log, day):
                 old["missing_since"] = day
 
 
+# ---------- Walmart: in-store clearance at one store (SerpApi) ----------
+
+WALMART_FACET = "special_offers:Clearance||retailer:Walmart||fulfillment_method_in_store:In-store"
+
+
+def walmart_sweep(store):
+    """Every in-store clearance item sold by Walmart at one store, about 40 per search.
+    Returns (items_seen, dept_log, searches_used)."""
+    cfg = CONFIG.get("walmart", {})
+    floor = float(CONFIG.get("min_price") or 0)
+    seen, used, total = {}, 0, None
+    for page in range(1, cfg.get("max_pages", 12) + 1):
+        data = serpapi({"engine": "walmart", "query": cfg.get("query", "clearance"), "store_id": store["number"],
+                        "facet": WALMART_FACET, "page": page})
+        used += 1
+        where = (data.get("search_information") or {}).get("location") or {}
+        if page == 1 and str(where.get("store_id") or store["number"]) != str(store["number"]):
+            raise RuntimeError(f"Walmart answered for store {where.get('store_id')}, not {store['number']}")
+        total = (data.get("search_information") or {}).get("total_results") or total
+        rows = data.get("organic_results") or []
+        for r in rows:
+            offer = r.get("primary_offer") or {}
+            pid, price, was = str(r.get("us_item_id") or ""), num(offer.get("offer_price")), num(offer.get("was_price"))
+            if not pid or price is None or max(price, was or 0) < floor:
+                continue
+            key = f"{store['id']}:{pid}"
+            seen[key] = {"pid": pid, "store_id": store["id"], "title": (r.get("title") or "").replace("&amp;", "&"),
+                         "brand": "", "model": "", "price": price, "was": was if was and was > price else None,
+                         "pct": int(round((was - price) / was * 100)) if was and was > price else None,
+                         "badge": "", "qty": 0 if r.get("out_of_stock") else None,
+                         "thumb": r.get("thumbnail") or "",
+                         "link": (r.get("product_page_url") or f"https://www.walmart.com/ip/{pid}").split("?")[0],
+                         "dept": "walmart", "clearance": True, "source": "walmart"}
+        if len(rows) < 20 or (total and page * 40 >= int(total)):
+            break
+    print(f"  {store['name']}: {len(seen)} clearance items kept of about {total} listed, {used} searches")
+    return seen, [{"dept": "walmart", "count": len(seen), "filtered": True, "error": ""}], used
+
+
 # ---------- Apify: store clearance (main source) ----------
 
 def apify(method, path, params=None, body=None):
@@ -436,7 +478,7 @@ def discontinued_candidates(ledger, day):
     limit = CONFIG.get("discontinued_checks_per_run", 12)
     pool = []
     for key, it in ledger["items"].items():
-        if it.get("discontinued") or not (it.get("pct") or 0) >= 40:
+        if it.get("discontinued") or not (it.get("pct") or 0) >= 40 or it.get("source") == "walmart":
             continue
         last = it.get("disc_checked")
         if last and days_between(last, day) < 21:
@@ -538,6 +580,7 @@ def score(it, day):
 
 def write_output(ledger, day, status):
     names = {s["id"]: s["name"] for s in CONFIG["stores"]}
+    kind = {s["id"]: s.get("retailer", "homedepot") for s in CONFIG["stores"]}
     items = []
     for key, it in ledger["items"].items():
         if it.get("store_id") not in names or it.get("price") is None:
@@ -545,7 +588,7 @@ def write_output(ledger, day, status):
         sc, why = score(it, day)
         end = ending(it["price"])
         items.append({
-            "id": key, "pid": it["pid"], "store_id": it["store_id"],
+            "id": key, "pid": it["pid"], "store_id": it["store_id"], "retailer": kind[it["store_id"]],
             "title": it.get("title", ""), "brand": it.get("brand", ""), "model": it.get("model", ""),
             "sku": it.get("sku", ""), "upc": it.get("upc", ""),
             "price": it["price"], "was": it.get("was"), "pct": it.get("pct"),
@@ -565,9 +608,10 @@ def write_output(ledger, day, status):
         "generated_at": datetime.now(TZ).isoformat(timespec="minutes"),
         "status": status,
         "stores": [{"id": s["id"], "name": s["name"], "short": s.get("short", s["name"]),
-                    "maps": s.get("maps", ""), "last_scan": ledger.get("sweeps", {}).get(s["id"])}
-                   for s in stores()],
-        "departments": CONFIG["searches"],
+                    "maps": s.get("maps", ""), "last_scan": ledger.get("sweeps", {}).get(s["id"]),
+                    "retailer": s.get("retailer", "homedepot")}
+                   for s in stores(None)],
+        "departments": CONFIG["searches"] + sorted({s["retailer"] for s in stores(None) if s.get("retailer")}),
         "log": ledger.get("log", [])[-12:],
         "items": items,
     }
@@ -614,6 +658,21 @@ def scan_one(ledger, store, day, have_apify, have_serp, status):
     print(f"Scanning {store['name']} ({day})")
     entry = {"date": day, "store": store["name"], "searches": 0, "items": 0, "note": "", "source": ""}
     seen, dept_log, problems = None, [], []
+    if store.get("retailer") == "walmart":
+        had = sum(1 for v in ledger["items"].values() if v.get("store_id") == store["id"] and not v.get("missed"))
+        try:
+            if not have_serp:
+                raise RuntimeError("no SerpApi key")
+            seen, dept_log, entry["searches"] = walmart_sweep(store)
+            entry["source"] = "SerpApi"
+            if had >= 5 and len(seen) < had * 0.25:
+                seen = None
+                raise RuntimeError("scan came back empty, so it was ignored")
+        except OutOfSearches:
+            problems.append("SerpApi: out of free searches")
+        except Exception as e:
+            problems.append(f"Walmart: {str(e)[:100]}")
+        have_apify = have_serp = False                 # the Home Depot sources below don't apply
     if have_apify:
         try:
             seen, dept_log, cost = apify_sweep(store)
@@ -687,21 +746,28 @@ def main():
         status = ledger.get("last_status") or {"ok": False, "note": "Waiting for the first scan."}
     else:
         order = sorted(stores(), key=lambda s: ledger.get("sweeps", {}).get(s["id"]) or "")
-        targets = [order[0]]
+        targets = [order[0]] if order else []
+        for x in stores(None):                         # other retailers run on their own schedule
+            if x.get("retailer", "homedepot") != "homedepot":
+                last = ledger.get("sweeps", {}).get(x["id"])
+                if not last or days_between(last, day) >= x.get("every_days", 2):
+                    targets.append(x)
         if "--store" in sys.argv:                      # scan particular stores on request: "a,b,c"
             targets = []
             for want in sys.argv[sys.argv.index("--store") + 1].lower().split(","):
-                want = want.strip()
-                for x in stores():
-                    if want and x not in targets and (want in (x["id"], x["id"].lstrip("0"))
-                                                      or want in x["name"].lower()
-                                                      or want in x.get("short", "").lower()):
-                        targets.append(x)
-            targets = targets or [order[0]]
+                want, every = want.strip(), stores(None)
+                if not want:
+                    continue
+                hit = [x for x in every if want in (x["id"].lower(), x["id"].lstrip("0"), x.get("short", "").lower())] \
+                    or [x for x in every if want in x.get("short", "").lower()] \
+                    or [x for x in every if want in x["name"].lower()]
+                targets += [x for x in hit if x not in targets]
+            targets = targets or ([order[0]] if order else [])
         for store in targets:
             scan_one(ledger, store, day, have_apify, have_serp, status)
         note, _ = check_discontinued(ledger, day)
-        ledger["log"][-1]["discontinued_check"] = note
+        if ledger.get("log"):
+            ledger["log"][-1]["discontinued_check"] = note
         print("  Discontinued check:", note)
         ledger["log"] = ledger["log"][-60:]
         ledger["last_status"] = status

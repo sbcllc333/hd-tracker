@@ -1,7 +1,8 @@
 # Penny Run
 
 A clearance and penny-item tracker for four Jacksonville-area Home Depot stores
-(Orange Park, Lane Ave/Normandy, Lem Turner, Southside). Not affiliated with The Home Depot.
+(Orange Park, Lane Ave/Normandy, Lem Turner, Southside) and the Walmart on Normandy Blvd.
+Not affiliated with The Home Depot or Walmart.
 
 **The app:** https://sbcllc333.github.io/hd-tracker/ — open it on your phone and
 choose "Install" or "Add to Home screen".
@@ -12,7 +13,8 @@ choose "Install" or "Add to Home screen".
 - **Apify** (free $5 monthly credit) pulls that store's clearance items in each department:
   clearance price, regular price, store SKU, UPC and the store's stock count.
   One store scan costs roughly 7 to 15 cents and is capped in `config.json`.
-- **SerpApi** (250 free searches a month) is the backup if Apify can't run.
+- **SerpApi** (250 free searches a month) is the backup if Apify can't run, and it
+  scans the Walmart's in-store clearance every 2 days (about 10 searches a scan).
 - **Bright Data** (free plan) is asked whether the deepest-clearance items are discontinued.
 - `data/ledger.json` keeps a history per item per store: first seen on clearance,
   every price change, stock count, and when it dropped off the clearance list.
