@@ -1,56 +1,41 @@
-"""Test 2: SerpApi Walmart for store 1083 — learn the filter codes, then ask for
-in-store + sold-by-Walmart + clearance items."""
+"""Test 3: Walmart store 1083, department by department — how much in-store clearance
+does each department have, and does it differ from the keyword search?"""
 import json, os, sys, urllib.request, urllib.error, urllib.parse
 
 KEY = os.environ.get("SERPAPI_KEY", "").strip()
-if not KEY:
-    sys.exit("no SERPAPI_KEY")
+FACET = "special_offers:Clearance||retailer:Walmart||fulfillment_method_in_store:In-store"
+CATS = {"Electronics": "3944", "Home": "4044", "Toys": "4171", "Clothing": "5438", "Patio & Garden": "5428",
+        "Home Improvement": "1072864", "Sports & Outdoors": "4125", "Auto & Tires": "91083", "Baby": "5427",
+        "Pets": "5440", "Beauty": "1085666", "Health": "976760", "Food": "976759",
+        "Household Essentials": "1115193", "Office & School": "1229749", "Video Games": "2636",
+        "Arts & Crafts": "1334134", "Party & Occasions": "2637", "Seasonal": "1085632",
+        "Personal Care": "1005862", "Cell Phones": "1105910", "Jewelry": "3891"}
 
 
 def serp(**p):
-    p.update(api_key=KEY, store_id="1083")
+    p.update(api_key=KEY, store_id="1083", engine="walmart")
     try:
         with urllib.request.urlopen("https://serpapi.com/search.json?" + urllib.parse.urlencode(p), timeout=120) as r:
             return json.loads(r.read().decode())
     except urllib.error.HTTPError as e:
-        return {"error": f"HTTP {e.code} {e.read().decode()[:200]}"}
+        return {"error": f"HTTP {e.code} {e.read().decode()[:160]}"}
 
 
-def show(label, d, n=25):
-    print(f"\n=== {label}")
+grand = 0
+for name, cid in CATS.items():
+    d = serp(cat_id=cid, facet=FACET)
     if d.get("error"):
-        print("error:", d["error"]); return
-    print("location:", json.dumps((d.get("search_information") or {}).get("location")),
-          "| total:", (d.get("search_information") or {}).get("total_results"))
+        print(f"{name:22} ERROR {d['error'][:120]}"); continue
+    info = d.get("search_information") or {}
     res = d.get("organic_results") or []
-    print(len(res), "results; walmart-sold:", sum(1 for r in res if r.get("seller_name") == "Walmart.com"),
-          "| with was-price:", sum(1 for r in res if (r.get("primary_offer") or {}).get("was_price")))
-    for r in res[:n]:
+    tot = info.get("total_results") or 0
+    grand += int(tot or 0)
+    print(f"{name:22} total={tot}  page1={len(res)}  store={(info.get('location') or {}).get('store_id')}")
+    for r in res[:4]:
         po = r.get("primary_offer") or {}
-        print(json.dumps({"id": r.get("us_item_id"), "t": (r.get("title") or "")[:55], "price": po.get("offer_price"),
-                          "was": po.get("was_price"), "seller": (r.get("seller_name") or "")[:14], "oos": r.get("out_of_stock")}))
-
-
-d = serp(engine="walmart", query="clearance", include_filters="true")
-flt = d.get("filters") or []
-print("=== filters returned:", len(flt))
-pick = {}
-for f in flt:
-    name = (f.get("name") or f.get("title") or f.get("key") or "")
-    vals = f.get("values") or f.get("options") or f.get("value") or []
-    print("-", json.dumps({k: v for k, v in f.items() if k not in ("values", "options", "value")})[:200])
-    for v in (vals if isinstance(vals, list) else [])[:14]:
-        print("     ", json.dumps(v)[:230])
-        text = json.dumps(v).lower()
-        if "clearance" in text and "clearance" not in pick: pick["clearance"] = (f, v)
-        if '"walmart"' in text and "retailer" not in pick: pick["retailer"] = (f, v)
-        if "in-store" in text and "instore" not in pick: pick["instore"] = (f, v)
-print("picked:", {k: json.dumps(v[1])[:160] for k, v in pick.items()})
-
-# try the facet forms Walmart's own site uses
-for label, facet in [
-    ("clearance + sold by Walmart + in-store",
-     "special_offers:Clearance||retailer:Walmart||fulfillment_method_in_store:In-store"),
-    ("clearance + in-store", "special_offers:Clearance||fulfillment_method_in_store:In-store"),
-]:
-    show(label + "  [facet=" + facet + "]", serp(engine="walmart", query="clearance", facet=facet, sort="price_low"))
+        print("      ", json.dumps({"t": (r.get("title") or "")[:52], "price": po.get("offer_price"), "was": po.get("was_price"),
+                                    "oos": r.get("out_of_stock"), "seller": (r.get("seller_name") or "")[:11]}))
+print("\nSUM of department totals:", grand)
+acct = json.loads(urllib.request.urlopen("https://serpapi.com/account.json?api_key=" + KEY, timeout=60).read().decode())
+print("SerpApi searches left this month:", acct.get("total_searches_left"), "of", acct.get("searches_per_month"),
+      "| used:", acct.get("this_month_usage"))
