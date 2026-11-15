@@ -7,7 +7,7 @@ is scanned every 4 days and the whole thing fits in SerpApi's free plan.
   1. Picks the store that was scanned longest ago.
   2. Asks Apify for that store's clearance items in each department
      (falls back to SerpApi if Apify can't run).
-     Walmart stores are scanned through SerpApi every couple of days.
+     Walmart is scanned through SerpApi a few searches a day, department by department.
   3. Updates data/ledger.json: a running history per item per store
      (first seen on clearance, every price change, stock count).
   4. Asks Bright Data whether the most promising items are discontinued.
@@ -282,43 +282,77 @@ def update_ledger(ledger, store, seen, dept_log, day):
                 old["missing_since"] = day
 
 
-# ---------- Walmart: in-store clearance at one store (SerpApi) ----------
+# ---------- Walmart: in-store clearance, department by department (SerpApi) ----------
 
 WALMART_FACET = "special_offers:Clearance||retailer:Walmart||fulfillment_method_in_store:In-store"
 
 
-def walmart_sweep(store):
-    """Every in-store clearance item sold by Walmart at one store, about 40 per search.
-    Returns (items_seen, dept_log, searches_used)."""
+def walmart_plan(state, day):
+    """Order the departments for this run: priority ones that are due, then the one
+    that was left half-done, then whichever was finished longest ago."""
     cfg = CONFIG.get("walmart", {})
+    due, rest = [], []
+    for i, d in enumerate(cfg.get("departments", [])):
+        st = state.get(d["name"], {})
+        if d.get("every_days"):
+            if not st.get("done") or days_between(st["done"], day) >= d["every_days"] or st.get("next", 1) > 1:
+                due.append(d)
+        else:
+            rest.append((0 if st.get("next", 1) > 1 else 1, st.get("done") or "", i, d))
+    return due + [d for *_, d in sorted(rest, key=lambda x: x[:3])]
+
+
+def walmart_sweep(store, ledger, day, budget):
+    """Spend up to `budget` searches on the store's clearance, picking up where the last run stopped.
+    Returns (items_seen, searches_used, finished_departments, notes)."""
     floor = float(CONFIG.get("min_price") or 0)
-    seen, used, total = {}, 0, None
-    for page in range(1, cfg.get("max_pages", 12) + 1):
-        data = serpapi({"engine": "walmart", "query": cfg.get("query", "clearance"), "store_id": store["number"],
-                        "facet": WALMART_FACET, "page": page})
-        used += 1
-        where = (data.get("search_information") or {}).get("location") or {}
-        if page == 1 and str(where.get("store_id") or store["number"]) != str(store["number"]):
-            raise RuntimeError(f"Walmart answered for store {where.get('store_id')}, not {store['number']}")
-        total = (data.get("search_information") or {}).get("total_results") or total
-        rows = data.get("organic_results") or []
-        for r in rows:
-            offer = r.get("primary_offer") or {}
-            pid, price, was = str(r.get("us_item_id") or ""), num(offer.get("offer_price")), num(offer.get("was_price"))
-            if not pid or price is None or max(price, was or 0) < floor:
-                continue
-            key = f"{store['id']}:{pid}"
-            seen[key] = {"pid": pid, "store_id": store["id"], "title": (r.get("title") or "").replace("&amp;", "&"),
-                         "brand": "", "model": "", "price": price, "was": was if was and was > price else None,
-                         "pct": int(round((was - price) / was * 100)) if was and was > price else None,
-                         "badge": "", "qty": 0 if r.get("out_of_stock") else None,
-                         "thumb": r.get("thumbnail") or "",
-                         "link": (r.get("product_page_url") or f"https://www.walmart.com/ip/{pid}").split("?")[0],
-                         "dept": "walmart", "clearance": True, "source": "walmart"}
-        if len(rows) < 20 or (total and page * 40 >= int(total)):
+    state = ledger.setdefault("walmart", {}).setdefault(store["id"], {})
+    seen, used, finished, notes = {}, 0, [], []
+    for d in walmart_plan(state, day):
+        if used >= budget:
             break
-    print(f"  {store['name']}: {len(seen)} clearance items kept of about {total} listed, {used} searches")
-    return seen, [{"dept": "walmart", "count": len(seen), "filtered": True, "error": ""}], used
+        st = state.setdefault(d["name"], {})
+        page = st.get("next", 1)
+        if page == 1:
+            st["cycle"] = day
+        kept = 0
+        while used < budget:
+            data = serpapi({"engine": "walmart", "cat_id": d["cat_id"], "store_id": store["number"],
+                            "facet": WALMART_FACET, "page": page})
+            used += 1
+            info = data.get("search_information") or {}
+            where = info.get("location") or {}
+            if str(where.get("store_id") or store["number"]) != str(store["number"]):
+                raise RuntimeError(f"Walmart answered for store {where.get('store_id')}, not {store['number']}")
+            st["total"] = int(info.get("total_results") or st.get("total") or 0)
+            rows = data.get("organic_results") or []
+            for r in rows:
+                offer = r.get("primary_offer") or {}
+                pid, price, was = str(r.get("us_item_id") or ""), num(offer.get("offer_price")), num(offer.get("was_price"))
+                if not pid or price is None or max(price, was or 0) < floor:
+                    continue
+                if r.get("seller_name") and r["seller_name"] != "Walmart.com":
+                    continue
+                seen[f"{store['id']}:{pid}"] = {
+                    "pid": pid, "store_id": store["id"], "title": (r.get("title") or "").replace("&amp;", "&"),
+                    "brand": "", "model": "", "price": price, "was": was if was and was > price else None,
+                    "pct": int(round((was - price) / was * 100)) if was and was > price else None,
+                    "badge": "", "qty": 0 if r.get("out_of_stock") else None, "thumb": r.get("thumbnail") or "",
+                    "link": (r.get("product_page_url") or f"https://www.walmart.com/ip/{pid}").split("?")[0],
+                    "dept": d["name"].lower(), "clearance": True, "source": "walmart"}
+                kept += 1
+            last_page = min(100, -(-st["total"] // 40)) if st["total"] else page
+            if len(rows) < 15 or page >= last_page:
+                st.update(next=1, done=day)
+                finished.append((d["name"].lower(), st.get("cycle", day)))
+                break
+            page += 1
+            st["next"] = page
+        pages = -(-st.get("total", 0) // 40) or 1
+        where_at = "finished" if st.get("next", 1) == 1 and st.get("done") == day else f"stopped at page {st.get('next')} of {pages}"
+        notes.append(f"{d['name']}: {kept} kept ({where_at})")
+        print(f"  Walmart / {d['name']}: {kept} items kept, {st.get('total')} listed, {where_at}")
+    return seen, used, finished, notes
 
 
 # ---------- Apify: store clearance (main source) ----------
@@ -611,7 +645,10 @@ def write_output(ledger, day, status):
                     "maps": s.get("maps", ""), "last_scan": ledger.get("sweeps", {}).get(s["id"]),
                     "retailer": s.get("retailer", "homedepot")}
                    for s in stores(None)],
-        "departments": CONFIG["searches"] + sorted({s["retailer"] for s in stores(None) if s.get("retailer")}),
+        "departments": CONFIG["searches"] + [d["name"].lower() for d in CONFIG.get("walmart", {}).get("departments", [])
+                                             if d["name"].lower() not in CONFIG["searches"]],
+        "walmart_progress": {sid: {k: {"done": v.get("done"), "next": v.get("next", 1), "total": v.get("total")}
+                                   for k, v in st.items()} for sid, st in ledger.get("walmart", {}).items()},
         "log": ledger.get("log", [])[-12:],
         "items": items,
     }
@@ -658,16 +695,16 @@ def scan_one(ledger, store, day, have_apify, have_serp, status):
     print(f"Scanning {store['name']} ({day})")
     entry = {"date": day, "store": store["name"], "searches": 0, "items": 0, "note": "", "source": ""}
     seen, dept_log, problems = None, [], []
+    wm_finished = []
     if store.get("retailer") == "walmart":
-        had = sum(1 for v in ledger["items"].values() if v.get("store_id") == store["id"] and not v.get("missed"))
         try:
             if not have_serp:
                 raise RuntimeError("no SerpApi key")
-            seen, dept_log, entry["searches"] = walmart_sweep(store)
-            entry["source"] = "SerpApi"
-            if had >= 5 and len(seen) < had * 0.25:
-                seen = None
-                raise RuntimeError("scan came back empty, so it was ignored")
+            budget = int(os.environ.get("WM_BUDGET") or CONFIG.get("walmart", {}).get("daily_searches", 5))
+            seen, entry["searches"], wm_finished, notes = walmart_sweep(store, ledger, day, budget)
+            entry["source"], entry["note"] = "SerpApi", "; ".join(notes)[:400]
+            # departments are scanned over several days, so drop-offs are worked out below, not by update_ledger
+            dept_log = [{"dept": "-", "count": len(seen), "filtered": True, "error": ""}]
         except OutOfSearches:
             problems.append("SerpApi: out of free searches")
         except Exception as e:
@@ -702,6 +739,13 @@ def scan_one(ledger, store, day, have_apify, have_serp, status):
         entry["items"] = len(seen)
         update_ledger(ledger, store, seen, dept_log, day)
         ledger.setdefault("sweeps", {})[store["id"]] = day
+        for dept, cycle in wm_finished:              # a full pass of a department just ended
+            for v in ledger["items"].values():
+                if v.get("store_id") == store["id"] and v.get("dept") == dept \
+                        and (v.get("last_seen") or "") < cycle and v.get("checked_cycle") != cycle:
+                    v["missed"], v["checked_cycle"] = v.get("missed", 0) + 1, cycle
+                    if v["missed"] == 1:
+                        v["missing_since"] = day
         bad = [d["dept"] for d in dept_log if d["error"]]
         if bad:
             entry["note"] = "Couldn't read: " + ", ".join(bad)
