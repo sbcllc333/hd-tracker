@@ -1,2 +1,2 @@
-2026-11-14T00:21:07Z
-store=orange park,lem turner,southside
+2026-11-15T14:51:17Z
+store=orange park,normandy,lem turner,southside
