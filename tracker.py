@@ -358,7 +358,7 @@ def walmart_sweep(store, ledger, day, budget):
                     "dept": d["name"].lower(), "clearance": True, "source": "walmart"}
                 kept += 1
             last_page = min(100, -(-st["total"] // 40)) if st["total"] else page
-            if len(rows) < 15 or page >= last_page:
+            if not rows or page >= last_page:      # short pages happen mid-list; only stop at the real end
                 st.update(next=1, done=day)
                 if not data.get("cut"):                # a pass cut short can't tell us what dropped off
                     finished.append((d["name"].lower(), st.get("cycle", day)))
