@@ -43,7 +43,12 @@
     draw();
   }
   const inStore = () => S.data.items.filter(i => S.store === 'all' || i.store_id === S.store);
-  const items = () => inStore().filter(i => !S.stock || i.qty !== 0);
+  const items = () => inStore().filter(i => (!S.stock || i.qty !== 0) && (S.dept === 'all' || i.dept === S.dept));
+  const deptChips = () => {
+    const have = new Set(inStore().map(i => i.dept));
+    const depts = ['all', ...S.data.departments.filter(d => have.has(d) || d === S.dept)];
+    return `<div class="chips row">${depts.map(d => `<button class="chip ${S.dept === d ? 'on' : ''}" data-dept="${esc(d)}">${d === 'all' ? 'All' : esc(cap(d))}</button>`).join('')}</div>`;
+  };
 
   // ---------- pieces ----------
   function header() {
@@ -112,17 +117,17 @@
     const disc = all.filter(i => i.discontinued);
     const low = all.filter(i => (i.ending === 3 || i.ending === 2) && i.score < 45);
     const deep = all.filter(i => i.pct >= 40 && i.score < 45 && !(i.ending === 3 || i.ending === 2)).sort((a, b) => b.pct - a.pct);
-    let h = section('No longer listed at the store', gone, 'Was on clearance, and a direct lookup no longer finds it at this store. Not proof of a penny, but the best lead. Scan it at the register.') +
+    let h = deptChips() + section('No longer listed at the store', gone, 'Was on clearance, and a direct lookup no longer finds it at this store. Not proof of a penny, but the best lead. Scan it at the register.') +
       section('Closest to a penny', hot, 'Deep discount, long on clearance, low or zero stock in the system.') +
       section('Price drops', drops, 'Marked down since the last scan.') +
       section('Confirmed discontinued', disc, 'No longer sold. Still on the shelf? Scan it.') +
       section('Ends in .03 or .02', low, 'Often the last markdown before a penny.') +
       section('Deep clearance', deep, '40% off or more.') +
       section('Other clearance', all.filter(i => i.clearance && i.score < 45 && !(i.pct >= 40) && !(i.ending === 3 || i.ending === 2)), 'On clearance at a smaller discount.');
-    if (!h) {
-      const where = S.store === 'all' ? 'your stores' : storeName(S.store);
-      h = `<div class="empty"><h3>No clearance finds at ${esc(where)} yet</h3>
-        <p>Deep discounts, price drops and discontinued items show up here after each store scan.</p>
+    if (h === deptChips()) {
+      const where = (S.dept === 'all' ? '' : cap(S.dept) + ' at ') + (S.store === 'all' ? 'your stores' : storeName(S.store));
+      h = deptChips() + `<div class="empty"><h3>Nothing ${S.stock ? 'in stock ' : ''}for ${esc(where)} right now</h3>
+        <p>${S.stock ? 'Turn off "In stock only" to see items showing 0 in the system.' : 'Clearance finds show up here after each store scan.'}</p>
         ${everything.length ? `<button class="btn tonal" data-tab="browse">Browse all ${everything.length} tracked items</button>` : ''}</div>`;
     }
     h += `<div class="tip"><b>In the store:</b> scan the barcode on the box at self-checkout, not the shelf tag. The register price is the only proof of a penny.</div>`;
@@ -140,9 +145,8 @@
       new: (a, b) => (b.first_seen || '').localeCompare(a.first_seen || '')
     };
     list.sort(by[S.sort]);
-    const depts = ['all', ...S.data.departments];
     return `<input class="search" id="q" type="search" placeholder="Search name, brand, model or SKU" value="${esc(S.q)}" autocomplete="off">
-      <div class="chips row">${depts.map(d => `<button class="chip ${S.dept === d ? 'on' : ''}" data-dept="${esc(d)}">${d === 'all' ? 'All' : esc(cap(d))}</button>`).join('')}</div>
+      ${deptChips()}
       <div class="sec"><h2>${list.length} item${list.length === 1 ? '' : 's'}</h2>
         <select id="sort" aria-label="Sort">${[['score', 'Best score'], ['pct', 'Biggest % off'], ['low', 'Price: low'], ['high', 'Price: high'], ['new', 'Newest']]
         .map(([v, l]) => `<option value="${v}" ${S.sort === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
