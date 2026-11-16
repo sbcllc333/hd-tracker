@@ -46,15 +46,61 @@
       "zip": "32216"
     },
     {
+      "id": "6890",
+      "name": "Oakleaf (Crosshill Blvd)",
+      "short": "Oakleaf",
+      "on": true,
+      "zip": "32222",
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+9751+Crosshill+Blvd+Jacksonville+FL"
+    },
+    {
+      "id": "6365",
+      "name": "Atlantic Blvd (at Girvin)",
+      "short": "Atlantic",
+      "on": true,
+      "zip": "32225",
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+12721+Atlantic+Blvd+Jacksonville+FL"
+    },
+    {
+      "id": "6974",
+      "name": "Jacksonville Beach (3rd St S)",
+      "short": "Jax Beach",
+      "on": true,
+      "zip": "32250",
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+3790+Third+Street+South+Jacksonville+Beach+FL"
+    },
+    {
       "id": "wm1083",
       "number": "1083",
       "retailer": "walmart",
       "name": "Walmart (Normandy Blvd)",
-      "short": "Walmart",
+      "short": "Normandy Walmart",
       "on": true,
       "every_days": 1,
       "maps": "https://www.google.com/maps/search/?api=1&query=Walmart+Supercenter+6830+Normandy+Blvd+Jacksonville+FL",
       "zip": "32205"
+    },
+    {
+      "id": "wm1172",
+      "number": "1172",
+      "retailer": "walmart",
+      "name": "Walmart (13490 Beach Blvd)",
+      "short": "Beach Blvd Walmart",
+      "on": true,
+      "every_days": 1,
+      "zip": "32224",
+      "maps": "https://www.google.com/maps/search/?api=1&query=Walmart+Supercenter+13490+Beach+Blvd+Jacksonville+FL"
+    },
+    {
+      "id": "wm1205",
+      "number": "1205",
+      "retailer": "walmart",
+      "name": "Walmart (Macclenny)",
+      "short": "Macclenny Walmart",
+      "on": true,
+      "every_days": 1,
+      "zip": "32063",
+      "maps": "https://www.google.com/maps/search/?api=1&query=Walmart+Supercenter+9218+S+State+Road+228+Macclenny+FL"
     }
   ],
   "apify": {
@@ -65,7 +111,7 @@
     "hand tools": "tools"
   },
   "walmart": {
-    "daily_searches": 5,
+    "daily_searches": 9,
     "departments": [
       {
         "name": "Electronics",

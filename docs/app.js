@@ -221,8 +221,8 @@
     if (log.length) h += '<div class="sec"><h2>Recent runs</h2></div><div class="log">' + log.slice().reverse().map(l =>
       `<div><span>${esc(niceDate(l.date))} · ${esc(l.store)}<small>${esc(l.note || (l.items + ' clearance items'))}${l.discontinued_check ? ' · discontinued: ' + esc(l.discontinued_check) : ''}</small></span><span>${esc(l.source || '')}</span></div>`).join('') + '</div>';
     h += S.retailer === 'walmart'
-      ? `<div class="tip">Walmart is scanned a few departments a day. Electronics, Home Improvement, Garden, Auto, Video Games, Cell Phones and Office refresh weekly; the rest rotate behind them.</div>`
-      : `<div class="tip">One Home Depot store is scanned each day, so each is refreshed about every 4 days. Scores run 0 to 100: discount depth, weeks on clearance, low or zero stock, price ending and discontinued status.</div>
+      ? `<div class="tip">Each Walmart is scanned a few departments a day. Electronics, Home Improvement, Garden, Auto, Video Games, Cell Phones and Office refresh weekly; the rest rotate behind them.</div>`
+      : `<div class="tip">One Home Depot store is scanned each day, so each is refreshed about every ${myStores().length} days. Scores run 0 to 100: discount depth, weeks on clearance, low or zero stock, price ending and discontinued status.</div>
       <a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Open PennyCentral's penny list</a>`;
     return h;
   }

@@ -1,7 +1,8 @@
 # Penny Run
 
-A clearance and penny-item tracker for four Jacksonville-area Home Depot stores
-(Orange Park, Lane Ave/Normandy, Lem Turner, Southside) and the Walmart on Normandy Blvd.
+A clearance and penny-item tracker for seven Jacksonville-area Home Depot stores
+(Orange Park, Lane Ave/Normandy, Lem Turner, Southside, Oakleaf, Atlantic Blvd, Jacksonville Beach)
+and three Walmarts (Normandy Blvd, 13490 Beach Blvd, Macclenny).
 Not affiliated with The Home Depot or Walmart.
 
 **The app:** https://sbcllc333.github.io/hd-tracker/ — open it on your phone and
