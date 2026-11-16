@@ -28,7 +28,7 @@ a{color:var(--primary)}
 .sticky{position:sticky;top:0;z-index:5;background:var(--bg)}
 .chip{flex:none;min-height:44px;padding:0 18px;border:1.5px solid var(--line);border-radius:22px;font-size:16px;font-weight:600;background:var(--surface);white-space:nowrap}
 .chip.on{background:var(--primary);border-color:var(--primary);color:var(--onprimary)}
-.switchrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 16px 8px;padding:12px 16px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow)}
+.switchrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 16px 8px;}.chips[hidden]+.switchrow{margin-top:14px}.switchrow{padding:12px 16px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow)}
 .switchrow b{font-size:17px;font-weight:700;display:block}.switchrow small{font-size:14px;color:var(--muted)}
 .switch{flex:none;width:56px;height:34px;border-radius:17px;border:2px solid var(--muted);background:transparent;position:relative;transition:.15s}
 .switch i{position:absolute;top:6px;left:6px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:.15s}
