@@ -10,13 +10,14 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="app.css?v=8">
+<link rel="stylesheet" href="app.css?v=9">
 </head>
 <body>
 <header class="bar">
   <div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><div><h1>Penny Run</h1><p id="updated">Loading…</p></div></div>
   <button id="install" class="textbtn" hidden>Install</button>
 </header>
+<div id="retailers" class="retail" role="tablist" aria-label="Retailer" hidden></div>
 <div id="stores" class="chips sticky" role="tablist" aria-label="Store"></div>
 <div id="stockrow" class="switchrow"><div><b>In stock only</b><small id="stocknote"></small></div><button id="stock" class="switch" role="switch" aria-checked="true" aria-label="In stock only"><i></i></button></div>
 <div id="banner" class="banner" hidden></div>
@@ -30,6 +31,6 @@
 <div id="scrim" class="scrim" hidden></div>
 <section id="sheet" class="sheet" hidden aria-modal="true" role="dialog"></section>
 <div id="toast" class="toast" hidden></div>
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

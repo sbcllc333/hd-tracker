@@ -8,7 +8,7 @@
   };
   const S = {
     data: null, tab: 'today', store: store.get('store', 'all'), dept: 'all', sort: 'score', q: '',
-    run: store.get('run', {}), limit: 30, offline: false, stock: store.get('stock', true)
+    retailer: store.get('retailer', 'homedepot'), picks: store.get('picks', {}), run: store.get('run', {}), limit: 30, offline: false, stock: store.get('stock', true)
   };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const money = v => v == null ? '' : '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -16,6 +16,11 @@
   const daysAgo = iso => iso ? Math.max(0, Math.round((Date.now() - new Date(iso.length > 10 ? iso : iso + 'T12:00:00').getTime()) / dayMs)) : null;
   const ago = iso => { const d = daysAgo(iso); return d == null ? 'never' : d === 0 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago'; };
   const niceDate = iso => iso ? new Date(iso.length > 10 ? iso : iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+  const RNAME = { homedepot: 'Home Depot', walmart: 'Walmart', bestbuy: 'Best Buy' };
+  const kind = s => s.retailer || 'homedepot';
+  const myStores = () => S.data.stores.filter(s => kind(s) === S.retailer);
+  const myItems = () => { const ids = new Set(myStores().map(s => s.id)); return S.data.items.filter(i => ids.has(i.store_id)); };
+  const pickStore = () => { const m = myStores(); const want = S.picks[S.retailer]; S.store = m.length === 1 ? m[0].id : (m.some(s => s.id === want) ? want : 'all'); };
   const storeName = id => (S.data.stores.find(s => s.id === id) || {}).short || id;
   const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
 
@@ -39,10 +44,12 @@
       $('#updated').textContent = 'No data yet';
       return;
     }
-    if (S.store !== 'all' && !S.data.stores.some(s => s.id === S.store)) S.store = 'all';
+    if (!S.data.stores.some(s => kind(s) === S.retailer)) S.retailer = kind(S.data.stores[0] || {});
+    if (S.picks[S.retailer] == null && S.retailer === 'homedepot') S.picks.homedepot = store.get('store', 'all');
+    pickStore();
     draw();
   }
-  const inStore = () => S.data.items.filter(i => S.store === 'all' || i.store_id === S.store);
+  const inStore = () => myItems().filter(i => S.store === 'all' || i.store_id === S.store);
   const items = () => inStore().filter(i => (!S.stock || i.qty !== 0) && (S.dept === 'all' || i.dept === S.dept));
   const deptChips = () => {
     const have = new Set(inStore().map(i => i.dept));
@@ -53,7 +60,7 @@
   // ---------- pieces ----------
   function header() {
     const d = S.data, age = daysAgo(d.generated_at);
-    const scans = d.stores.map(s => s.last_scan).filter(Boolean).sort();
+    const scans = myStores().map(s => s.last_scan).filter(Boolean).sort();
     const newest = scans[scans.length - 1];
     $('#updated').textContent = newest ? 'Last store scan ' + ago(newest) : 'Waiting for the first scan';
     const b = $('#banner'); let msg = '';
@@ -65,13 +72,19 @@
       if (st && daysAgo(st.last_scan) > 6) msg = st.short + ' was last scanned ' + ago(st.last_scan) + '.';
     }
     b.textContent = msg; b.hidden = !msg;
-    $('#stores').innerHTML = [{ id: 'all', short: 'All stores' }, ...d.stores].map(s =>
+    const kinds = [...new Set(d.stores.map(kind))];
+    $('#retailers').hidden = kinds.length < 2;
+    $('#retailers').innerHTML = kinds.map(k => `<button class="${S.retailer === k ? 'on' : ''}" data-retailer="${esc(k)}">${esc(RNAME[k] || k)}</button>`).join('');
+    const mine = myStores();
+    $('#stores').hidden = mine.length < 2;
+    $('#stores').innerHTML = [{ id: 'all', short: 'All ' + mine.length + ' stores' }, ...mine].map(s =>
       `<button class="chip ${S.store === s.id ? 'on' : ''}" data-store="${esc(s.id)}">${esc(s.short)}</button>`).join('');
     const hidden = inStore().filter(i => i.qty === 0).length;
     $('#stockrow').hidden = S.tab === 'run' || S.tab === 'history';
     $('#stock').setAttribute('aria-checked', S.stock);
     $('#stocknote').textContent = S.stock ? (hidden ? hidden + ' with 0 in the system hidden' : 'Nothing hidden') : 'Showing everything';
-    const n = Object.keys(S.run).length, rc = $('#runcount');
+    const mineIds = new Set(myItems().map(i => i.id));
+    const n = Object.keys(S.run).filter(id => mineIds.has(id)).length, rc = $('#runcount');
     rc.hidden = !n; rc.textContent = n;
     document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
   }
@@ -125,7 +138,7 @@
       section('Deep clearance', deep, '40% off or more.') +
       section('Other clearance', all.filter(i => i.clearance && i.score < 45 && !(i.pct >= 40) && !(i.ending === 3 || i.ending === 2)), 'On clearance at a smaller discount.');
     if (h === deptChips()) {
-      const where = (S.dept === 'all' ? '' : cap(S.dept) + ' at ') + (S.store === 'all' ? 'your stores' : storeName(S.store));
+      const where = (S.dept === 'all' ? '' : cap(S.dept) + ' at ') + (S.store === 'all' ? 'your ' + (RNAME[S.retailer] || '') + ' stores' : storeName(S.store));
       h = deptChips() + `<div class="empty"><h3>Nothing ${S.stock ? 'in stock ' : ''}for ${esc(where)} right now</h3>
         <p>${S.stock ? 'Turn off "In stock only" to see items showing 0 in the system.' : 'Clearance finds show up here after each store scan.'}</p>
         ${everything.length ? `<button class="btn tonal" data-tab="browse">Browse all ${everything.length} tracked items</button>` : ''}</div>`;
@@ -155,12 +168,12 @@
   }
 
   function runList() {
-    const ids = Object.keys(S.run), byId = Object.fromEntries(S.data.items.map(i => [i.id, i]));
+    const ids = Object.keys(S.run), byId = Object.fromEntries(myItems().map(i => [i.id, i]));
     const mine = ids.map(id => byId[id]).filter(Boolean).filter(i => S.store === 'all' || i.store_id === S.store);
     if (!mine.length) return `<div class="empty"><h3>Your run list is empty</h3><p>Open any item and tap "Add to run list" to plan a store trip.</p><button class="btn tonal" data-tab="today">See today's finds</button></div>`;
     const done = mine.filter(i => S.run[i.id] !== 'todo').length;
     let h = `<div class="sec"><h2>Store run</h2><span>${done} of ${mine.length} checked</span></div><div class="prog"><div style="width:${done / mine.length * 100}%"></div></div>`;
-    for (const st of S.data.stores) {
+    for (const st of myStores()) {
       const group = mine.filter(i => i.store_id === st.id);
       if (!group.length) continue;
       h += `<div class="sec"><h2>${esc(st.short)}</h2>${st.maps ? `<a class="textbtn" href="${esc(st.maps)}" target="_blank" rel="noopener">Directions</a>` : ''}</div>`;
@@ -180,11 +193,15 @@
     const d = S.data;
     let h = disc.length ? section('Discontinued log', disc, 'Newest first.', 50) :
       '<div class="sec"><h2>Discontinued log</h2></div><p class="sub">Nothing confirmed discontinued yet. Items land here once a check confirms it.</p>';
-    h += '<div class="sec"><h2>Store scans</h2></div><div class="log">' + d.stores.map(s =>
+    h += '<div class="sec"><h2>Store scans</h2></div><div class="log">' + myStores().map(s =>
       `<div><span>${esc(s.name)}</span><span>${esc(ago(s.last_scan))}</span></div>`).join('') + '</div>';
-    if (d.log && d.log.length) h += '<div class="sec"><h2>Recent runs</h2></div><div class="log">' + d.log.slice().reverse().map(l =>
+    const names = new Set(d.stores.filter(s => kind(s) !== S.retailer).map(s => s.name));
+    const log = (d.log || []).filter(l => !names.has(l.store) && (S.retailer === 'homedepot' || myStores().some(s => s.name === l.store)));
+    if (log.length) h += '<div class="sec"><h2>Recent runs</h2></div><div class="log">' + log.slice().reverse().map(l =>
       `<div><span>${esc(niceDate(l.date))} · ${esc(l.store)}<small>${esc(l.note || (l.items + ' clearance items'))}${l.discontinued_check ? ' · discontinued: ' + esc(l.discontinued_check) : ''}</small></span><span>${esc(l.source || '')}</span></div>`).join('') + '</div>';
-    h += `<div class="tip">One Home Depot store is scanned each day, so each is refreshed about every 4 days. Walmart is scanned every 2 days. Scores run 0 to 100: discount depth, weeks on clearance, low or zero stock, price ending and discontinued status.</div>
+    h += S.retailer === 'walmart'
+      ? `<div class="tip">Walmart is scanned a few departments a day. Electronics, Home Improvement, Garden, Auto, Video Games, Cell Phones and Office refresh weekly; the rest rotate behind them.</div>`
+      : `<div class="tip">One Home Depot store is scanned each day, so each is refreshed about every 4 days. Scores run 0 to 100: discount depth, weeks on clearance, low or zero stock, price ending and discontinued status.</div>
       <a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Open PennyCentral's penny list</a>`;
     return h;
   }
@@ -229,11 +246,12 @@
 
   // ---------- events ----------
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim,#stock');
+    const t = e.target.closest('[data-retailer],[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim,#stock');
     if (!t) return;
     if (t.id === 'scrim') return closeSheet();
     if (t.id === 'stock') { S.stock = !S.stock; store.set('stock', S.stock); S.limit = 30; return draw(); }
-    if (t.dataset.store) { S.store = t.dataset.store; store.set('store', S.store); S.limit = 30; return draw(); }
+    if (t.dataset.retailer) { S.retailer = t.dataset.retailer; store.set('retailer', S.retailer); S.dept = 'all'; S.q = ''; S.limit = 30; pickStore(); draw(); return window.scrollTo(0, 0); }
+    if (t.dataset.store) { S.store = t.dataset.store; S.picks[S.retailer] = S.store; store.set('picks', S.picks); S.limit = 30; return draw(); }
     if (t.dataset.tab) { S.tab = t.dataset.tab; S.limit = 30; draw(); return window.scrollTo(0, 0); }
     if (t.dataset.goto) { S.tab = 'browse'; S.sort = t.dataset.goto === 'Deep clearance' ? 'pct' : 'score'; draw(); return window.scrollTo(0, 0); }
     if (t.dataset.item) return openSheet(t.dataset.item);
@@ -256,7 +274,7 @@
       return;
     }
     if (t.id === 'morebtn') { S.limit += 30; return draw(); }
-    if (t.id === 'clearrun') { S.run = {}; store.set('run', S.run); toast('Run list cleared'); return draw(); }
+    if (t.id === 'clearrun') { for (const i of myItems()) delete S.run[i.id]; store.set('run', S.run); toast('Run list cleared'); return draw(); }
   });
   document.addEventListener('input', e => {
     if (e.target.id === 'q') {
