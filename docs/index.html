@@ -5,19 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Penny Run</title>
 <meta name="description" content="Clearance and penny-item tracker for my local stores.">
-<meta name="theme-color" content="#0B5D4E" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1413" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0A1736">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Penny Run">
+<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="app.css?v=9">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="app.css?v=10">
 </head>
 <body>
+<div class="hero">
 <header class="bar">
-  <div class="brand"><img src="icons/icon-192.png" alt="" width="32" height="32"><div><h1>Penny Run</h1><p id="updated">Loading…</p></div></div>
-  <button id="install" class="textbtn" hidden>Install</button>
+  <div class="brand"><img src="icons/icon-192.png" alt="" width="44" height="44"><div><h1>Penny Run</h1><p id="updated">Loading…</p></div></div>
+  <div class="baract"><button id="install" class="textbtn" hidden>Install</button>
+  <button id="refresh" class="iconbtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.95 7.95 0 0012 4a8 8 0 108 8h-2a6 6 0 11-1.76-4.24L13 11h7V4l-2.35 2.35z"/></svg></button></div>
 </header>
 <div id="retailers" class="retail" role="tablist" aria-label="Retailer" hidden></div>
+</div>
 <div id="stores" class="chips sticky" role="tablist" aria-label="Store"></div>
 <div id="stockrow" class="switchrow"><div><b>In stock only</b><small id="stocknote"></small></div><button id="stock" class="switch" role="switch" aria-checked="true" aria-label="In stock only"><i></i></button></div>
 <div id="banner" class="banner" hidden></div>
@@ -31,6 +38,6 @@
 <div id="scrim" class="scrim" hidden></div>
 <section id="sheet" class="sheet" hidden aria-modal="true" role="dialog"></section>
 <div id="toast" class="toast" hidden></div>
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

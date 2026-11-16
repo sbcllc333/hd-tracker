@@ -31,7 +31,7 @@
 
   // ---------- data ----------
   async function load() {
-    view.innerHTML = '<div class="skel"></div>'.repeat(5);
+    if (!S.data) view.innerHTML = '<div class="skel"></div>'.repeat(5);
     try {
       const r = await fetch('data.json?t=' + Math.floor(Date.now() / 6e4), { cache: 'no-store' });
       if (!r.ok) throw new Error(r.status);
@@ -246,9 +246,10 @@
 
   // ---------- events ----------
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-retailer],[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim,#stock');
+    const t = e.target.closest('[data-retailer],[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim,#stock,#refresh');
     if (!t) return;
     if (t.id === 'scrim') return closeSheet();
+    if (t.id === 'refresh') { t.classList.add('spin'); return load().then(() => { S.loaded = Date.now(); t.classList.remove('spin'); toast(S.offline ? 'Offline. Showing saved data.' : 'Up to date'); }); }
     if (t.id === 'stock') { S.stock = !S.stock; store.set('stock', S.stock); S.limit = 30; return draw(); }
     if (t.dataset.retailer) { S.retailer = t.dataset.retailer; store.set('retailer', S.retailer); S.dept = 'all'; S.q = ''; S.limit = 30; pickStore(); draw(); return window.scrollTo(0, 0); }
     if (t.dataset.store) { S.store = t.dataset.store; S.picks[S.retailer] = S.store; store.set('picks', S.picks); S.limit = 30; return draw(); }
@@ -290,6 +291,16 @@
   let deferred;
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#install').hidden = false; });
   $('#install').addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $('#install').hidden = true; });
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  if (ios && !standalone) {
+    $('#install').hidden = false;
+    $('#install').addEventListener('click', () => {
+      $('#sheet').innerHTML = '<div class="grab"></div><h2>Add Penny Run to your iPhone</h2><p>1. Open this page in Safari.</p><p>2. Tap the Share button (the square with an arrow).</p><p>3. Tap "Add to Home Screen", then "Add".</p><button class="btn fill" id="scrimclose">Got it</button>';
+      $('#sheet').hidden = $('#scrim').hidden = false;
+      $('#scrimclose').onclick = () => closeSheet();
+    });
+  }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });
 
   load().then(() => (S.loaded = Date.now()));
