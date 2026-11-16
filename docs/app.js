@@ -8,7 +8,7 @@
   };
   const S = {
     data: null, tab: 'today', store: store.get('store', 'all'), dept: 'all', sort: 'score', q: '',
-    retailer: store.get('retailer', 'homedepot'), picks: store.get('picks', {}), run: store.get('run', {}), limit: 30, offline: false, stock: store.get('stock', true)
+    retailer: store.get('retailer', 'homedepot'), picks: store.get('picks', {}), run: store.get('run', {}), limit: 30, offline: false, pennyOnly: false, stock: store.get('stock', true)
   };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const money = v => v == null ? '' : '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -82,15 +82,31 @@
     const hidden = inStore().filter(i => i.qty === 0).length;
     $('#stockrow').hidden = S.tab === 'run' || S.tab === 'history';
     $('#stock').setAttribute('aria-checked', S.stock);
-    $('#stocknote').textContent = S.stock ? (hidden ? hidden + ' with 0 in the system hidden' : 'Nothing hidden') : 'Showing everything';
+    $('#stocknote').textContent = S.stock ? (hidden ? hidden + ' with 0 in the system hidden' + (S.tab === 'today' && S.retailer !== 'walmart' ? ', except possible pennies' : '') : 'Nothing hidden') : 'Showing everything';
     const mineIds = new Set(myItems().map(i => i.id));
     const n = Object.keys(S.run).filter(id => mineIds.has(id)).length, rc = $('#runcount');
     rc.hidden = !n; rc.textContent = n;
     document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
   }
 
+  // Home Depot only: signs an item may ring up at a penny. A lead to check, never a promise.
+  function pennyWhy(i) {
+    if (i.retailer === 'walmart') return [];
+    const w = [];
+    if (i.gone === 'unlisted') w.push('was on clearance and is no longer listed at this store');
+    if (i.missed) return w;
+    if (i.discontinued) w.push('confirmed discontinued');
+    if (i.pct >= 85) w.push(i.pct + '% off, the last markdown step');
+    if ((i.ending === 2 || i.ending === 3) && i.clearance) w.push('price ends in .0' + i.ending);
+    if (i.price <= 1) w.push('already under $1');
+    return w;
+  }
+  const isPenny = i => pennyWhy(i).length > 0;
+  const coin = i => isPenny(i) ? '<span class="coin" aria-label="Possible penny">1¢</span>' : '';
+
   function tags(i) {
     const t = [];
+    if (isPenny(i)) t.push('<span class="tag penny">Possible penny</span>');
     if (i.discontinued) t.push('<span class="tag drop">Discontinued</span>');
     if (i.ending === 3 || i.ending === 2) t.push(`<span class="tag warn">Ends .0${i.ending}</span>`);
     else if (i.ending === 6 || i.ending === 4) t.push(`<span class="tag plain">Ends .0${i.ending}</span>`);
@@ -103,10 +119,10 @@
     if (S.run[i.id]) t.push('<span class="tag ok">On run list</span>');
     return t.join('');
   }
-  const thumb = i => `<div class="thumb">${i.thumb ? `<img src="${esc(i.thumb)}" alt="" loading="lazy" onerror="this.remove()">` : ''}${esc((i.dept || '?')[0].toUpperCase())}</div>`;
+  const thumb = i => `<div class="tw">${coin(i)}<div class="thumb">${i.thumb ? `<img src="${esc(i.thumb)}" alt="" loading="lazy" onerror="this.remove()">` : ''}${esc((i.dept || '?')[0].toUpperCase())}</div></div>`;
   function card(i) {
     const was = i.was || (i.prev_price > i.price ? i.prev_price : null);
-    return `<button class="card" data-item="${esc(i.id)}">${thumb(i)}
+    return `<button class="card${isPenny(i) ? ' pennycard' : ''}" data-item="${esc(i.id)}">${thumb(i)}
       <div class="body"><div class="title">${esc(i.title)}</div>
         <div class="meta">${esc(i.brand || i.cat || cap(i.dept))}${i.model ? ' · <b>' + esc(i.model) + '</b>' : ''}</div>
         <div class="tags">${tags(i)}</div></div>
@@ -124,14 +140,17 @@
   function today() {
     const everything = items();
     const gone = everything.filter(i => i.gone === 'unlisted' && i.missed <= 4).sort((a, b) => (b.missing_since || '').localeCompare(a.missing_since || '') || b.score - a.score);
-    const all = everything.filter(i => !i.missed);
+    const byDept = i => S.dept === 'all' || i.dept === S.dept;
+    const pennies = inStore().filter(i => byDept(i) && isPenny(i)).sort((a, b) => (b.gone === 'unlisted') - (a.gone === 'unlisted') || (b.qty > 0) - (a.qty > 0) || (b.pct || 0) - (a.pct || 0));
+    const all = everything.filter(i => !i.missed && !isPenny(i));
     const hot = all.filter(i => i.score >= 45);
     const drops = all.filter(i => i.prev_price > i.price && daysAgo(i.price_changed_on) <= 8).sort((a, b) => (b.prev_price - b.price) / b.prev_price - (a.prev_price - a.price) / a.prev_price);
     const disc = all.filter(i => i.discontinued);
     const low = all.filter(i => (i.ending === 3 || i.ending === 2) && i.score < 45);
     const deep = all.filter(i => i.pct >= 40 && i.score < 45 && !(i.ending === 3 || i.ending === 2)).sort((a, b) => b.pct - a.pct);
-    let h = deptChips() + section('No longer listed at the store', gone, 'Was on clearance, and a direct lookup no longer finds it at this store. Not proof of a penny, but the best lead. Scan it at the register.') +
-      section('Closest to a penny', hot, 'Deep discount, long on clearance, low or zero stock in the system.') +
+    const gone2 = gone.filter(i => !isPenny(i));
+    let h = deptChips() + section('Possible pennies', pennies, 'Worth a shelf check. Most show 0 in the system, so the shelf may be empty. Scan at the register to know for sure.', 10) + section('No longer listed at the store', gone2, 'Was on clearance, and a direct lookup no longer finds it at this store. Not proof of a penny, but the best lead. Scan it at the register.') +
+      section('Highest scores', hot, 'Deep discount, long on clearance, low stock.') +
       section('Price drops', drops, 'Marked down since the last scan.') +
       section('Confirmed discontinued', disc, 'No longer sold. Still on the shelf? Scan it.') +
       section('Ends in .03 or .02', low, 'Often the last markdown before a penny.') +
@@ -149,7 +168,8 @@
 
   function browse() {
     const q = S.q.trim().toLowerCase();
-    let list = items().filter(i => (S.dept === 'all' || i.dept === S.dept) &&
+    const pool = S.pennyOnly ? inStore().filter(isPenny) : items();
+    let list = pool.filter(i => (S.dept === 'all' || i.dept === S.dept) &&
       (!q || (i.title + ' ' + i.brand + ' ' + i.model + ' ' + i.pid + ' ' + i.sku + ' ' + i.upc).toLowerCase().includes(q)));
     const by = {
       score: (a, b) => b.score - a.score || (b.pct || 0) - (a.pct || 0),
@@ -160,6 +180,7 @@
     list.sort(by[S.sort]);
     return `<input class="search" id="q" type="search" placeholder="Search name, brand, model or SKU" value="${esc(S.q)}" autocomplete="off">
       ${deptChips()}
+      ${S.retailer === 'walmart' ? '' : `<div class="row" style="margin-top:0;padding-top:0"><button class="chip pennychip ${S.pennyOnly ? 'on' : ''}" data-penny="1"><span class="coin inline">1¢</span> Possible pennies only</button></div>`}
       <div class="sec"><h2>${list.length} item${list.length === 1 ? '' : 's'}</h2>
         <select id="sort" aria-label="Sort">${[['score', 'Best score'], ['pct', 'Biggest % off'], ['low', 'Price: low'], ['high', 'Price: high'], ['new', 'Newest']]
         .map(([v, l]) => `<option value="${v}" ${S.sort === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
@@ -220,6 +241,7 @@
     $('#sheet').innerHTML = `<div class="grab"></div><h2>${esc(i.title)}</h2>
       <div class="meta">${esc([i.brand, i.cat, st.name].filter(Boolean).join(' · '))}</div>
       <div class="big"><span class="price">${money(i.price)}</span>${was ? `<span class="was">${money(was)}</span>` : ''}${i.pct ? `<span class="pct">−${i.pct}%</span>` : ''}</div>
+      ${isPenny(i) ? `<div class="pennybox"><span class="coin big">1¢</span><div><b>Possible penny</b><span>${esc(pennyWhy(i).join('; '))}. Not guaranteed. Scan it at the register.</span></div></div>` : ''}
       <ul class="why">${i.score ? `<li class="tag">Score ${i.score}</li>` : ''}${(i.why || []).map(w => `<li class="tag plain">${esc(w)}</li>`).join('')}</ul>
       <div class="ids">${box('Model', i.model)}${box(i.retailer === 'walmart' ? 'Walmart item #' : 'Internet #', i.pid)}${box('Store SKU', i.sku)}${box('UPC', i.upc)}</div>
       <button class="btn ${S.run[i.id] ? 'tonal' : 'fill'}" data-run="${esc(i.id)}">${S.run[i.id] ? 'Remove from run list' : 'Add to run list'}</button>
@@ -246,16 +268,17 @@
 
   // ---------- events ----------
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-retailer],[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim,#stock,#refresh');
+    const t = e.target.closest('[data-penny],[data-retailer],[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim,#stock,#refresh');
     if (!t) return;
     if (t.id === 'scrim') return closeSheet();
     if (t.id === 'refresh') { t.classList.add('spin'); return load().then(() => { S.loaded = Date.now(); t.classList.remove('spin'); toast(S.offline ? 'Offline. Showing saved data.' : 'Up to date'); }); }
     if (t.id === 'stock') { S.stock = !S.stock; store.set('stock', S.stock); S.limit = 30; return draw(); }
-    if (t.dataset.retailer) { S.retailer = t.dataset.retailer; store.set('retailer', S.retailer); S.dept = 'all'; S.q = ''; S.limit = 30; pickStore(); draw(); return window.scrollTo(0, 0); }
+    if (t.dataset.retailer) { S.pennyOnly = false; S.retailer = t.dataset.retailer; store.set('retailer', S.retailer); S.dept = 'all'; S.q = ''; S.limit = 30; pickStore(); draw(); return window.scrollTo(0, 0); }
     if (t.dataset.store) { S.store = t.dataset.store; S.picks[S.retailer] = S.store; store.set('picks', S.picks); S.limit = 30; return draw(); }
     if (t.dataset.tab) { S.tab = t.dataset.tab; S.limit = 30; draw(); return window.scrollTo(0, 0); }
-    if (t.dataset.goto) { S.tab = 'browse'; S.sort = t.dataset.goto === 'Deep clearance' ? 'pct' : 'score'; draw(); return window.scrollTo(0, 0); }
+    if (t.dataset.goto) { S.pennyOnly = t.dataset.goto === 'Possible pennies'; S.tab = 'browse'; S.sort = t.dataset.goto === 'Deep clearance' ? 'pct' : 'score'; draw(); return window.scrollTo(0, 0); }
     if (t.dataset.item) return openSheet(t.dataset.item);
+    if (t.dataset.penny) { S.pennyOnly = !S.pennyOnly; S.limit = 30; return draw(); }
     if (t.dataset.dept) { S.dept = t.dataset.dept; S.limit = 30; return draw(); }
     if (t.dataset.run) {
       const id = t.dataset.run;

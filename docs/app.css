@@ -102,3 +102,12 @@ select{height:44px;border-radius:22px;border:1.5px solid var(--line);background:
 @keyframes sh{to{background-position:-200% 0}}
 @media (max-width:359px){.thumb{width:60px;height:60px}.price{font-size:21px}.title{font-size:16px}.brand h1{font-size:21px}.nav button{font-size:12px}}
 @media (min-width:700px){body{max-width:680px;margin:0 auto}.nav{max-width:680px;margin:0 auto}.sheet{max-width:680px;margin:0 auto}}
+.tw{position:relative;flex:none}
+.coin{position:absolute;top:-8px;left:-8px;z-index:2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 14px/1 system-ui,sans-serif;color:#3A1B08;background:radial-gradient(circle at 35% 30%,#F8D2A8,#D98A4E 60%,#B5672F);border:2.5px solid var(--surface);box-shadow:0 2px 6px rgba(120,60,10,.5);letter-spacing:-.5px}
+.coin.inline{position:static;display:inline-grid;width:26px;height:26px;font-size:12px;border-width:0;vertical-align:middle;margin-right:4px;box-shadow:none}
+.coin.big{position:static;width:48px;height:48px;font-size:19px;flex:none;border-width:0}
+.pennycard{border:2px solid #D98A4E!important;background:linear-gradient(180deg,var(--copperbg),var(--surface) 55%)}
+.tag.penny{background:#C56A2B;color:#fff}
+.pennychip{display:inline-flex;align-items:center;border-color:#D98A4E}.pennychip.on{background:#C56A2B;border-color:#C56A2B;color:#fff}
+.pennybox{display:flex;gap:12px;align-items:center;background:var(--copperbg);border:2px solid #D98A4E;border-radius:16px;padding:12px 14px;margin:12px 0}
+.pennybox b{display:block;font-size:18px;color:var(--copper)}.pennybox span:not(.coin){font-size:15px;color:var(--text)}
