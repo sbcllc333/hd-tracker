@@ -109,15 +109,23 @@
     "deep": {
       "keywords": [
         "tools",
+        "power tools",
         "hand tools",
+        "tool storage",
+        "power tool batteries",
+        "power tool accessories",
         "appliances"
       ],
-      "per_search": 6000,
-      "max_cost": 0.45
+      "per_search": 744,
+      "max_cost": 0.3
     }
   },
   "extra_searches": {
-    "hand tools": "tools"
+    "power tools": "tools",
+    "hand tools": "tools",
+    "tool storage": "tools",
+    "power tool batteries": "tools",
+    "power tool accessories": "tools"
   },
   "walmart": {
     "daily_searches": 9,
