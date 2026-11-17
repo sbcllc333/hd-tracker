@@ -22,4 +22,5 @@ jobs:
         env:
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          APIFY_TOKEN2: x
         run: python probe/walmart_probe.py
