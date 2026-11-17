@@ -202,7 +202,7 @@ def parse_product(p, store, dept):
             "price": price, "was": was if was and was > price else None,
             "pct": int(pct) if pct else None, "badge": p.get("price_badge") or "",
             "qty": num(pickup.get("quantity")), "thumb": thumb,
-            "link": clean_link(p.get("link", ""), pid), "dept": dept}
+            "link": clean_link(p.get("link", ""), pid), "dept": dept, "source": "serpapi"}
 
 
 def sweep_store(ledger, store, day):
@@ -275,7 +275,8 @@ def update_ledger(ledger, store, seen, dept_log, day):
         old.pop("missing_since", None)
         old["last_seen"], old["missed"] = day, 0
     for key, old in items.items():
-        if old.get("store_id") == store["id"] and key not in seen \
+        src = next(iter(seen.values()), {}).get("source")
+        if old.get("store_id") == store["id"] and key not in seen and old.get("source") == src \
                 and old.get("dept") in ok_depts and old.get("last_seen") != day:
             old["missed"] = old.get("missed", 0) + 1
             if old["missed"] == 1:
