@@ -387,28 +387,23 @@ def apify(method, path, params=None, body=None):
         return json.loads(r.read().decode("utf-8", "replace"))
 
 
-def apify_sweep(store):
-    """One run = every department at one store, clearance items only.
-    Returns (items_seen, dept_log, cost_usd). Raises on failure."""
-    cfg = CONFIG.get("apify", {})
-    extra = CONFIG.get("extra_searches", {})          # e.g. {"hand tools": "tools"}
-    run = apify("POST", f"/acts/{APIFY_ACTOR}/runs",
-                {"timeout": 1200, "maxTotalChargeUsd": cfg.get("max_cost_per_run", 0.16)},
-                {"mode": "search", "keywords": CONFIG["searches"] + list(extra), "storeIds": [store["id"]],
-                 "zipCode": store.get("zip", ""), "maxStores": 1,
-                 "maxProductsPerSearch": cfg.get("products_per_department", 480),
+def apify_run(store, keywords, per_search, cap):
+    """One Apify run: these keywords at one store, clearance items only. Returns (rows, cost)."""
+    run = apify("POST", f"/acts/{APIFY_ACTOR}/runs", {"timeout": 2400, "maxTotalChargeUsd": cap},
+                {"mode": "search", "keywords": keywords, "storeIds": [store["id"]],
+                 "zipCode": store.get("zip", ""), "maxStores": 1, "maxProductsPerSearch": per_search,
                  "onlyClearance": True, "minDiscountPercent": 0,
                  "onlyChanges": False, "maxConcurrency": 3})["data"]
-    for _ in range(100):                               # up to ~20 minutes
+    for _ in range(200):                               # up to ~40 minutes
         time.sleep(12)
         run = apify("GET", f"/actor-runs/{run['id']}")["data"]
         if run.get("status") not in ("READY", "RUNNING"):
             break
     if run.get("status") != "SUCCEEDED":
         raise RuntimeError(f"Apify run ended as {run.get('status')}")
-    rows = apify("GET", f"/datasets/{run['defaultDatasetId']}/items", {"limit": 5000, "clean": "true"})
-    print(f"  Apify: {len(rows)} rows, cost ${run.get('usageTotalUsd') or 0:.3f}, "
-          f"events {json.dumps(run.get('chargedEventCounts'))}")
+    rows = apify("GET", f"/datasets/{run['defaultDatasetId']}/items", {"limit": 10000, "clean": "true"})
+    print(f"  Apify ({', '.join(keywords)} up to {per_search} each): {len(rows)} rows, "
+          f"cost ${run.get('usageTotalUsd') or 0:.3f}, events {json.dumps(run.get('chargedEventCounts'))}")
     if not rows:
         try:
             req = urllib.request.Request(APIFY + f"/actor-runs/{run['id']}/log", headers={
@@ -417,6 +412,24 @@ def apify_sweep(store):
             print("  Apify log tail:\n    " + "\n    ".join(l[:220] for l in tail))
         except Exception:
             pass
+    return rows, run.get("usageTotalUsd") or 0
+
+
+def apify_sweep(store):
+    """Every department at one store, clearance items only. Departments listed under
+    "deep" in config.json (tools, appliances) are scanned all the way through in a second run.
+    Returns (items_seen, dept_log, cost_usd). Raises on failure."""
+    cfg = CONFIG.get("apify", {})
+    extra = CONFIG.get("extra_searches", {})          # e.g. {"hand tools": "tools"}
+    deep = cfg.get("deep", {})                         # {"keywords": [...], "per_search": N, "max_cost": $}
+    deep_kw = deep.get("keywords", [])
+    normal_kw = [k for k in CONFIG["searches"] + list(extra) if k not in deep_kw]
+    rows, cost = apify_run(store, normal_kw, cfg.get("products_per_department", 480),
+                           cfg.get("max_cost_per_run", 0.18))
+    if deep_kw:
+        more, c2 = apify_run(store, deep_kw, deep.get("per_search", 6000), deep.get("max_cost", 0.6))
+        rows, cost = rows + more, cost + c2
+    run = {"usageTotalUsd": cost}
     floor = float(CONFIG.get("min_price") or 0)
     seen, counts = {}, {d: 0 for d in CONFIG["searches"]}
     for r in rows:
@@ -827,6 +840,15 @@ def main():
                     or [x for x in every if want in x["name"].lower()]
                 targets += [x for x in hit if x not in targets]
             targets = targets or ([order[0]] if order else [])
+        if have_apify:
+            try:
+                lim = apify("GET", "/users/me/limits")["data"]
+                used = (lim.get("current") or {}).get("monthlyUsageUsd")
+                cap = (lim.get("limits") or {}).get("maxMonthlyUsageUsd")
+                print(f"Apify credit this month: ${used} used of ${cap}")
+                ledger["apify_credit"] = {"used": used, "cap": cap, "on": day}
+            except Exception as e:
+                print("Apify credit check failed:", str(e)[:80])
         for store in targets:
             scan_one(ledger, store, day, have_apify, have_serp, status)
         note, _ = check_discontinued(ledger, day)

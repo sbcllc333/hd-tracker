@@ -105,7 +105,16 @@
   ],
   "apify": {
     "products_per_department": 480,
-    "max_cost_per_run": 0.18
+    "max_cost_per_run": 0.18,
+    "deep": {
+      "keywords": [
+        "tools",
+        "hand tools",
+        "appliances"
+      ],
+      "per_search": 6000,
+      "max_cost": 0.45
+    }
   },
   "extra_searches": {
     "hand tools": "tools"
