@@ -70,6 +70,14 @@
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+3790+Third+Street+South+Jacksonville+Beach+FL"
     },
     {
+      "id": "6864",
+      "name": "Lake City (SW Home Depot Dr)",
+      "short": "Lake City",
+      "on": true,
+      "zip": "32025",
+      "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+215+SW+Home+Depot+Dr+Lake+City+FL"
+    },
+    {
       "id": "wm1083",
       "number": "1083",
       "retailer": "walmart",
