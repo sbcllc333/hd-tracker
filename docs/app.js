@@ -275,7 +275,7 @@
     const scanned = id => (per[id] || {}).last_scan;
     const pickNote = id => scanned(id) ? 'Last scan ' + niceDate(scanned(id)) + ' (' + ago(scanned(id)) + ')' : 'Not scanned yet';
     let h = `<div class="sec"><h2>Deep clearance</h2><span>${deals.length} items ${f.min_pct || 50}%+ off</span></div>
-      <p class="sub">Home Depot's own store clearance prices, deepest discount first. Updated every morning.</p>`;
+      <p class="sub">Home Depot's own store clearance prices, deepest discount first. Each store refreshes every few days.</p>`;
     if (S.store !== 'all') {
       h += `<p class="sub">${esc(storeFull(S.store))} · ${esc(pickNote(S.store))}</p>`;
       if (!deals.length) return h + '<div class="empty"><h3>Nothing 50%+ off here right now</h3><p>This store gets checked again within a few days.</p></div>';
