@@ -141,3 +141,9 @@ select{height:44px;border-radius:22px;border:1.5px solid var(--line);background:
 .runitem{scroll-margin-bottom:calc(100px + env(safe-area-inset-bottom))}
 .sheet{z-index:30}
 .scrim{z-index:29}
+
+/* v18: daily deep-clearance feed */
+.sec.store{margin-top:26px;flex-wrap:wrap}.sec.store span{font-size:14px}
+.card.deal .side{gap:4px}
+.card.deal .meta+.meta{margin-top:1px}
+.card.deal .pct{font-size:13px}

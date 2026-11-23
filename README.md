@@ -8,9 +8,37 @@ or Walmart.
 **The app (after you publish this branch):** https://sbcllc333.github.io/hd-tracker/
 Open it on your phone and choose "Install" or "Add to Home screen".
 
-This rebuild costs **$0 a month**. It does not call Apify, SerpApi, Bright Data,
-or any LLM. There is no Home Depot scrape. Every lead is shown as **unconfirmed
-until it rings up at the register**.
+Every morning the app fills itself with **deep-clearance items (50% off and
+more) at these stores**, deepest discount first, with price, was-price, % off,
+SKU, UPC, and the date it was last seen. Every item is shown as
+**unconfirmed until it scans at the register**.
+
+## Where the daily items come from (and what it costs)
+
+Home Depot blocks scripts and cloud servers (including GitHub's) from its own
+site, so the feed uses the same source that produced the old app's 50-99% off
+items: the [Home Depot Scraper actor on Apify](https://apify.com/s_actors/home-depot-scraper)
+(`s_actors~home-depot-scraper`). It returns Home Depot's own store-level data:
+clearance price, was price, % off, store SKU, UPC, and pickup count.
+
+- **Cost: $0.** It runs on Apify's **Free plan**: $5 of usage credit every month,
+  no card. If the credit runs out, runs pause until next month; nothing is billed.
+  `tools/feed.py` also checks the month's usage first, spreads the credit over the
+  days left, stops at $4.50, and caps every run at $0.20.
+- About 2 stores are scanned per day, oldest scan first, so each store is
+  refreshed every few days. Items not seen in a store's newest full scan are
+  dropped; items older than 14 days are hidden.
+- It needs **one** repo secret: `APIFY_TOKEN` (Apify Console > Settings >
+  API & Integrations). Keep the account on the Free plan with no card.
+  `SERPAPI_KEY` and `BRIGHTDATA_KEY` are not used and can be deleted.
+- Without the secret (or when the month's credit is used up), nothing new is
+  fetched and the app keeps showing each store's last real scan with its date.
+- The first build was seeded from the old app's last real scans
+  (Nov 16-17, 2026), so the app is not empty on day one.
+- Fine print: Home Depot's terms of use restrict automated access to its site.
+  The scraping is done by the Apify actor, not by this repo, but it is still
+  Home Depot's data collected without its permission. Use it for personal
+  shopping only, and don't republish it.
 
 ## How it works
 
@@ -19,8 +47,11 @@ until it rings up at the register**.
 - The phone app also saves new finds and trip marks in local storage, so you
   can use it with no server. Export a backup, or copy one lead as a JSON line
   and commit it to `data/leads.json`.
-- Once a day, GitHub Actions runs `python tools/build.py`. That reads
-  `data/leads.json` and writes `docs/data.json`. It uses no paid keys.
+- Once a day, GitHub Actions runs `python tracker.py`. That scans today's
+  stores (see above), keeps items 50%+ off in `data/feed.json`, reads
+  `data/leads.json`, and writes `docs/data.json`. A code push only rebuilds
+  (`--no-fetch`) and spends no credit. Run it by hand from the Actions tab;
+  "stores" takes store numbers to scan right away (e.g. `6346,0275`).
 - On a store run, mark **Found**, **Not there**, **Full price**, or **Rang up 1¢**.
   Each mark is stored with the date. Two "Not there" trips (on different days)
   demote the lead, unless a later trip finds it or rings up a penny.
@@ -73,23 +104,26 @@ commit a scraped dump of their list.
   are hidden until you turn this on. There is still no Walmart scrape; you
   would add those leads by hand the same way.
 
-## What this branch removed
+## Feed settings (`config.json` > `feed`)
 
-The old daily job paid Apify, SerpApi, and Bright Data to scrape clearance
-aisles. That could not find real pennies (a $0.01 system price is a
-pull-and-destroy flag, and most "possible pennies" showed 0 in stock). Those
-code paths and the `APIFY_TOKEN`, `SERPAPI_KEY`, and `BRIGHTDATA_KEY` secrets
-are gone from the workflow. After you publish, you can delete those secrets
-and cancel the paid plans.
+- `min_pct` (50): lowest % off kept.  `max_age_days` (14): hide older items.
+- `stores_per_day` (2), `monthly_budget_usd` (4.5), `max_cost_per_store_usd` (0.2).
+- `category_urls`: Home Depot's In-Store Clearance page; `keywords` are scanned
+  instead when that comes back empty (the old app's department searches).
 
-Leftover scrape files (`data/ledger.json`, `data/snapshots/`) are unused. You
-can delete them whenever you like; the app no longer reads them.
+## What changed from the old app
+
+SerpApi and Bright Data are gone, and so are the Walmart scans. Apify stays,
+on its Free plan only, because it is the only source that gave real 50-99% off
+store clearance. `data/ledger.json` is read once to seed `data/feed.json` and is
+otherwise unused.
 
 ## Develop locally
 
 ```
-python tools/build.py
-python tools/test_rebuild.py
+python tracker.py --no-fetch          # rebuild docs/data.json, no network
+APIFY_TOKEN=... python tracker.py --store 6346   # real scan of one store
+python -m unittest discover -s tools -p "test_*.py"
 cd docs && python -m http.server 8765
 ```
 

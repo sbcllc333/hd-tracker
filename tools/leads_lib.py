@@ -1,4 +1,4 @@
-"""Shared lead and trip-log helpers. No paid APIs, no network calls."""
+"""Shared lead and trip-log helpers. No network calls here (the daily feed lives in feed.py)."""
 
 from __future__ import annotations
 
@@ -311,7 +311,8 @@ def apply_trips(lead: dict, trips: list[dict]) -> dict:
     return out
 
 
-def build_output(book: dict, cfg: dict | None = None) -> dict:
+def build_output(book: dict, cfg: dict | None = None, feed: dict | None = None,
+                 feed_status: dict | None = None) -> dict:
     cfg = cfg or load_config()
     stores = active_stores(cfg)
     ids = {s["id"] for s in stores}
@@ -328,7 +329,14 @@ def build_output(book: dict, cfg: dict | None = None) -> dict:
     items.sort(key=lambda i: lead_sort_key(i, preferred)[0:2] + (-_ord(i.get("reported_at")), lead_sort_key(i, preferred)[3]))
     # recency descending — handle in helper
     items.sort(key=lambda i: item_sort(i, preferred))
+    import feed as feedmod
+    fd = feed if feed is not None else feedmod.load_feed()
+    deals, feed_meta = feedmod.deals_for_output(fd, cfg, stores, today())
+    feed_meta["status"] = feed_status or (fd.get("last_status") or {"ok": True, "note": ""})
     status = {"ok": True, "note": ""}
+    if feed_meta["status"].get("note"):
+        status = {"ok": bool(feed_meta["status"].get("ok", True)), "note": feed_meta["status"]["note"]}
+    log = [l for l in (fd.get("log") or [])][-20:]
     return {
         "app": "Penny Run",
         "mode": "leads",
@@ -346,12 +354,14 @@ def build_output(book: dict, cfg: dict | None = None) -> dict:
         ],
         "walmart_enabled": walmart_enabled(cfg),
         "items": items,
+        "deals": deals,
+        "feed": feed_meta,
         "trips": book.get("trips", []),
-        "log": [{
+        "log": log + [{
             "date": today(),
-            "store": "Lead book",
-            "items": len(items),
-            "note": f"Built {len(items)} leads from data/leads.json. No paid data sources.",
+            "store": "Build",
+            "items": len(deals) + len(items),
+            "note": f"{len(deals)} clearance items {feed_meta['min_pct']}%+ off and {len(items)} community/trip leads.",
             "source": "local",
         }],
     }
@@ -369,9 +379,10 @@ def item_sort(item: dict, preferred: list[str]) -> tuple:
     return (demoted, confirmed, -_ord(recency), mine)
 
 
-def write_output(book: dict | None = None, path: Path | None = None) -> dict:
+def write_output(book: dict | None = None, path: Path | None = None, feed: dict | None = None,
+                 feed_status: dict | None = None) -> dict:
     book = book if book is not None else load_book()
-    out = build_output(book)
+    out = build_output(book, feed=feed, feed_status=feed_status)
     dest = path or OUT_PATH
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(out, separators=(",", ":"), ensure_ascii=False))
