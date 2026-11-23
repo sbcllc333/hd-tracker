@@ -1,0 +1,7 @@
+# Paste a PennyCentral (or other) shortlist here, one item per line.
+# Format: SKU, price, optional name, optional notes
+# This file is an example only. Do not paste scraped dumps into the public repo
+# if a site's terms forbid redistribution.
+#
+# PREVIEW-101, 0.01, Example pasted shelf unit, preview only
+# 1001-234-567, 0.01, Example SKU from a trip

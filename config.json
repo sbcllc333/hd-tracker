@@ -1,23 +1,12 @@
 {
-  "searches": [
-    "plumbing",
-    "electrical",
-    "garden",
-    "clearance",
-    "appliances",
-    "lighting",
-    "tools"
-  ],
-  "min_price": 10,
-  "min_percent_off": 40,
-  "skip_online_only": true,
-  "discontinued_checks_per_run": 12,
+  "walmart_enabled": false,
   "stores": [
     {
       "id": "0275",
       "name": "Orange Park (Wells Rd)",
       "short": "Orange Park",
       "on": true,
+      "retailer": "homedepot",
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Wells+Rd+Orange+Park+FL",
       "zip": "32073"
     },
@@ -26,6 +15,7 @@
       "name": "Lane Ave / Normandy",
       "short": "Normandy",
       "on": true,
+      "retailer": "homedepot",
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Lane+Ave+Jacksonville+FL",
       "zip": "32205"
     },
@@ -34,6 +24,7 @@
       "name": "North Jax (Lem Turner)",
       "short": "Lem Turner",
       "on": true,
+      "retailer": "homedepot",
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Lem+Turner+Rd+Jacksonville+FL",
       "zip": "32218"
     },
@@ -42,6 +33,7 @@
       "name": "Southside Blvd",
       "short": "Southside",
       "on": true,
+      "retailer": "homedepot",
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+Southside+Blvd+Jacksonville+FL",
       "zip": "32216"
     },
@@ -50,6 +42,7 @@
       "name": "Oakleaf (Crosshill Blvd)",
       "short": "Oakleaf",
       "on": true,
+      "retailer": "homedepot",
       "zip": "32222",
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+9751+Crosshill+Blvd+Jacksonville+FL"
     },
@@ -58,6 +51,7 @@
       "name": "Atlantic Blvd (at Girvin)",
       "short": "Atlantic",
       "on": true,
+      "retailer": "homedepot",
       "zip": "32225",
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+12721+Atlantic+Blvd+Jacksonville+FL"
     },
@@ -66,6 +60,7 @@
       "name": "Jacksonville Beach (3rd St S)",
       "short": "Jax Beach",
       "on": true,
+      "retailer": "homedepot",
       "zip": "32250",
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+3790+Third+Street+South+Jacksonville+Beach+FL"
     },
@@ -74,6 +69,7 @@
       "name": "Lake City (SW Home Depot Dr)",
       "short": "Lake City",
       "on": true,
+      "retailer": "homedepot",
       "zip": "32025",
       "maps": "https://www.google.com/maps/search/?api=1&query=The+Home+Depot+215+SW+Home+Depot+Dr+Lake+City+FL"
     },
@@ -83,8 +79,7 @@
       "retailer": "walmart",
       "name": "Walmart (Normandy Blvd)",
       "short": "Normandy Walmart",
-      "on": true,
-      "every_days": 1,
+      "on": false,
       "maps": "https://www.google.com/maps/search/?api=1&query=Walmart+Supercenter+6830+Normandy+Blvd+Jacksonville+FL",
       "zip": "32205"
     },
@@ -94,8 +89,7 @@
       "retailer": "walmart",
       "name": "Walmart (13490 Beach Blvd)",
       "short": "Beach Blvd Walmart",
-      "on": true,
-      "every_days": 1,
+      "on": false,
       "zip": "32224",
       "maps": "https://www.google.com/maps/search/?api=1&query=Walmart+Supercenter+13490+Beach+Blvd+Jacksonville+FL"
     },
@@ -105,130 +99,9 @@
       "retailer": "walmart",
       "name": "Walmart (Macclenny)",
       "short": "Macclenny Walmart",
-      "on": true,
-      "every_days": 1,
+      "on": false,
       "zip": "32063",
       "maps": "https://www.google.com/maps/search/?api=1&query=Walmart+Supercenter+9218+S+State+Road+228+Macclenny+FL"
     }
-  ],
-  "apify": {
-    "products_per_department": 480,
-    "max_cost_per_run": 0.18,
-    "deep": {
-      "keywords": [
-        "tools",
-        "power tools",
-        "hand tools",
-        "tool storage",
-        "power tool batteries",
-        "power tool accessories",
-        "appliances"
-      ],
-      "per_search": 744,
-      "max_cost": 0.3
-    }
-  },
-  "extra_searches": {
-    "power tools": "tools",
-    "hand tools": "tools",
-    "tool storage": "tools",
-    "power tool batteries": "tools",
-    "power tool accessories": "tools"
-  },
-  "walmart": {
-    "daily_searches": 6,
-    "departments": [
-      {
-        "name": "Electronics",
-        "cat_id": "3944",
-        "every_days": 7
-      },
-      {
-        "name": "Home Improvement",
-        "cat_id": "1072864",
-        "every_days": 7
-      },
-      {
-        "name": "Patio & Garden",
-        "cat_id": "5428",
-        "every_days": 7
-      },
-      {
-        "name": "Auto & Tires",
-        "cat_id": "91083",
-        "every_days": 7
-      },
-      {
-        "name": "Video Games",
-        "cat_id": "2636",
-        "every_days": 7
-      },
-      {
-        "name": "Cell Phones",
-        "cat_id": "1105910",
-        "every_days": 7
-      },
-      {
-        "name": "Office & School",
-        "cat_id": "1229749",
-        "every_days": 7
-      },
-      {
-        "name": "Toys",
-        "cat_id": "4171"
-      },
-      {
-        "name": "Pets",
-        "cat_id": "5440"
-      },
-      {
-        "name": "Household Essentials",
-        "cat_id": "1115193"
-      },
-      {
-        "name": "Jewelry",
-        "cat_id": "3891"
-      },
-      {
-        "name": "Personal Care",
-        "cat_id": "1005862"
-      },
-      {
-        "name": "Arts & Crafts",
-        "cat_id": "1334134"
-      },
-      {
-        "name": "Sports & Outdoors",
-        "cat_id": "4125"
-      },
-      {
-        "name": "Baby",
-        "cat_id": "5427"
-      },
-      {
-        "name": "Beauty",
-        "cat_id": "1085666"
-      },
-      {
-        "name": "Health",
-        "cat_id": "976760"
-      },
-      {
-        "name": "Food",
-        "cat_id": "976759"
-      },
-      {
-        "name": "Home",
-        "cat_id": "4044"
-      },
-      {
-        "name": "Seasonal",
-        "cat_id": "1085632"
-      },
-      {
-        "name": "Clothing",
-        "cat_id": "5438"
-      }
-    ]
-  }
+  ]
 }
