@@ -1,4 +1,4 @@
-/* Penny Run — community and trip leads. No paid APIs, no build step, no server. */
+/* Penny Run — daily Home Depot deep-clearance feed plus community and trip leads. No build step, no server. */
 (() => {
   const $ = (s, el = document) => el.querySelector(s);
   const view = $('#view');
@@ -62,12 +62,20 @@
       notes: i.notes || '',
       retailer: i.retailer || 'homedepot',
       preview: !!i.preview,
-      local: !!i.local
+      local: !!i.local,
+      ...(i.feed ? {
+        feed: true, pid: i.pid || '', brand: i.brand || '', model: i.model || '', was: i.was, pct: i.pct,
+        qty: i.qty, thumb: i.thumb || '', hd_link: i.link || '', aisle: i.aisle || '', bay: i.bay || '',
+        dept: i.dept || '', first_seen: i.first_seen || '', last_seen: i.last_seen || '', stage: i.stage || ''
+      } : {})
     };
+  }
+  function dealLead(d) {
+    return toLead({ ...d, feed: true, name: d.title, stores: [d.store_id], source: 'feed', reported_price: d.price, reported_at: d.last_seen });
   }
 
   function mergeBook() {
-    const baseLeads = (S.data.items || []).map(toLead);
+    const baseLeads = (S.data.deals || []).map(dealLead).concat((S.data.items || []).map(toLead));
     const baseTrips = S.data.trips ? S.data.trips.slice() : [];
     (S.data.items || []).forEach(i => {
       (i.trips || []).forEach(t => baseTrips.push({ ...t, lead_id: t.lead_id || i.id }));
@@ -75,7 +83,11 @@
     const loc = localBook();
     const leads = new Map();
     baseLeads.forEach(l => leads.set(l.id, l));
-    (loc.leads || []).forEach(l => leads.set(l.id, { ...leads.get(l.id), ...toLead(l), local: true }));
+    (loc.leads || []).forEach(l => {
+      const base = leads.get(l.id);
+      if (base && base.feed) leads.set(l.id, { ...base, confirmed_at_register: base.confirmed_at_register || !!l.confirmed_at_register });
+      else leads.set(l.id, { ...base, ...toLead(l), local: true });
+    });
     const tripKey = t => [t.lead_id, t.store_id || '', t.date].join('|');
     const trips = new Map();
     baseTrips.forEach(t => trips.set(tripKey(t), t));
@@ -112,7 +124,7 @@
       ...lead,
       title: lead.name || lead.sku || lead.upc || 'Untitled find',
       price: lead.reported_price,
-      link: searchLink(lead),
+      link: lead.feed ? (lead.hd_link || searchLink(lead)) : searchLink(lead),
       confirmed,
       demoted: isDemoted(lead, trips),
       not_there_count: notThereDates(trips).size,
@@ -124,6 +136,7 @@
   function isNew(lead) {
     const last = store.get('lastVisit', null);
     if (!last) return false;
+    if (lead.feed) return !!lead.first_seen && new Date(lead.first_seen + 'T23:59:00').getTime() > last;
     const day = (lead.reported_at || '').slice(0, 10);
     const added = lead.added_at || (lead.local && day);
     const when = lead.added_at || (day ? day + 'T12:00:00' : '');
@@ -151,6 +164,8 @@
     };
     const ord = d => { const t = Date.parse((d || '') + (d && d.length === 10 ? 'T12:00:00' : '')); return Number.isNaN(t) ? 0 : t; };
     return list.slice().sort((a, b) =>
+      ((b.feed ? 1 : 0) - (a.feed ? 1 : 0)) ||
+      (a.feed && b.feed ? ((b.pct || 0) - (a.pct || 0)) || ((a.price ?? 1e9) - (b.price ?? 1e9)) : 0) ||
       (a.demoted - b.demoted) ||
       ((b.confirmed ? 1 : 0) - (a.confirmed ? 1 : 0)) ||
       (ord(b.reported_at) - ord(a.reported_at)) ||
@@ -202,7 +217,22 @@
     document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
   }
 
+  const STAGE = { penny: '1¢ in the data', near: 'Near penny' };
+  const shelf = i => i.qty > 0 ? i.qty + ' on the shelf' : i.qty === 0 ? '0 for pickup' : '';
+  const spot = i => [i.aisle && 'Aisle ' + i.aisle, i.bay && 'Bay ' + i.bay].filter(Boolean).join(' · ');
+  function dealTags(i) {
+    const t = [];
+    if (i.isNew) t.push('<span class="tag new">New</span>');
+    if (i.confirmed) t.push('<span class="tag ok">Rang up 1¢</span>');
+    if (i.stage) t.push(`<span class="tag penny">${STAGE[i.stage]}</span>`);
+    if (spot(i)) t.push(`<span class="tag ok">${esc(spot(i))}</span>`);
+    if (S.store === 'all' && !S.grouped) t.push(`<span class="tag plain">${esc(storeName(i.store_id))}</span>`);
+    if (i.demoted) t.push('<span class="tag demoted">Missed ' + i.not_there_count + ' trips</span>');
+    if (S.run[i.id]) t.push('<span class="tag ok">On run list</span>');
+    return t.join('');
+  }
   function tags(i) {
+    if (i.feed) return dealTags(i);
     const t = [];
     if (i.isNew) t.push('<span class="tag new">New</span>');
     if (i.confirmed) t.push('<span class="tag ok">Confirmed at register</span>');
@@ -218,8 +248,17 @@
   }
   const initial = i => esc(((i.title || '?')[0] || '?').toUpperCase());
   const coin = i => i.confirmed ? '<span class="coin" aria-label="Confirmed penny">1¢</span>' : '';
-  const thumb = i => `<div class="tw">${coin(i)}<div class="thumb">${initial(i)}</div></div>`;
+  const thumb = i => `<div class="tw">${coin(i)}<div class="thumb">${initial(i)}${i.thumb ? `<img src="${esc(i.thumb.replace(/_(\d+)\.jpg$/, '_145.jpg'))}" alt="" loading="lazy" onerror="this.remove()">` : ''}</div></div>`;
+  function dealCard(i) {
+    return `<button class="card deal${i.confirmed ? ' confirmed pennycard' : ''}${i.demoted ? ' demoted' : ''}" data-item="${esc(i.id)}">${thumb(i)}
+      <div class="body"><div class="title">${esc(i.title)}</div>
+        <div class="meta">${i.sku ? 'SKU <b>' + esc(i.sku) + '</b>' : ''}${i.upc ? ' · UPC ' + esc(i.upc) : ''}</div>
+        <div class="meta">${esc(['Seen ' + niceDate(i.last_seen), shelf(i)].filter(Boolean).join(' · '))}</div>
+        <div class="tags">${tags(i)}</div></div>
+      <div class="side"><div class="price">${money(i.price) || '—'}</div>${i.was ? `<div class="was">${money(i.was)}</div>` : ''}${i.pct ? `<div class="pct">${i.pct}% off</div>` : ''}</div></button>`;
+  }
   function card(i) {
+    if (i.feed) return dealCard(i);
     return `<button class="card${i.confirmed ? ' confirmed pennycard' : ''}${i.demoted ? ' demoted' : ''}" data-item="${esc(i.id)}">${thumb(i)}
       <div class="body"><div class="title">${esc(i.title)}</div>
         <div class="meta">${i.source === 'my_trip' ? 'My trip' : 'Community'}${i.sku ? ' · <b>' + esc(i.sku) + '</b>' : ''}${i.reported_at ? ' · ' + niceDate(i.reported_at) : ''}</div>
@@ -231,17 +270,44 @@
     list.slice(0, max).map(card).join('') +
     (list.length > max ? `<button class="more" data-goto="${title}">See all ${list.length}</button>` : '');
 
+  function feedView(deals) {
+    const f = S.data.feed || {}, per = f.stores || {};
+    const scanned = id => (per[id] || {}).last_scan;
+    const pickNote = id => scanned(id) ? 'Last scan ' + niceDate(scanned(id)) + ' (' + ago(scanned(id)) + ')' : 'Not scanned yet';
+    let h = `<div class="sec"><h2>Deep clearance</h2><span>${deals.length} items ${f.min_pct || 50}%+ off</span></div>
+      <p class="sub">Home Depot's own store clearance prices, deepest discount first. Updated every morning.</p>`;
+    if (S.store !== 'all') {
+      h += `<p class="sub">${esc(storeFull(S.store))} · ${esc(pickNote(S.store))}</p>`;
+      if (!deals.length) return h + '<div class="empty"><h3>Nothing 50%+ off here right now</h3><p>This store gets checked again within a few days.</p></div>';
+      h += deals.slice(0, S.limit).map(card).join('');
+      if (deals.length > S.limit) h += `<button class="more" id="morebtn">Show more (${deals.length - S.limit} left)</button>`;
+      return h;
+    }
+    for (const st of myStores()) {
+      const list = deals.filter(i => i.store_id === st.id);
+      h += `<div class="sec store"><h2>${esc(st.short)}</h2><span>${list.length ? list.length + ' items · ' : ''}${esc(pickNote(st.id))}</span></div>`;
+      if (!list.length) { h += '<p class="sub">Nothing 50%+ off in the last scan window yet.</p>'; continue; }
+      S.grouped = true; h += list.slice(0, 5).map(card).join(''); S.grouped = false;
+      if (list.length > 5) h += `<button class="more" data-store="${esc(st.id)}">See all ${list.length} at ${esc(st.short)}</button>`;
+    }
+    return h;
+  }
+
   function todayView() {
-    const all = sortItems(inStore());
+    const every = sortItems(inStore());
+    const deals = every.filter(i => i.feed);
+    const all = every.filter(i => !i.feed);
     const fresh = all.filter(i => i.isNew);
     const confirmed = all.filter(i => i.confirmed && !i.demoted && !i.isNew);
     const open = all.filter(i => !i.confirmed && !i.demoted && !i.isNew);
     const demoted = all.filter(i => i.demoted && !i.isNew);
     let h = '';
-    if (fresh.length) h += `<div class="badge-row" id="newbanner">${fresh.length} new since your last visit</div>`;
-    h += `<p class="notice"><b>Every lead is unconfirmed until it rings up at the register.</b> Scan the barcode on the box, not the shelf tag.</p>`;
+    const newDeals = deals.filter(i => i.isNew).length;
+    if (fresh.length + newDeals) h += `<div class="badge-row" id="newbanner">${fresh.length + newDeals} new since your last visit</div>`;
+    h += `<p class="notice"><b>Unconfirmed until it scans at the register.</b> Online clearance prices lag the store. Scan the barcode on the box, not the shelf tag.</p>`;
+    h += feedView(deals);
     if (!all.length) {
-      h += `<div class="empty"><h3>No leads yet</h3><p>Tap <b>Add a find</b> to save a SKU from a trip, or paste a shortlist of SKUs and prices. Nothing is scraped automatically.</p>
+      h += `<div class="sec"><h2>Community and trip leads</h2></div><div class="empty"><h3>No leads yet</h3><p>Tap <b>Add a find</b> to save a SKU from a trip, or paste a shortlist of SKUs and prices.</p>
         <button class="btn fill" id="emptyadd">Add a find</button>
         <a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Open PennyCentral's penny list</a></div>`;
       return h;
@@ -256,9 +322,9 @@
 
   function browse() {
     const q = S.q.trim().toLowerCase();
-    let list = sortItems(inStore()).filter(i => !q || (i.title + ' ' + i.sku + ' ' + i.upc + ' ' + (i.notes || '')).toLowerCase().includes(q));
-    return `<input class="search" id="q" type="search" placeholder="Search name, SKU or UPC" value="${esc(S.q)}" autocomplete="off">
-      <div class="sec"><h2>${list.length} lead${list.length === 1 ? '' : 's'}</h2></div>
+    let list = sortItems(inStore()).filter(i => !q || (i.title + ' ' + i.sku + ' ' + i.upc + ' ' + (i.brand || '') + ' ' + (i.dept || '') + ' ' + (i.notes || '')).toLowerCase().includes(q));
+    return `<input class="search" id="q" type="search" placeholder="Search name, SKU, UPC or brand" value="${esc(S.q)}" autocomplete="off">
+      <div class="sec"><h2>${list.length} item${list.length === 1 ? '' : 's'}</h2></div>
       <div id="list">${list.slice(0, S.limit).map(card).join('') || '<div class="empty"><h3>Nothing matches</h3></div>'}</div>
       ${list.length > S.limit ? `<button class="more" id="morebtn">Show more (${list.length - S.limit} left)</button>` : ''}`;
   }
@@ -292,8 +358,8 @@
     const v = S.run[i.id];
     const sid = storeId || i.store_id || '';
     return `<div class="runitem" data-lead="${esc(i.id)}"><button class="top" data-item="${esc(i.id)}">${thumb(i)}<div class="body"><div class="title">${esc(i.title)}</div>
-      <div class="meta">${i.sku ? '<b>' + esc(i.sku) + '</b> · ' : ''}${money(i.price) || 'no price'}</div>
-      <div class="tags">${i.confirmed ? '<span class="tag ok">Confirmed</span>' : '<span class="tag unconfirmed">Unconfirmed until it rings up at the register</span>'}</div></div></button>
+      <div class="meta">${i.sku ? '<b>' + esc(i.sku) + '</b> · ' : ''}${money(i.price) || 'no price'}${i.pct ? ' · ' + i.pct + '% off' : ''}${spot(i) ? ' · ' + esc(spot(i)) : ''}</div>
+      <div class="tags">${i.confirmed ? '<span class="tag ok">Confirmed</span>' : '<span class="tag unconfirmed">Unconfirmed until it scans</span>'}</div></div></button>
       <div class="seg">${[['found', 'Found'], ['gone', 'Not there'], ['full', 'Full price'], ['penny', 'Rang up 1¢']].map(([k, l]) =>
       `<button class="${k} ${v === k ? 'on' : ''}" data-mark="${esc(i.id)}" data-val="${k}" data-tripstore="${esc(sid)}">${l}</button>`).join('')}</div></div>`;
   }
@@ -434,8 +500,29 @@
     return line;
   }
 
+  function openDeal(i) {
+    const box = (label, val) => val ? `<button class="idbox" data-copy="${esc(val)}"><small>${label} · tap to copy</small><b>${esc(val)}</b></button>` : '';
+    const st = S.data.stores.find(s => s.id === i.store_id);
+    const rows = [['Store', storeFull(i.store_id)], ['Brand', i.brand], ['Model', i.model], ['Department', i.dept],
+      ['Aisle / bay', spot(i) || 'Not listed online'], ['Units', i.qty > 0 ? i.qty + ' listed for pickup' : i.qty === 0 ? '0 listed for pickup online. Check the shelf.' : 'Not shown online'],
+      ['First seen 50%+ off', niceDate(i.first_seen)], ['Last seen', i.last_seen ? niceDate(i.last_seen) + ' (' + ago(i.last_seen) + ')' : '']].filter(r => r[1]);
+    $('#sheet').innerHTML = `<div class="grab"></div><h2>${esc(i.title)}</h2>
+      <div class="big"><span class="price">${money(i.price) || '—'}</span>${i.was ? `<span class="was">${money(i.was)}</span>` : ''}${i.pct ? `<span class="pct">${i.pct}% off</span>` : ''}</div>
+      <div class="notice">${i.confirmed ? '<b>Rang up 1¢ on your trip.</b>' : '<b>Unconfirmed until it scans at the register.</b> This is Home Depot\'s store price from the last scan. Scan the barcode on the box, not the shelf tag.'}</div>
+      <div class="ids">${box('SKU', i.sku)}${box('UPC', i.upc)}</div>
+      <button class="btn ${S.run[i.id] ? 'tonal' : 'fill'}" data-run="${esc(i.id)}">${S.run[i.id] ? 'Remove from run list' : 'Add to run list'}</button>
+      <div class="two">${i.link ? `<a class="btn out" href="${esc(i.link)}" target="_blank" rel="noopener">Home Depot page</a>` : '<span></span>'}
+        ${st && st.maps ? `<a class="btn out" href="${esc(st.maps)}" target="_blank" rel="noopener">Directions</a>` : '<span></span>'}</div>
+      <button class="btn out" data-share="${esc(i.id)}">Share</button>
+      <div class="hist">${rows.map(r => `<div><span>${esc(r[0])}</span><span>${esc(r[1])}</span></div>`).join('')}
+        ${(i.trips || []).map(t => `<div><span>${esc(niceDate(t.date))}${t.store_id ? ' · ' + esc(storeName(t.store_id)) : ''}</span><span>${esc(MARKS[t.mark] || t.mark)}</span></div>`).join('')}</div>`;
+    $('#sheet').hidden = $('#scrim').hidden = false;
+    window.history.pushState({ sheet: i.id }, '');
+  }
+
   function openSheet(id) {
     const i = allItems().find(x => x.id === id); if (!i) return;
+    if (i.feed) return openDeal(i);
     const st = (i.stores || []).map(storeFull).join(', ');
     const box = (label, val) => val ? `<button class="idbox" data-copy="${esc(val)}"><small>${label} · tap to copy</small><b>${esc(val)}</b></button>` : '';
     const maps = (i.stores || []).map(id => S.data.stores.find(s => s.id === id)).filter(s => s && s.maps);
@@ -547,7 +634,7 @@
     if (t.id === 'find-copy') { const lead = formLead(); if (lead) copyLine(lead); return; }
     if (t.dataset.retailer) { S.retailer = t.dataset.retailer; store.set('retailer', S.retailer); S.q = ''; S.limit = 30; pickStore(); draw(); return window.scrollTo(0, 0); }
     if (t.dataset.mark) return markTrip(t.dataset.mark, t.dataset.val, t.dataset.tripstore);
-    if (t.dataset.store) { S.store = t.dataset.store; S.picks[S.retailer] = S.store; store.set('picks', S.picks); S.limit = 30; return draw(); }
+    if (t.dataset.store) { S.store = t.dataset.store; S.picks[S.retailer] = S.store; store.set('picks', S.picks); S.limit = 30; draw(); return t.classList.contains('more') && window.scrollTo(0, 0); }
     if (t.dataset.tab) { S.tab = t.dataset.tab; S.limit = 30; draw(); return window.scrollTo(0, 0); }
     if (t.dataset.goto) { S.tab = 'browse'; S.q = ''; draw(); return window.scrollTo(0, 0); }
     if (t.dataset.item) return openSheet(t.dataset.item);

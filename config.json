@@ -1,5 +1,27 @@
 {
   "walmart_enabled": false,
+  "feed": {
+    "source": "apify",
+    "min_pct": 50,
+    "max_age_days": 14,
+    "stores_per_day": 2,
+    "monthly_budget_usd": 4.5,
+    "max_cost_per_store_usd": 0.2,
+    "category_urls": [
+      "https://www.homedepot.com/b/N-5yc1vZbwo6v"
+    ],
+    "keywords": [
+      "tools",
+      "garden",
+      "electrical",
+      "lighting",
+      "plumbing",
+      "appliances",
+      "storage"
+    ],
+    "per_search": 480,
+    "per_category": 744
+  },
   "stores": [
     {
       "id": "0275",

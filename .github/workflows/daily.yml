@@ -1,9 +1,14 @@
-name: Daily Penny Run build
+name: Daily Penny Run feed
 
 on:
   schedule:
-    - cron: "17 11 * * *"   # about 6:17 AM Jacksonville time
+    - cron: "17 10 * * *"   # about 5:17 AM Jacksonville time (6:17 AM in summer)
   workflow_dispatch:
+    inputs:
+      stores:
+        description: "Scan these store numbers now (comma list, e.g. 6346,0275). Empty = the usual daily pick."
+        required: false
+        default: ""
   push:
     branches: [main]
     paths:
@@ -21,19 +26,32 @@ concurrency: penny-run
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build the lead book
-        run: python tools/build.py
+      - name: Tests
+        run: python -m unittest discover -s tools -p "test_*.py"
+      - name: Scan stores and build the app data
+        env:
+          # Apify Free plan: $5 of credit a month, no card. The script stops at $4.50.
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          STORES: ${{ github.event.inputs.stores }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python tracker.py --no-fetch            # code changes only rebuild; no paid-credit use
+          elif [ -n "$STORES" ]; then
+            python tracker.py --store "$STORES"
+          else
+            python tracker.py
+          fi
       - name: Save results
         run: |
           git config user.name "penny-run-bot"
           git config user.email "penny-run-bot@users.noreply.github.com"
-          git add docs/data.json
-          git commit -m "Build $(date +%F)" || echo "Nothing new"
+          git add docs/data.json data/feed.json
+          git commit -m "Feed $(date +%F)" || echo "Nothing new"
           git pull --rebase -X theirs origin main
           git push
