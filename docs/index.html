@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Penny Run</title>
-<meta name="description" content="Clearance and penny-item tracker for my local stores.">
+<meta name="description" content="Community and trip leads for penny finds at my local stores. Unconfirmed until it rings up at the register.">
 <meta name="theme-color" content="#0A1736">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,23 +14,25 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="stylesheet" href="app.css?v=14">
+<link rel="stylesheet" href="app.css?v=17">
 </head>
 <body>
 <div class="hero">
 <header class="bar">
   <div class="brand"><img src="icons/icon-192.png" alt="" width="44" height="44"><div><h1>Penny Run</h1><p id="updated">Loading…</p></div></div>
-  <div class="baract"><button id="install" class="textbtn" hidden>Install</button>
-  <button id="refresh" class="iconbtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.95 7.95 0 0012 4a8 8 0 108 8h-2a6 6 0 11-1.76-4.24L13 11h7V4l-2.35 2.35z"/></svg></button></div>
+  <div class="baract">
+    <button id="install" class="textbtn" hidden>Install</button>
+    <button id="addfind" class="textbtn">Add a find</button>
+    <button id="refresh" class="iconbtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.95 7.95 0 0012 4a8 8 0 108 8h-2a6 6 0 11-1.76-4.24L13 11h7V4l-2.35 2.35z"/></svg></button>
+  </div>
 </header>
 <div id="retailers" class="retail" role="tablist" aria-label="Retailer" hidden></div>
 </div>
 <div id="stores" class="chips sticky" role="tablist" aria-label="Store"></div>
-<div id="stockrow" class="switchrow"><div><b>In stock only</b><small id="stocknote"></small></div><button id="stock" class="switch" role="switch" aria-checked="true" aria-label="In stock only"><i></i></button></div>
 <div id="banner" class="banner" hidden></div>
 <main id="view" tabindex="-1"></main>
 <nav class="nav" aria-label="Sections">
-  <button data-tab="today" class="on"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg><span>Today</span></button>
+  <button data-tab="today" class="on"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg><span>Today</span><i id="newcount" hidden></i></button>
   <button data-tab="browse"><svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 015.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1110 3zm0 2a5 5 0 100 10 5 5 0 000-10z"/></svg><span>Browse</span></button>
   <button data-tab="run"><svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5L4 14.1 9 19 20 8l-1.4-1.4zM4 5h10v2H4z"/></svg><span>Run List</span><i id="runcount" hidden></i></button>
   <button data-tab="history"><svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 11-7.7 10h2.1A6 6 0 1012 6V4zm-1 4h2v4.4l3 1.8-1 1.7-4-2.4zM4 4l4 1-3 3z"/></svg><span>History</span></button>
@@ -38,6 +40,7 @@
 <div id="scrim" class="scrim" hidden></div>
 <section id="sheet" class="sheet" hidden aria-modal="true" role="dialog"></section>
 <div id="toast" class="toast" hidden></div>
-<script src="app.js?v=14"></script>
+<input id="importfile" type="file" accept="application/json,text/plain,.json,.txt" hidden>
+<script src="app.js?v=17"></script>
 </body>
 </html>

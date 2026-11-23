@@ -1,16 +1,17 @@
-name: Daily Penny Run scan
+name: Daily Penny Run build
 
 on:
   schedule:
     - cron: "17 11 * * *"   # about 6:17 AM Jacksonville time
   workflow_dispatch:
-    inputs:
-      store:
-        description: "Store to scan (blank = next in line)"
-        required: false
   push:
     branches: [main]
-    paths: [".github/run-now.txt"]   # touching this file starts an extra scan
+    paths:
+      - "data/leads.json"
+      - "config.json"
+      - "tools/**"
+      - "tracker.py"
+      - ".github/workflows/daily.yml"
 
 permissions:
   contents: write
@@ -20,31 +21,19 @@ concurrency: penny-run
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 170
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Scan one store
-        env:
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
-          BRIGHTDATA_KEY: ${{ secrets.BRIGHTDATA_KEY }}
-          EVENT: ${{ github.event_name }}
-          PICK: ${{ inputs.store }}
-        run: |
-          # an extra scan can name a store on a "store=" line in .github/run-now.txt
-          if [ "$EVENT" = "push" ]; then PICK=$(sed -n 's/^store=//p' .github/run-now.txt | head -1 | tr -cd 'A-Za-z0-9 ,'); fi
-          MODE=""; if [ "$EVENT" = "push" ]; then MODE=$(sed -n 's/^mode=//p' .github/run-now.txt | head -1); fi
-          if [ "$EVENT" = "push" ]; then export WM_BUDGET=$(sed -n 's/^budget=//p' .github/run-now.txt | head -1 | tr -cd '0-9'); fi
-          if [ "$MODE" = "recheck" ]; then python tracker.py --recheck
-          elif [ -n "$PICK" ]; then python tracker.py --store "$PICK"; else python tracker.py; fi
+      - name: Build the lead book
+        run: python tools/build.py
       - name: Save results
         run: |
           git config user.name "penny-run-bot"
           git config user.email "penny-run-bot@users.noreply.github.com"
-          git add data docs
-          git commit -m "Scan $(date +%F)" || echo "Nothing new"
+          git add docs/data.json
+          git commit -m "Build $(date +%F)" || echo "Nothing new"
           git pull --rebase -X theirs origin main
           git push

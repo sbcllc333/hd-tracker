@@ -111,3 +111,33 @@ select{height:44px;border-radius:22px;border:1.5px solid var(--line);background:
 .pennychip{display:inline-flex;align-items:center;border-color:#D98A4E}.pennychip.on{background:#C56A2B;border-color:#C56A2B;color:#fff}
 .pennybox{display:flex;gap:12px;align-items:center;background:var(--copperbg);border:2px solid #D98A4E;border-radius:16px;padding:12px 14px;margin:12px 0}
 .pennybox b{display:block;font-size:18px;color:var(--copper)}.pennybox span:not(.coin){font-size:15px;color:var(--text)}
+
+/* rebuild-free: forms, trip log, badges */
+.baract{gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#addfind{font-size:15px;padding:0 14px}
+.card.demoted{opacity:.72;border-color:var(--line)}
+.card.confirmed{border-color:var(--found)}
+.tag.new{background:var(--deal);color:#fff}
+.tag.unconfirmed{background:var(--warnbg);color:var(--warn)}
+.tag.demoted{background:var(--dropbg);color:var(--drop)}
+.tag.community{background:var(--pc);color:var(--onpc)}
+.notice{background:var(--copperbg);color:var(--text);border-radius:16px;padding:12px 14px;margin:12px 0;font-size:15px}
+.notice b{color:var(--copper)}
+.field{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.field label{font-size:14px;font-weight:700;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;min-height:48px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--text);padding:10px 12px}
+.field textarea{min-height:96px;resize:vertical}
+.seg{grid-template-columns:1fr 1fr}
+.seg .on.penny{background:var(--copperbg);color:var(--copper);border-color:transparent}
+.badge-row{display:flex;align-items:center;gap:10px;margin:12px 0;padding:12px 14px;background:var(--foundbg);color:var(--found);border-radius:16px;font-weight:700}
+.actions{display:grid;gap:10px;margin:16px 0}
+@media (min-width:1200px){body,.nav,.sheet{max-width:840px}}
+@media (max-width:430px){
+  .brand h1{font-size:20px}
+  .baract{gap:6px;max-width:60%}
+  #addfind,#install{min-height:40px;height:40px;padding:0 12px;font-size:13px}
+  .iconbtn{width:40px;height:40px}
+}
+.runitem{scroll-margin-bottom:calc(100px + env(safe-area-inset-bottom))}
+.sheet{z-index:30}
+.scrim{z-index:29}

@@ -1,4 +1,4 @@
-/* Penny Run — reads data.json and draws the app. No build step, no server. */
+/* Penny Run — community and trip leads. No paid APIs, no build step, no server. */
 (() => {
   const $ = (s, el = document) => el.querySelector(s);
   const view = $('#view');
@@ -7,31 +7,159 @@
     set(k, v) { try { localStorage.setItem('pr_' + k, JSON.stringify(v)); } catch { /* private mode */ } }
   };
   const S = {
-    data: null, tab: 'today', store: store.get('store', 'all'), dept: 'all', sort: 'score', q: '',
-    retailer: store.get('retailer', 'homedepot'), picks: store.get('picks', {}), run: store.get('run', {}), limit: 30, offline: false, pennyOnly: false, stock: store.get('stock', true)
+    data: null, tab: 'today', store: store.get('store', 'all'), q: '',
+    retailer: store.get('retailer', 'homedepot'), picks: store.get('picks', {}),
+    run: store.get('run', {}), limit: 30, offline: false, showDemoted: store.get('showDemoted', true)
   };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const money = v => v == null ? '' : '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money = v => v == null || v === '' ? '' : '$' + Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const dayMs = 864e5;
-  const daysAgo = iso => iso ? Math.max(0, Math.round((Date.now() - new Date(iso.length > 10 ? iso : iso + 'T12:00:00').getTime()) / dayMs)) : null;
+  const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  const daysAgo = iso => {
+    if (!iso) return null;
+    const t = new Date(iso.length > 10 ? iso : iso + 'T12:00:00').getTime();
+    return Math.max(0, Math.round((Date.now() - t) / dayMs));
+  };
   const ago = iso => { const d = daysAgo(iso); return d == null ? 'never' : d === 0 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago'; };
   const niceDate = iso => iso ? new Date(iso.length > 10 ? iso : iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-  const RNAME = { homedepot: 'Home Depot', walmart: 'Walmart', bestbuy: 'Best Buy' };
+  const RNAME = { homedepot: 'Home Depot', walmart: 'Walmart' };
   const kind = s => s.retailer || 'homedepot';
-  const myStores = () => S.data.stores.filter(s => kind(s) === S.retailer);
-  const myItems = () => { const ids = new Set(myStores().map(s => s.id)); return S.data.items.filter(i => ids.has(i.store_id)); };
-  const pickStore = () => { const m = myStores(); const want = S.picks[S.retailer]; S.store = m.length === 1 ? m[0].id : (m.some(s => s.id === want) ? want : 'all'); };
+  const myStores = () => (S.data.stores || []).filter(s => kind(s) === S.retailer);
+  const pickStore = () => {
+    const m = myStores();
+    const want = S.picks[S.retailer];
+    S.store = m.length === 1 ? m[0].id : (m.some(s => s.id === want) ? want : (want === 'all' || !want ? 'all' : 'all'));
+  };
   const storeName = id => (S.data.stores.find(s => s.id === id) || {}).short || id;
-  const cap = s => s ? s[0].toUpperCase() + s.slice(1) : '';
+  const storeFull = id => (S.data.stores.find(s => s.id === id) || {}).name || id;
 
   function toast(msg) {
     const t = $('#toast'); t.textContent = msg; t.hidden = false;
     clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 1800);
   }
 
-  // ---------- data ----------
+  const MARKS = {
+    found: 'Found',
+    gone: 'Not there',
+    full: 'Full price',
+    penny: 'Rang up 1¢'
+  };
+
+  function localBook() { return store.get('book', { leads: [], trips: [] }); }
+  function saveLocalBook(b) { store.set('book', b); }
+
+  function toLead(i) {
+    return {
+      id: i.id,
+      sku: i.sku || '',
+      upc: i.upc || '',
+      name: i.name || i.title || '',
+      stores: i.stores || (i.store_id ? [i.store_id] : []),
+      source: i.source || 'community',
+      reported_price: i.reported_price != null ? i.reported_price : i.price,
+      reported_at: i.reported_at || i.first_seen || '',
+      confirmed_at_register: !!i.confirmed_at_register,
+      notes: i.notes || '',
+      retailer: i.retailer || 'homedepot',
+      preview: !!i.preview,
+      local: !!i.local
+    };
+  }
+
+  function mergeBook() {
+    const baseLeads = (S.data.items || []).map(toLead);
+    const baseTrips = S.data.trips ? S.data.trips.slice() : [];
+    (S.data.items || []).forEach(i => {
+      (i.trips || []).forEach(t => baseTrips.push({ ...t, lead_id: t.lead_id || i.id }));
+    });
+    const loc = localBook();
+    const leads = new Map();
+    baseLeads.forEach(l => leads.set(l.id, l));
+    (loc.leads || []).forEach(l => leads.set(l.id, { ...leads.get(l.id), ...toLead(l), local: true }));
+    const tripKey = t => [t.lead_id, t.store_id || '', t.date].join('|');
+    const trips = new Map();
+    baseTrips.forEach(t => trips.set(tripKey(t), t));
+    (loc.trips || []).forEach(t => trips.set(tripKey(t), t));
+    return { leads: [...leads.values()], trips: [...trips.values()] };
+  }
+
+  function tripsFor(book, id) { return book.trips.filter(t => t.lead_id === id); }
+  function notThereDates(trips) { return new Set(trips.filter(t => t.mark === 'gone' && t.date).map(t => t.date)); }
+  function latestTrip(trips) {
+    return trips.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')).at(0);
+  }
+  function isConfirmed(lead, trips) {
+    return !!(lead.confirmed_at_register || trips.some(t => t.mark === 'penny'));
+  }
+  function isDemoted(lead, trips) {
+    if (isConfirmed(lead, trips)) return false;
+    if (notThereDates(trips).size < 2) return false;
+    const last = latestTrip(trips);
+    if (last && (last.mark === 'found' || last.mark === 'penny')) return false;
+    return true;
+  }
+  function searchLink(lead) {
+    const q = lead.sku || lead.upc || lead.name || '';
+    if (!q) return '';
+    return (lead.retailer === 'walmart')
+      ? 'https://www.walmart.com/search?q=' + encodeURIComponent(q)
+      : 'https://www.homedepot.com/s/' + encodeURIComponent(q);
+  }
+  function decorate(lead, book) {
+    const trips = tripsFor(book, lead.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const confirmed = isConfirmed(lead, trips);
+    return {
+      ...lead,
+      title: lead.name || lead.sku || lead.upc || 'Untitled find',
+      price: lead.reported_price,
+      link: searchLink(lead),
+      confirmed,
+      demoted: isDemoted(lead, trips),
+      not_there_count: notThereDates(trips).size,
+      trips,
+      store_id: (lead.stores || [])[0] || '',
+      isNew: isNew(lead)
+    };
+  }
+  function isNew(lead) {
+    const last = store.get('lastVisit', null);
+    if (!last) return false;
+    const day = (lead.reported_at || '').slice(0, 10);
+    const added = lead.added_at || (lead.local && day);
+    const when = lead.added_at || (day ? day + 'T12:00:00' : '');
+    if (!when) return false;
+    return new Date(when).getTime() > last;
+  }
+  function allItems() {
+    const book = mergeBook();
+    return book.leads
+      .filter(l => (l.retailer || 'homedepot') === S.retailer)
+      .map(l => decorate(l, book));
+  }
+  function inStore() {
+    const items = allItems();
+    if (S.store === 'all') return items;
+    return items.filter(i => (i.stores || []).includes(S.store) || !(i.stores || []).length);
+  }
+  function sortItems(list) {
+    const pref = S.store === 'all' ? myStores().map(s => s.id) : [S.store];
+    const mine = i => {
+      const stores = i.stores || [];
+      if (stores.some(s => pref.includes(s))) return 0;
+      if (!stores.length) return 1;
+      return 2;
+    };
+    const ord = d => { const t = Date.parse((d || '') + (d && d.length === 10 ? 'T12:00:00' : '')); return Number.isNaN(t) ? 0 : t; };
+    return list.slice().sort((a, b) =>
+      (a.demoted - b.demoted) ||
+      ((b.confirmed ? 1 : 0) - (a.confirmed ? 1 : 0)) ||
+      (ord(b.reported_at) - ord(a.reported_at)) ||
+      (mine(a) - mine(b))
+    );
+  }
+
   async function load() {
-    if (!S.data) view.innerHTML = '<div class="skel"></div>'.repeat(5);
+    if (!S.data) view.innerHTML = '<div class="skel"></div>'.repeat(4);
     try {
       const r = await fetch('data.json?t=' + Math.floor(Date.now() / 6e4), { cache: 'no-store' });
       if (!r.ok) throw new Error(r.status);
@@ -44,33 +172,19 @@
       $('#updated').textContent = 'No data yet';
       return;
     }
+    if (!S.data.walmart_enabled) S.retailer = 'homedepot';
     if (!S.data.stores.some(s => kind(s) === S.retailer)) S.retailer = kind(S.data.stores[0] || {});
-    if (S.picks[S.retailer] == null && S.retailer === 'homedepot') S.picks.homedepot = store.get('store', 'all');
     pickStore();
     draw();
   }
-  const inStore = () => myItems().filter(i => S.store === 'all' || i.store_id === S.store);
-  const items = () => inStore().filter(i => (!S.stock || i.qty !== 0) && (S.dept === 'all' || i.dept === S.dept));
-  const deptChips = () => {
-    const have = new Set(inStore().map(i => i.dept));
-    const depts = ['all', ...S.data.departments.filter(d => have.has(d) || d === S.dept)];
-    return `<div class="chips row">${depts.map(d => `<button class="chip ${S.dept === d ? 'on' : ''}" data-dept="${esc(d)}">${d === 'all' ? 'All' : esc(cap(d))}</button>`).join('')}</div>`;
-  };
 
-  // ---------- pieces ----------
   function header() {
-    const d = S.data, age = daysAgo(d.generated_at);
-    const scans = myStores().map(s => s.last_scan).filter(Boolean).sort();
-    const newest = scans[scans.length - 1];
-    $('#updated').textContent = newest ? 'Last store scan ' + ago(newest) : 'Waiting for the first scan';
-    const b = $('#banner'); let msg = '';
+    const d = S.data;
+    $('#updated').textContent = d.generated_at ? 'Updated ' + ago(d.generated_at) : 'Waiting for the first build';
+    const b = $('#banner');
+    let msg = '';
     if (S.offline) msg = 'Offline. Showing saved data from ' + niceDate(d.generated_at) + '.';
     else if (d.status && d.status.ok === false && d.status.note) msg = d.status.note;
-    else if (age != null && age > 2) msg = 'Data is ' + age + ' days old. The daily scan may not be running.';
-    else if (S.store !== 'all') {
-      const st = d.stores.find(s => s.id === S.store);
-      if (st && daysAgo(st.last_scan) > 6) msg = st.short + ' was last scanned ' + ago(st.last_scan) + '.';
-    }
     b.textContent = msg; b.hidden = !msg;
     const kinds = [...new Set(d.stores.map(kind))];
     $('#retailers').hidden = kinds.length < 2;
@@ -79,186 +193,273 @@
     $('#stores').hidden = mine.length < 2;
     $('#stores').innerHTML = [{ id: 'all', short: 'All ' + mine.length + ' stores' }, ...mine].map(s =>
       `<button class="chip ${S.store === s.id ? 'on' : ''}" data-store="${esc(s.id)}">${esc(s.short)}</button>`).join('');
-    const hidden = inStore().filter(i => i.qty === 0).length;
-    $('#stockrow').hidden = S.tab === 'run' || S.tab === 'history';
-    $('#stock').setAttribute('aria-checked', S.stock);
-    $('#stocknote').textContent = S.stock ? (hidden ? hidden + ' with 0 in the system hidden' + (S.tab === 'today' && S.retailer !== 'walmart' ? ', except possible pennies' : '') : 'Nothing hidden') : 'Showing everything';
-    const mineIds = new Set(myItems().map(i => i.id));
+    const items = allItems();
+    const nNew = items.filter(i => i.isNew).length;
+    const nc = $('#newcount'); nc.hidden = !nNew; nc.textContent = nNew;
+    const mineIds = new Set(items.map(i => i.id));
     const n = Object.keys(S.run).filter(id => mineIds.has(id)).length, rc = $('#runcount');
     rc.hidden = !n; rc.textContent = n;
     document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === S.tab));
   }
 
-  // Home Depot only: signs an item may ring up at a penny. A lead to check, never a promise.
-  function pennyWhy(i) {
-    if (i.retailer === 'walmart') return [];
-    const w = [];
-    if (i.gone === 'unlisted') w.push('was on clearance and is no longer listed at this store');
-    if (i.missed) return w;
-    if (i.discontinued) w.push('confirmed discontinued');
-    if (i.pct >= 85) w.push(i.pct + '% off, the last markdown step');
-    if ((i.ending === 2 || i.ending === 3) && i.clearance) w.push('price ends in .0' + i.ending);
-    if (i.price <= 1) w.push('already under $1');
-    return w;
-  }
-  const isPenny = i => pennyWhy(i).length > 0;
-  const coin = i => isPenny(i) ? '<span class="coin" aria-label="Possible penny">1¢</span>' : '';
-
   function tags(i) {
     const t = [];
-    if (isPenny(i)) t.push('<span class="tag penny">Possible penny</span>');
-    if (i.discontinued) t.push('<span class="tag drop">Discontinued</span>');
-    if (i.ending === 3 || i.ending === 2) t.push(`<span class="tag warn">Ends .0${i.ending}</span>`);
-    else if (i.ending === 6 || i.ending === 4) t.push(`<span class="tag plain">Ends .0${i.ending}</span>`);
-    if (i.qty != null && i.qty > 0 && i.qty <= 5) t.push(`<span class="tag warn">${i.qty} left</span>`);
-    else if (i.qty === 0 && i.clearance && !i.missed) t.push('<span class="tag warn">0 in system</span>');
-    if (i.gone === 'unlisted') t.push('<span class="tag drop">No longer listed</span>');
-    else if (i.gone === 'fullprice') t.push('<span class="tag plain">Back to full price</span>');
-    else if (i.missed >= 1) t.push('<span class="tag plain">Missed in last scan</span>');
-    if (S.store === 'all') t.push(`<span class="tag plain">${esc(storeName(i.store_id))}</span>`);
+    if (i.isNew) t.push('<span class="tag new">New</span>');
+    if (i.confirmed) t.push('<span class="tag ok">Confirmed at register</span>');
+    else t.push('<span class="tag unconfirmed">Unconfirmed until it rings up at the register</span>');
+    if (i.demoted) t.push('<span class="tag demoted">Demoted · missed ' + i.not_there_count + ' trips</span>');
+    if (i.source === 'my_trip') t.push('<span class="tag ok">My trip</span>');
+    else t.push('<span class="tag community">Community</span>');
+    if (i.preview) t.push('<span class="tag plain">Preview example</span>');
+    const stores = i.stores || [];
+    if (S.store === 'all' && stores.length) t.push(`<span class="tag plain">${esc(stores.map(storeName).join(', '))}</span>`);
     if (S.run[i.id]) t.push('<span class="tag ok">On run list</span>');
     return t.join('');
   }
-  const thumb = i => `<div class="tw">${coin(i)}<div class="thumb">${i.thumb ? `<img src="${esc(i.thumb)}" alt="" loading="lazy" onerror="this.remove()">` : ''}${esc((i.dept || '?')[0].toUpperCase())}</div></div>`;
+  const initial = i => esc(((i.title || '?')[0] || '?').toUpperCase());
+  const coin = i => i.confirmed ? '<span class="coin" aria-label="Confirmed penny">1¢</span>' : '';
+  const thumb = i => `<div class="tw">${coin(i)}<div class="thumb">${initial(i)}</div></div>`;
   function card(i) {
-    const was = i.was || (i.prev_price > i.price ? i.prev_price : null);
-    return `<button class="card${isPenny(i) ? ' pennycard' : ''}" data-item="${esc(i.id)}">${thumb(i)}
+    return `<button class="card${i.confirmed ? ' confirmed pennycard' : ''}${i.demoted ? ' demoted' : ''}" data-item="${esc(i.id)}">${thumb(i)}
       <div class="body"><div class="title">${esc(i.title)}</div>
-        <div class="meta">${esc(i.brand || i.cat || cap(i.dept))}${i.model ? ' · <b>' + esc(i.model) + '</b>' : ''}</div>
+        <div class="meta">${i.source === 'my_trip' ? 'My trip' : 'Community'}${i.sku ? ' · <b>' + esc(i.sku) + '</b>' : ''}${i.reported_at ? ' · ' + niceDate(i.reported_at) : ''}</div>
         <div class="tags">${tags(i)}</div></div>
-      <div class="side"><div class="price">${money(i.price)}</div>
-        ${was ? `<div class="was">${money(was)}</div>` : ''}
-        ${i.pct ? `<div class="pct">−${i.pct}%</div>` : ''}
-        ${i.score >= 20 ? `<div class="score">Score ${i.score}</div>` : ''}</div></button>`;
+      <div class="side"><div class="price">${money(i.price) || '—'}</div></div></button>`;
   }
-  const section = (title, list, sub, max = 8) => !list.length ? '' :
+  const section = (title, list, sub, max = 12) => !list.length ? '' :
     `<div class="sec"><h2>${title}</h2><span>${list.length}</span></div>${sub ? `<p class="sub">${sub}</p>` : ''}` +
     list.slice(0, max).map(card).join('') +
     (list.length > max ? `<button class="more" data-goto="${title}">See all ${list.length}</button>` : '');
 
-  // ---------- tabs ----------
-  function today() {
-    const everything = items();
-    const gone = everything.filter(i => i.gone === 'unlisted' && i.missed <= 4).sort((a, b) => (b.missing_since || '').localeCompare(a.missing_since || '') || b.score - a.score);
-    const byDept = i => S.dept === 'all' || i.dept === S.dept;
-    const pennies = inStore().filter(i => byDept(i) && isPenny(i)).sort((a, b) => (b.gone === 'unlisted') - (a.gone === 'unlisted') || (b.qty > 0) - (a.qty > 0) || (b.pct || 0) - (a.pct || 0));
-    const all = everything.filter(i => !i.missed && !isPenny(i));
-    const hot = all.filter(i => i.score >= 45);
-    const drops = all.filter(i => i.prev_price > i.price && daysAgo(i.price_changed_on) <= 8).sort((a, b) => (b.prev_price - b.price) / b.prev_price - (a.prev_price - a.price) / a.prev_price);
-    const disc = all.filter(i => i.discontinued);
-    const low = all.filter(i => (i.ending === 3 || i.ending === 2) && i.score < 45);
-    const deep = all.filter(i => i.pct >= 40 && i.score < 45 && !(i.ending === 3 || i.ending === 2)).sort((a, b) => b.pct - a.pct);
-    const gone2 = gone.filter(i => !isPenny(i));
-    let h = deptChips() + section('Possible pennies', pennies, 'Worth a shelf check. Most show 0 in the system, so the shelf may be empty. Scan at the register to know for sure.', 10) + section('No longer listed at the store', gone2, 'Was on clearance, and a direct lookup no longer finds it at this store. Not proof of a penny, but the best lead. Scan it at the register.') +
-      section('Highest scores', hot, 'Deep discount, long on clearance, low stock.') +
-      section('Price drops', drops, 'Marked down since the last scan.') +
-      section('Confirmed discontinued', disc, 'No longer sold. Still on the shelf? Scan it.') +
-      section('Ends in .03 or .02', low, 'Often the last markdown before a penny.') +
-      section('Deep clearance', deep, '40% off or more.') +
-      section('Other clearance', all.filter(i => i.clearance && i.score < 45 && !(i.pct >= 40) && !(i.ending === 3 || i.ending === 2)), 'On clearance at a smaller discount.');
-    if (h === deptChips()) {
-      const where = (S.dept === 'all' ? '' : cap(S.dept) + ' at ') + (S.store === 'all' ? 'your ' + (RNAME[S.retailer] || '') + ' stores' : storeName(S.store));
-      h = deptChips() + `<div class="empty"><h3>Nothing ${S.stock ? 'in stock ' : ''}for ${esc(where)} right now</h3>
-        <p>${S.stock ? 'Turn off "In stock only" to see items showing 0 in the system.' : 'Clearance finds show up here after each store scan.'}</p>
-        ${everything.length ? `<button class="btn tonal" data-tab="browse">Browse all ${everything.length} tracked items</button>` : ''}</div>`;
+  function todayView() {
+    const all = sortItems(inStore());
+    const fresh = all.filter(i => i.isNew);
+    const confirmed = all.filter(i => i.confirmed && !i.demoted && !i.isNew);
+    const open = all.filter(i => !i.confirmed && !i.demoted && !i.isNew);
+    const demoted = all.filter(i => i.demoted && !i.isNew);
+    let h = '';
+    if (fresh.length) h += `<div class="badge-row" id="newbanner">${fresh.length} new since your last visit</div>`;
+    h += `<p class="notice"><b>Every lead is unconfirmed until it rings up at the register.</b> Scan the barcode on the box, not the shelf tag.</p>`;
+    if (!all.length) {
+      h += `<div class="empty"><h3>No leads yet</h3><p>Tap <b>Add a find</b> to save a SKU from a trip, or paste a shortlist of SKUs and prices. Nothing is scraped automatically.</p>
+        <button class="btn fill" id="emptyadd">Add a find</button>
+        <a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Open PennyCentral's penny list</a></div>`;
+      return h;
     }
+    h += section('New since last visit', fresh, '', 10);
+    h += section('Confirmed at the register', confirmed, 'These already rang up at a penny on a trip.', 10);
+    h += section('Leads to check', open, 'Community reports and your own trip notes. Still unconfirmed.', 20);
+    if (demoted.length) h += section('Demoted', demoted, 'Not there on two or more trips. Worth skipping unless you want another look.', 10);
     h += `<div class="tip"><b>In the store:</b> scan the barcode on the box at self-checkout, not the shelf tag. The register price is the only proof of a penny.</div>`;
     return h;
   }
 
   function browse() {
     const q = S.q.trim().toLowerCase();
-    const pool = S.pennyOnly ? inStore().filter(isPenny) : items();
-    let list = pool.filter(i => (S.dept === 'all' || i.dept === S.dept) &&
-      (!q || (i.title + ' ' + i.brand + ' ' + i.model + ' ' + i.pid + ' ' + i.sku + ' ' + i.upc).toLowerCase().includes(q)));
-    const by = {
-      score: (a, b) => b.score - a.score || (b.pct || 0) - (a.pct || 0),
-      pct: (a, b) => (b.pct || 0) - (a.pct || 0),
-      low: (a, b) => a.price - b.price, high: (a, b) => b.price - a.price,
-      new: (a, b) => (b.first_seen || '').localeCompare(a.first_seen || '')
-    };
-    list.sort(by[S.sort]);
-    return `<input class="search" id="q" type="search" placeholder="Search name, brand, model or SKU" value="${esc(S.q)}" autocomplete="off">
-      ${deptChips()}
-      ${S.retailer === 'walmart' ? '' : `<div class="row" style="margin-top:0;padding-top:0"><button class="chip pennychip ${S.pennyOnly ? 'on' : ''}" data-penny="1"><span class="coin inline">1¢</span> Possible pennies only</button></div>`}
-      <div class="sec"><h2>${list.length} item${list.length === 1 ? '' : 's'}</h2>
-        <select id="sort" aria-label="Sort">${[['score', 'Best score'], ['pct', 'Biggest % off'], ['low', 'Price: low'], ['high', 'Price: high'], ['new', 'Newest']]
-        .map(([v, l]) => `<option value="${v}" ${S.sort === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
-      <div id="list">${list.slice(0, S.limit).map(card).join('') || '<div class="empty"><h3>Nothing matches</h3><p>Try a different word or department.</p></div>'}</div>
+    let list = sortItems(inStore()).filter(i => !q || (i.title + ' ' + i.sku + ' ' + i.upc + ' ' + (i.notes || '')).toLowerCase().includes(q));
+    return `<input class="search" id="q" type="search" placeholder="Search name, SKU or UPC" value="${esc(S.q)}" autocomplete="off">
+      <div class="sec"><h2>${list.length} lead${list.length === 1 ? '' : 's'}</h2></div>
+      <div id="list">${list.slice(0, S.limit).map(card).join('') || '<div class="empty"><h3>Nothing matches</h3></div>'}</div>
       ${list.length > S.limit ? `<button class="more" id="morebtn">Show more (${list.length - S.limit} left)</button>` : ''}`;
   }
 
   function runList() {
-    const ids = Object.keys(S.run), byId = Object.fromEntries(myItems().map(i => [i.id, i]));
-    const mine = ids.map(id => byId[id]).filter(Boolean).filter(i => S.store === 'all' || i.store_id === S.store);
-    if (!mine.length) return `<div class="empty"><h3>Your run list is empty</h3><p>Open any item and tap "Add to run list" to plan a store trip.</p><button class="btn tonal" data-tab="today">See today's finds</button></div>`;
+    const ids = Object.keys(S.run), byId = Object.fromEntries(allItems().map(i => [i.id, i]));
+    const mine = ids.map(id => byId[id]).filter(Boolean).filter(i => S.store === 'all' || (i.stores || []).includes(S.store) || !(i.stores || []).length);
+    if (!mine.length) return `<div class="empty"><h3>Your run list is empty</h3><p>Open any item and tap "Add to run list" to plan a store trip.</p><button class="btn tonal" data-tab="today">See today's leads</button></div>`;
     const done = mine.filter(i => S.run[i.id] !== 'todo').length;
     let h = `<div class="sec"><h2>Store run</h2><span>${done} of ${mine.length} checked</span></div><div class="prog"><div style="width:${done / mine.length * 100}%"></div></div>`;
+    const groups = [];
     for (const st of myStores()) {
-      const group = mine.filter(i => i.store_id === st.id);
-      if (!group.length) continue;
-      h += `<div class="sec"><h2>${esc(st.short)}</h2>${st.maps ? `<a class="textbtn" href="${esc(st.maps)}" target="_blank" rel="noopener">Directions</a>` : ''}</div>`;
-      h += group.map(i => {
-        const v = S.run[i.id];
-        return `<div class="runitem"><button class="top" data-item="${esc(i.id)}">${thumb(i)}<div class="body"><div class="title">${esc(i.title)}</div>
-          <div class="meta">${i.model ? '<b>' + esc(i.model) + '</b> · ' : ''}${money(i.price)}${i.pct ? ' · −' + i.pct + '%' : ''}</div></div></button>
-          <div class="seg">${[['found', 'Found'], ['gone', 'Not there'], ['full', 'Full price']].map(([k, l]) =>
-          `<button class="${k} ${v === k ? 'on' : ''}" data-mark="${esc(i.id)}" data-val="${k}">${l}</button>`).join('')}</div></div>`;
-      }).join('');
+      const group = mine.filter(i => (i.stores || []).includes(st.id) || (!(i.stores || []).length && S.store === st.id));
+      if (group.length) groups.push([st, group]);
+    }
+    const unassigned = mine.filter(i => !(i.stores || []).length && S.store === 'all');
+    if (!groups.length && mine.length) {
+      h += mine.map(runRow).join('');
+    } else {
+      for (const [st, group] of groups) {
+        h += `<div class="sec"><h2>${esc(st.short)}</h2>${st.maps ? `<a class="textbtn" href="${esc(st.maps)}" target="_blank" rel="noopener">Directions</a>` : ''}</div>`;
+        h += group.map(i => runRow(i, st.id)).join('');
+      }
+      if (unassigned.length) {
+        h += `<div class="sec"><h2>No store assigned</h2></div>` + unassigned.map(i => runRow(i)).join('');
+      }
     }
     return h + '<button class="btn out" id="clearrun">Clear run list</button>';
   }
+  function runRow(i, storeId) {
+    const v = S.run[i.id];
+    const sid = storeId || i.store_id || '';
+    return `<div class="runitem" data-lead="${esc(i.id)}"><button class="top" data-item="${esc(i.id)}">${thumb(i)}<div class="body"><div class="title">${esc(i.title)}</div>
+      <div class="meta">${i.sku ? '<b>' + esc(i.sku) + '</b> · ' : ''}${money(i.price) || 'no price'}</div>
+      <div class="tags">${i.confirmed ? '<span class="tag ok">Confirmed</span>' : '<span class="tag unconfirmed">Unconfirmed until it rings up at the register</span>'}</div></div></button>
+      <div class="seg">${[['found', 'Found'], ['gone', 'Not there'], ['full', 'Full price'], ['penny', 'Rang up 1¢']].map(([k, l]) =>
+      `<button class="${k} ${v === k ? 'on' : ''}" data-mark="${esc(i.id)}" data-val="${k}" data-tripstore="${esc(sid)}">${l}</button>`).join('')}</div></div>`;
+  }
 
   function history() {
-    const disc = inStore().filter(i => i.discontinued).sort((a, b) => (b.discontinued_on || '').localeCompare(a.discontinued_on || ''));
-    const d = S.data;
-    let h = disc.length ? section('Discontinued log', disc, 'Newest first.', 50) :
-      '<div class="sec"><h2>Discontinued log</h2></div><p class="sub">Nothing confirmed discontinued yet. Items land here once a check confirms it.</p>';
-    h += '<div class="sec"><h2>Store scans</h2></div><div class="log">' + myStores().map(s =>
-      `<div><span>${esc(s.name)}</span><span>${esc(ago(s.last_scan))}</span></div>`).join('') + '</div>';
-    const names = new Set(d.stores.filter(s => kind(s) !== S.retailer).map(s => s.name));
-    const log = (d.log || []).filter(l => !names.has(l.store) && (S.retailer === 'homedepot' || myStores().some(s => s.name === l.store)));
-    if (log.length) h += '<div class="sec"><h2>Recent runs</h2></div><div class="log">' + log.slice().reverse().map(l =>
-      `<div><span>${esc(niceDate(l.date))} · ${esc(l.store)}<small>${esc(l.note || (l.items + ' clearance items'))}${l.discontinued_check ? ' · discontinued: ' + esc(l.discontinued_check) : ''}</small></span><span>${esc(l.source || '')}</span></div>`).join('') + '</div>';
-    h += S.retailer === 'walmart'
-      ? `<div class="tip">Each Walmart is scanned a few departments a day. Electronics, Home Improvement, Garden, Auto, Video Games, Cell Phones and Office refresh weekly; the rest rotate behind them.</div>`
-      : `<div class="tip">One Home Depot store is scanned each day, so each is refreshed about every ${myStores().length} days. Scores run 0 to 100: discount depth, weeks on clearance, low or zero stock, price ending and discontinued status.</div>
-      <a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Open PennyCentral's penny list</a>`;
+    const book = mergeBook();
+    const trips = book.trips.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.lead_id.localeCompare(b.lead_id));
+    const byId = Object.fromEntries(allItems().map(i => [i.id, i]));
+    let h = `<div class="sec"><h2>Trip log</h2><span>${trips.length}</span></div>
+      <p class="sub">Marks stay on this phone until you export them. Two "Not there" trips demote a lead.</p>`;
+    if (!trips.length) h += '<div class="empty"><h3>No trips recorded yet</h3><p>Add a lead to your run list and mark what you found.</p></div>';
+    else {
+      h += '<div class="log">' + trips.map(t => {
+        const item = byId[t.lead_id];
+        const name = item ? item.title : t.lead_id;
+        return `<div><span>${esc(niceDate(t.date))}${t.store_id ? ' · ' + esc(storeName(t.store_id)) : ''}<small>${esc(name)}</small></span><span>${esc(MARKS[t.mark] || t.mark)}</span></div>`;
+      }).join('') + '</div>';
+    }
+    h += `<div class="sec"><h2>Backup</h2></div>
+      <div class="actions">
+        <button class="btn fill" id="exportbtn">Export leads and trips</button>
+        <button class="btn tonal" id="importbtn">Import JSON or a pasted list</button>
+      </div>
+      <p class="sub">Export saves a file you can keep or commit to the repo as data/leads.json. Import merges into this phone.</p>`;
+    const log = S.data.log || [];
+    if (log.length) h += '<div class="sec"><h2>Recent builds</h2></div><div class="log">' + log.slice().reverse().map(l =>
+      `<div><span>${esc(niceDate(l.date))} · ${esc(l.store || '')}<small>${esc(l.note || '')}</small></span><span>${esc(l.source || '')}</span></div>`).join('') + '</div>';
+    h += `<div class="tip"><b>Community lists:</b> PennyCentral has no public feed we are allowed to copy automatically, and its terms forbid scraping. Open the list, copy SKUs and prices you want to check, then paste them under Add a find.
+      <a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener" style="margin-top:12px">Open PennyCentral's penny list</a></div>`;
     return h;
   }
 
   function draw() {
     header();
-    view.innerHTML = ({ today, browse, run: runList, history })[S.tab]();
+    view.innerHTML = ({ today: todayView, browse, run: runList, history })[S.tab]();
   }
 
-  // ---------- detail sheet ----------
-  function openSheet(id) {
-    const i = S.data.items.find(x => x.id === id); if (!i) return;
-    const st = S.data.stores.find(s => s.id === i.store_id) || {};
-    const was = i.was || (i.prev_price > i.price ? i.prev_price : null);
-    const box = (label, val) => val ? `<button class="idbox" data-copy="${esc(val)}"><small>${label} · tap to copy</small><b>${esc(val)}</b></button>` : '';
-    $('#sheet').innerHTML = `<div class="grab"></div><h2>${esc(i.title)}</h2>
-      <div class="meta">${esc([i.brand, i.cat, st.name].filter(Boolean).join(' · '))}</div>
-      <div class="big"><span class="price">${money(i.price)}</span>${was ? `<span class="was">${money(was)}</span>` : ''}${i.pct ? `<span class="pct">−${i.pct}%</span>` : ''}</div>
-      ${isPenny(i) ? `<div class="pennybox"><span class="coin big">1¢</span><div><b>Possible penny</b><span>${esc(pennyWhy(i).join('; '))}. Not guaranteed. Scan it at the register.</span></div></div>` : ''}
-      <ul class="why">${i.score ? `<li class="tag">Score ${i.score}</li>` : ''}${(i.why || []).map(w => `<li class="tag plain">${esc(w)}</li>`).join('')}</ul>
-      <div class="ids">${box('Model', i.model)}${box(i.retailer === 'walmart' ? 'Walmart item #' : 'Internet #', i.pid)}${box('Store SKU', i.sku)}${box('UPC', i.upc)}</div>
-      <button class="btn ${S.run[i.id] ? 'tonal' : 'fill'}" data-run="${esc(i.id)}">${S.run[i.id] ? 'Remove from run list' : 'Add to run list'}</button>
-      <div class="two"><a class="btn out" href="${esc(i.link)}" target="_blank" rel="noopener">Product page</a>
-        ${st.maps ? `<a class="btn out" href="${esc(st.maps)}" target="_blank" rel="noopener">Directions</a>` : '<span></span>'}</div>
-      <div class="two">${i.retailer === 'walmart' ? '<span></span>' : '<a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Penny list</a>'}
-        <button class="btn out" data-share="${esc(i.id)}">Share</button></div>
-      <div class="hist"><div><span>First tracked</span><span>${esc(niceDate(i.first_seen))}</span></div>
-        ${i.first_clearance ? `<div><span>On clearance since</span><span>${esc(niceDate(i.first_clearance))}</span></div>` : ''}
-        <div><span>Last seen in a scan</span><span>${esc(ago(i.last_seen))}</span></div>
-        ${i.qty != null ? `<div><span>Store system count</span><span>${i.qty}</span></div>` : ''}
-        ${i.gone === 'unlisted' ? `<div><span>No longer listed since</span><span>${esc(niceDate(i.missing_since))}</span></div>` : ''}
-        ${i.gone === 'fullprice' ? `<div><span>Back to full price</span><span>${money(i.now_price)}</span></div>` : ''}
-        ${(i.history || []).slice().reverse().map(([d, p]) => `<div><span>${esc(niceDate(d))}</span><span>${money(p)}</span></div>`).join('')}</div>`;
+  function nid() { return 'ld_' + Math.random().toString(16).slice(2, 12); }
+
+  function openAdd(opts = {}) {
+    const stores = myStores();
+    const storeOpts = ['<option value="">Not assigned yet</option>'].concat(stores.map(s =>
+      `<option value="${esc(s.id)}" ${S.store === s.id ? 'selected' : ''}>${esc(s.name)}</option>`)).join('');
+    $('#sheet').innerHTML = `<div class="grab"></div>
+      <h2>Add a find</h2>
+      <p>Paste a SKU or UPC from a trip or a community list. Nothing is sent to a paid service.</p>
+      <form id="findform">
+        <div class="field"><label for="find-name">Name</label><input id="find-name" name="name" maxlength="200" value="${esc(opts.name || '')}"></div>
+        <div class="field"><label for="find-sku">SKU</label><input id="find-sku" name="sku" maxlength="40" autocapitalize="off" value="${esc(opts.sku || '')}"></div>
+        <div class="field"><label for="find-upc">UPC</label><input id="find-upc" name="upc" inputmode="numeric" maxlength="14" value="${esc(opts.upc || '')}"></div>
+        <div class="field"><label for="find-price">Reported price</label><input id="find-price" name="price" inputmode="decimal" placeholder="0.01" value="${esc(opts.price || '')}"></div>
+        <div class="field"><label for="find-store">Store</label><select id="find-store" name="store">${storeOpts}</select></div>
+        <div class="field"><label for="find-source">Source</label><select id="find-source" name="source">
+          <option value="my_trip">My trip</option>
+          <option value="community" ${opts.source === 'community' ? 'selected' : ''}>Community</option>
+        </select></div>
+        <div class="field"><label for="find-notes">Notes</label><textarea id="find-notes" name="notes" maxlength="500">${esc(opts.notes || '')}</textarea></div>
+        <div class="field"><label for="find-paste">Or paste a list of SKUs and prices</label>
+          <textarea id="find-paste" placeholder="564-184, 0.01, Wire shelf"></textarea></div>
+        <button class="btn fill" id="find-save" type="submit">Save on this phone</button>
+        <button class="btn tonal" id="find-copy" type="button">Copy as JSON line</button>
+        <button class="btn out" id="find-cancel" type="button">Cancel</button>
+      </form>`;
     $('#sheet').hidden = $('#scrim').hidden = false;
-    window.history.pushState({ sheet: 1 }, '');
+    window.history.pushState({ sheet: 'add' }, '');
+    $('#find-sku').focus();
   }
+
+  function formLead() {
+    const sku = $('#find-sku').value.trim();
+    const upc = $('#find-upc').value.replace(/\D/g, '');
+    const name = $('#find-name').value.trim();
+    const priceRaw = $('#find-price').value.trim();
+    const price = priceRaw === '' ? null : Number(String(priceRaw).replace('$', ''));
+    if (!sku && !upc && !name) { toast('Add a SKU, UPC, or name'); return null; }
+    if (priceRaw && Number.isNaN(price)) { toast('Price looks off'); return null; }
+    const st = $('#find-store').value;
+    return {
+      id: nid(),
+      sku, upc, name,
+      stores: st ? [st] : [],
+      source: $('#find-source').value || 'my_trip',
+      reported_price: Number.isFinite(price) ? price : null,
+      reported_at: today(),
+      confirmed_at_register: false,
+      notes: $('#find-notes').value.trim(),
+      retailer: S.retailer,
+      local: true,
+      added_at: new Date().toISOString()
+    };
+  }
+
+  function parsePaste(text, source) {
+    const rows = [];
+    for (const raw of (text || '').split(/\n+/)) {
+      const line = raw.trim();
+      if (!line || line.startsWith('#')) continue;
+      if (/^(sku|upc|item)\b/i.test(line) && !/\d{3,}/.test(line)) continue;
+      let parts;
+      if (line.includes(',')) parts = line.split(',').map(s => s.trim());
+      else if (line.includes('\t')) parts = line.split('\t').map(s => s.trim());
+      else parts = line.split(/\s{2,}|\s+(?=\$|\d+\.\d{2}\b)/).map(s => s.trim()).filter(Boolean);
+      if (!parts.length) continue;
+      const token = parts[0];
+      let price = parts[1] != null && parts[1] !== '' ? Number(String(parts[1]).replace(/[$,]/g, '')) : null;
+      if (Number.isNaN(price)) price = null;
+      const name = parts[2] || '';
+      const notes = parts.slice(3).join(', ');
+      const digits = token.replace(/\D/g, '');
+      const upc = (digits.length === 12 || digits.length === 13) && digits === token.replace(/\D/g, '') ? digits : '';
+      const sku = upc ? '' : token.replace(/\s+/g, '');
+      rows.push({
+        id: nid(), sku, upc, name, stores: [], source: source || 'community',
+        reported_price: price, reported_at: today(), confirmed_at_register: false,
+        notes, retailer: S.retailer, local: true, added_at: new Date().toISOString()
+      });
+    }
+    return rows;
+  }
+
+  function saveLeads(leads) {
+    const book = localBook();
+    for (const lead of leads) {
+      const i = book.leads.findIndex(x => x.id === lead.id);
+      if (i >= 0) book.leads[i] = lead; else book.leads.push(lead);
+    }
+    saveLocalBook(book);
+  }
+
+  function copyLine(lead) {
+    const line = JSON.stringify({
+      id: lead.id, sku: lead.sku, upc: lead.upc, name: lead.name, stores: lead.stores,
+      source: lead.source, reported_price: lead.reported_price, reported_at: lead.reported_at,
+      confirmed_at_register: !!lead.confirmed_at_register, notes: lead.notes
+    });
+    if (navigator.clipboard) navigator.clipboard.writeText(line).then(() => toast('Copied JSON line'), () => toast('Copy failed'));
+    else toast(line);
+    return line;
+  }
+
+  function openSheet(id) {
+    const i = allItems().find(x => x.id === id); if (!i) return;
+    const st = (i.stores || []).map(storeFull).join(', ');
+    const box = (label, val) => val ? `<button class="idbox" data-copy="${esc(val)}"><small>${label} · tap to copy</small><b>${esc(val)}</b></button>` : '';
+    const maps = (i.stores || []).map(id => S.data.stores.find(s => s.id === id)).filter(s => s && s.maps);
+    $('#sheet').innerHTML = `<div class="grab"></div><h2>${esc(i.title)}</h2>
+      <div class="meta">${esc([i.source === 'my_trip' ? 'My trip' : 'Community', st].filter(Boolean).join(' · '))}</div>
+      <div class="big"><span class="price">${money(i.price) || '—'}</span></div>
+      <div class="notice">${i.confirmed
+        ? '<b>Confirmed at the register.</b> Keep the receipt note in your trip log.'
+        : '<b>Unconfirmed until it rings up at the register.</b> Scan the barcode on the box, not the shelf tag.'}</div>
+      ${i.demoted ? '<p>Demoted after two or more "Not there" trips.</p>' : ''}
+      ${i.notes ? `<p>${esc(i.notes)}</p>` : ''}
+      <div class="ids">${box('SKU', i.sku)}${box('UPC', i.upc)}</div>
+      <button class="btn ${S.run[i.id] ? 'tonal' : 'fill'}" data-run="${esc(i.id)}">${S.run[i.id] ? 'Remove from run list' : 'Add to run list'}</button>
+      <div class="two">${i.link ? `<a class="btn out" href="${esc(i.link)}" target="_blank" rel="noopener">Search the item</a>` : '<span></span>'}
+        ${maps[0] ? `<a class="btn out" href="${esc(maps[0].maps)}" target="_blank" rel="noopener">Directions</a>` : '<span></span>'}</div>
+      <div class="two"><a class="btn out" href="https://www.pennycentral.com/penny-list" target="_blank" rel="noopener">Penny list</a>
+        <button class="btn out" data-share="${esc(i.id)}">Share</button></div>
+      <button class="btn out" data-copyline="${esc(i.id)}">Copy as JSON line</button>
+      <div class="hist"><div><span>Reported</span><span>${esc(niceDate(i.reported_at) || '—')}</span></div>
+        ${(i.trips || []).map(t => `<div><span>${esc(niceDate(t.date))}${t.store_id ? ' · ' + esc(storeName(t.store_id)) : ''}</span><span>${esc(MARKS[t.mark] || t.mark)}</span></div>`).join('')}</div>`;
+    $('#sheet').hidden = $('#scrim').hidden = false;
+    window.history.pushState({ sheet: id }, '');
+  }
+
   function closeSheet(fromPop) {
     if ($('#sheet').hidden) return;
     $('#sheet').hidden = $('#scrim').hidden = true;
@@ -266,39 +467,125 @@
   }
   window.addEventListener('popstate', () => closeSheet(true));
 
-  // ---------- events ----------
+  function markTrip(leadId, val, storeId) {
+    const book = localBook();
+    const day = today();
+    const sid = storeId || '';
+    const cur = S.run[leadId] === val ? 'todo' : val;
+    S.run[leadId] = cur;
+    store.set('run', S.run);
+    // Replace the same day's mark for this lead+store; keep other dates.
+    book.trips = (book.trips || []).filter(t => !(t.lead_id === leadId && (t.store_id || '') === sid && t.date === day));
+    if (cur !== 'todo') {
+      const trip = { lead_id: leadId, store_id: sid, mark: cur, date: day };
+      book.trips.push(trip);
+      if (cur === 'penny') {
+        const leads = book.leads || [];
+        const i = leads.findIndex(l => l.id === leadId);
+        if (i >= 0) leads[i] = { ...leads[i], confirmed_at_register: true };
+        else {
+          const item = allItems().find(x => x.id === leadId);
+          if (item) book.leads.push({ ...toLead(item), confirmed_at_register: true, local: true });
+        }
+      }
+    }
+    saveLocalBook(book);
+    if (navigator.vibrate) navigator.vibrate(12);
+    toast(cur === 'todo' ? 'Cleared today\'s mark' : MARKS[cur]);
+    draw();
+  }
+
+  function exportBook() {
+    const book = mergeBook();
+    const payload = { version: 1, leads: book.leads.map(toLead), trips: book.trips };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'leads-' + today() + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Exported leads and trips');
+  }
+
+  function importPayload(text, name) {
+    const trimmed = text.trim();
+    if (!trimmed) { toast('That file was empty'); return; }
+    let leads = [], trips = [];
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      const data = JSON.parse(trimmed);
+      if (Array.isArray(data)) leads = data;
+      else { leads = data.leads || []; trips = data.trips || []; }
+    } else {
+      leads = parsePaste(trimmed, 'community');
+    }
+    const book = localBook();
+    for (const raw of leads) {
+      const lead = toLead({ ...raw, id: raw.id || nid(), local: true, added_at: raw.added_at || new Date().toISOString() });
+      const i = book.leads.findIndex(x => x.id === lead.id);
+      if (i >= 0) book.leads[i] = { ...book.leads[i], ...lead };
+      else book.leads.push(lead);
+    }
+    const key = t => [t.lead_id, t.store_id || '', t.date].join('|');
+    const map = new Map((book.trips || []).map(t => [key(t), t]));
+    for (const t of trips) map.set(key(t), t);
+    book.trips = [...map.values()];
+    saveLocalBook(book);
+    toast('Imported ' + leads.length + ' lead' + (leads.length === 1 ? '' : 's') + ' from ' + (name || 'the paste'));
+    S.tab = 'today';
+    closeSheet();
+    draw();
+  }
+
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-penny],[data-retailer],[data-store],[data-tab],[data-item],[data-dept],[data-run],[data-mark],[data-copy],[data-share],[data-goto],#morebtn,#clearrun,#scrim,#stock,#refresh');
+    const t = e.target.closest('[data-retailer],[data-store],[data-tab],[data-item],[data-run],[data-mark],[data-copy],[data-share],[data-copyline],[data-goto],#morebtn,#clearrun,#scrim,#refresh,#addfind,#emptyadd,#exportbtn,#importbtn,#find-copy,#find-cancel,#newbanner');
     if (!t) return;
-    if (t.id === 'scrim') return closeSheet();
+    if (t.id === 'scrim' || t.id === 'find-cancel') return closeSheet();
     if (t.id === 'refresh') { t.classList.add('spin'); return load().then(() => { S.loaded = Date.now(); t.classList.remove('spin'); toast(S.offline ? 'Offline. Showing saved data.' : 'Up to date'); }); }
-    if (t.id === 'stock') { S.stock = !S.stock; store.set('stock', S.stock); S.limit = 30; return draw(); }
-    if (t.dataset.retailer) { S.pennyOnly = false; S.retailer = t.dataset.retailer; store.set('retailer', S.retailer); S.dept = 'all'; S.q = ''; S.limit = 30; pickStore(); draw(); return window.scrollTo(0, 0); }
+    if (t.id === 'addfind' || t.id === 'emptyadd') { closeSheet(); return openAdd(); }
+    if (t.id === 'exportbtn') return exportBook();
+    if (t.id === 'importbtn') return $('#importfile').click();
+    if (t.id === 'find-copy') { const lead = formLead(); if (lead) copyLine(lead); return; }
+    if (t.dataset.retailer) { S.retailer = t.dataset.retailer; store.set('retailer', S.retailer); S.q = ''; S.limit = 30; pickStore(); draw(); return window.scrollTo(0, 0); }
+    if (t.dataset.mark) return markTrip(t.dataset.mark, t.dataset.val, t.dataset.tripstore);
     if (t.dataset.store) { S.store = t.dataset.store; S.picks[S.retailer] = S.store; store.set('picks', S.picks); S.limit = 30; return draw(); }
     if (t.dataset.tab) { S.tab = t.dataset.tab; S.limit = 30; draw(); return window.scrollTo(0, 0); }
-    if (t.dataset.goto) { S.pennyOnly = t.dataset.goto === 'Possible pennies'; S.tab = 'browse'; S.sort = t.dataset.goto === 'Deep clearance' ? 'pct' : 'score'; draw(); return window.scrollTo(0, 0); }
+    if (t.dataset.goto) { S.tab = 'browse'; S.q = ''; draw(); return window.scrollTo(0, 0); }
     if (t.dataset.item) return openSheet(t.dataset.item);
-    if (t.dataset.penny) { S.pennyOnly = !S.pennyOnly; S.limit = 30; return draw(); }
-    if (t.dataset.dept) { S.dept = t.dataset.dept; S.limit = 30; return draw(); }
     if (t.dataset.run) {
       const id = t.dataset.run;
       if (S.run[id]) { delete S.run[id]; toast('Removed from run list'); } else { S.run[id] = 'todo'; toast('Added to run list'); }
       store.set('run', S.run); closeSheet(); return draw();
     }
-    if (t.dataset.mark) {
-      const id = t.dataset.mark; S.run[id] = S.run[id] === t.dataset.val ? 'todo' : t.dataset.val;
-      store.set('run', S.run); if (navigator.vibrate) navigator.vibrate(12); return draw();
-    }
     if (t.dataset.copy) { navigator.clipboard && navigator.clipboard.writeText(t.dataset.copy).then(() => toast('Copied ' + t.dataset.copy), () => toast(t.dataset.copy)); return; }
+    if (t.dataset.copyline) { const i = allItems().find(x => x.id === t.dataset.copyline); if (i) copyLine(toLead(i)); return; }
     if (t.dataset.share) {
-      const i = S.data.items.find(x => x.id === t.dataset.share);
-      const text = `${i.title} — ${money(i.price)}${i.pct ? ' (' + i.pct + '% off)' : ''} at ${storeName(i.store_id)}`;
-      if (navigator.share) navigator.share({ title: 'Penny Run', text, url: i.link }).catch(() => { });
-      else navigator.clipboard && navigator.clipboard.writeText(text + ' ' + i.link).then(() => toast('Copied'));
+      const i = allItems().find(x => x.id === t.dataset.share);
+      const text = `${i.title} — ${money(i.price) || 'penny lead'} at ${ (i.stores || []).map(storeName).join(', ') || 'my stores' }`;
+      if (navigator.share) navigator.share({ title: 'Penny Run', text, url: i.link || location.href }).catch(() => { });
+      else navigator.clipboard && navigator.clipboard.writeText(text).then(() => toast('Copied'));
       return;
     }
     if (t.id === 'morebtn') { S.limit += 30; return draw(); }
-    if (t.id === 'clearrun') { for (const i of myItems()) delete S.run[i.id]; store.set('run', S.run); toast('Run list cleared'); return draw(); }
+    if (t.id === 'clearrun') { for (const i of allItems()) delete S.run[i.id]; store.set('run', S.run); toast('Run list cleared'); return draw(); }
+  });
+  document.addEventListener('submit', e => {
+    if (e.target.id !== 'findform') return;
+    e.preventDefault();
+    const paste = ($('#find-paste') || {}).value || '';
+    let leads = [];
+    if (paste.trim()) leads = parsePaste(paste, $('#find-source').value || 'community');
+    if (!leads.length) {
+      const lead = formLead();
+      if (!lead) return;
+      leads = [lead];
+    } else if ($('#find-store').value) {
+      leads.forEach(l => { l.stores = [$('#find-store').value]; });
+    }
+    saveLeads(leads);
+    toast(leads.length === 1 ? 'Saved on this phone' : 'Saved ' + leads.length + ' leads on this phone');
+    closeSheet();
+    S.tab = 'today';
+    draw();
   });
   document.addEventListener('input', e => {
     if (e.target.id === 'q') {
@@ -306,11 +593,23 @@
       clearTimeout(S.qt); S.qt = setTimeout(() => { draw(); const q = $('#q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); }, 180);
     }
   });
-  document.addEventListener('change', e => { if (e.target.id === 'sort') { S.sort = e.target.value; draw(); } });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && S.data && Date.now() - (S.loaded || 0) > 6e5) load(); });
+  let hideTimer;
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      hideTimer = setTimeout(() => store.set('lastVisit', Date.now()), 2000);
+    } else {
+      clearTimeout(hideTimer);
+      if (S.data && Date.now() - (S.loaded || 0) > 6e5) load();
+    }
+  });
+  $('#importfile').addEventListener('change', ev => {
+    const f = ev.target.files && ev.target.files[0];
+    ev.target.value = '';
+    if (!f) return;
+    f.text().then(t => importPayload(t, f.name)).catch(() => toast('Could not read that file'));
+  });
 
-  // install button
   let deferred;
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; $('#install').hidden = false; });
   $('#install').addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $('#install').hidden = true; });
@@ -325,6 +624,5 @@
     });
   }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });
-
   load().then(() => (S.loaded = Date.now()));
 })();
