@@ -1,4 +1,4 @@
-/* Penny Run v19 — Home Depot penny candidates + deep clearance at Paul's stores, plus his own penny leads.
+/* Penny Run v20 — Home Depot penny candidates + deep clearance at Paul's stores, plus his own penny leads.
    Pennies never show online: only the register shows $0.01. No build step, no server. */
 (() => {
   const $ = (s, el = document) => el.querySelector(s);
@@ -23,7 +23,6 @@
     return Math.max(0, Math.round((Date.now() - t) / dayMs));
   };
   const ago = iso => { const d = daysAgo(iso); return d == null ? 'never' : d === 0 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago'; };
-  const agoS = iso => { const d = daysAgo(iso); return d == null ? '' : d === 0 ? 'today' : d + 'd ago'; };
   const niceDate = iso => iso ? new Date(iso.length > 10 ? iso : iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
   const base = () => location.origin + location.pathname;
   const stores = () => (S.data.stores || []).filter(s => (s.retailer || 'homedepot') === 'homedepot');
@@ -180,8 +179,9 @@
     } else { up.textContent = 'No store scans yet'; }
     const b = $('#banner');
     let msg = '';
+    const scanAsOf = si.oldest || si.newest;
     if (S.offline) msg = 'Offline. Showing what this phone saved on ' + niceDate(d.generated_at) + '.';
-    else if (d.status && d.status.ok === false) msg = 'Feed paused, last store scan ' + niceDate(si.newest) + '. Every price shows its date.';
+    else if (d.status && d.status.ok === false) msg = 'Feed paused, last store scan ' + niceDate(scanAsOf) + '. Every price shows its date.';
     b.textContent = msg; b.hidden = !msg;
     const ss = stores();
     $('#stores').innerHTML = [{ id: 'all', short: 'All ' + ss.length + ' stores' }, ...ss].map(s =>
@@ -203,7 +203,7 @@
         <button class="chip tog ${S.likely ? 'on' : ''}" id="likelytog" aria-pressed="${S.likely}">Penny signals only</button>
         <button class="chip tog ${S.stock ? 'on' : ''}" id="stocktog" aria-pressed="${S.stock}">In stock only</button>
         <label class="sortsel"><span>Sort</span><select id="sort">
-          <option value="penny" ${S.sort === 'penny' ? 'selected' : ''}>Closest to a penny</option>
+          <option value="penny" ${S.sort === 'penny' ? 'selected' : ''}>Penny first</option>
           <option value="pct" ${S.sort === 'pct' ? 'selected' : ''}>Deepest % off</option>
           <option value="new" ${S.sort === 'new' ? 'selected' : ''}>Newest</option></select></label>
       </div>
@@ -239,14 +239,18 @@
     const at = i.at || [i];
     const where = at.length > 1 ? 'at ' + at.length + ' stores: ' + at.map(x => storeName(x.store_id)).join(', ') : storeName(i.store_id);
     const prices = [...new Set(at.map(x => x.price))];
-    return `<button class="card ${i.stage ? 'st-' + i.stage : ''}" data-item="${esc(i.id)}">${thumb(i)}
-      <div class="body"><div class="title">${esc(i.title)}</div>
-        <div class="meta">${esc(i.brand || '')}${i.sku ? (i.brand ? ' · ' : '') + 'SKU <b>' + esc(i.sku) + '</b>' : ''}</div>
-        ${i.upc ? `<div class="meta">UPC ${esc(i.upc)}</div>` : ''}
-        <div class="meta dim">${esc([where, (i.gone_on ? 'gone ' + niceDate(i.gone_on) + ', last seen ' : 'seen ') + niceDate(i.last_seen) + ' · ' + agoS(i.last_seen), i.gone_on ? '' : stockLine(i)].filter(Boolean).join(' · '))}</div>
-        ${i.why && i.why.length && i.stage !== '' && i.stage !== 'weak' ? `<div class="why">${esc(i.why.filter(w => !/^0 in stock/.test(w)).join(' · '))}</div>` : ''}
-        <div class="tags">${tagsFor(i)}</div></div>
-      <div class="side"><div class="price">${money(i.price) || '—'}</div>${prices.length > 1 ? '<div class="was">low</div>' : ''}${i.was ? `<div class="was">${money(i.was)}</div>` : ''}${i.pct ? `<div class="pct">${i.pct}% off</div>` : ''}<div class="asof">as of ${esc(niceDate(i.last_seen))}</div></div></button>`;
+    const seen = (i.gone_on ? 'gone ' + niceDate(i.gone_on) + ', last seen ' : 'seen ') + niceDate(i.last_seen);
+    const stock = i.gone_on ? '' : stockLine(i);
+    const why = i.why && i.why.length && i.stage !== '' && i.stage !== 'weak' ? i.why.filter(w => !/^0 in stock/.test(w)).join(' · ') : '';
+    const ids = [i.sku ? 'SKU <b>' + esc(i.sku) + '</b>' : '', i.upc ? 'UPC ' + esc(i.upc) : ''].filter(Boolean).join(' · ');
+    return `<button class="card deal ${i.stage ? 'st-' + i.stage : ''}" data-item="${esc(i.id)}">
+      <div class="top">${thumb(i)}<div class="title">${esc(i.title)}</div>
+        <div class="side"><div class="price">${money(i.price) || '—'}</div>${i.was ? `<div class="was">${money(i.was)}</div>` : ''}${prices.length > 1 ? '<div class="was">low</div>' : ''}${i.pct ? `<div class="pct">${i.pct}% off</div>` : ''}</div></div>
+      ${ids ? `<div class="meta ids">${ids}</div>` : ''}
+      <div class="meta dim">${esc(where)} · ${esc(seen)}</div>
+      ${stock ? `<div class="meta dim stock">${esc(stock)}</div>` : ''}
+      ${why ? `<div class="why">${esc(why)}</div>` : ''}
+      <div class="tags">${tagsFor(i)}</div></button>`;
   }
   const sec = (title, n, sub) => `<div class="sec"><h2>${title}</h2><span>${n}</span></div>${sub ? `<p class="sub">${sub}</p>` : ''}`;
   function list(items, max, moreKey) {
@@ -266,27 +270,31 @@
     const all = grouped({ likely: false });
     const hidden = grouped({ likely: false, stock: false }).filter(g => g.stage === 'hidden');
     const lateG = all.filter(g => g.stage === 'late');
+    const rest = all.filter(g => g.stage === '' || g.stage === 'weak');
     const si = scanInfo();
+    const paused = !!(S.data.status && S.data.status.ok === false);
+    const confN = conf.length + confLeads.length;
     let h = `<p class="notice"><b>Pennies only show at the register.</b> Home Depot never posts $0.01 online, so these are candidates. The store may refuse; be polite.</p>`;
-    // 1. Confirmed
-    h += sec('Confirmed 1¢', conf.length + confLeads.length, conf.length + confLeads.length ? 'Rang $0.01 at a register (your "Rang 1¢" marks).' : '');
-    if (conf.length + confLeads.length) h += list([...confLeads, ...conf], 6, 'data-goto="run"');
-    else h += `<div class="empty small"><p>Nothing has rung up 1¢ yet. Paste SKUs from a penny list (tap +), check them in the HD app, then mark them on your run.</p>
-      <div class="three"><button class="btn fill" id="emptyadd">Paste finds</button><a class="btn out" href="${PENNY_LIST}" target="_blank" rel="noopener">PennyCentral</a><a class="btn out" href="${PAYDIRT}" target="_blank" rel="noopener">Paydirt</a></div></div>`;
-    // 2. Leads
-    if (openLeads.length) h += sec('Penny leads', openLeads.length, 'Your pasted community reports and trip notes. Unconfirmed until it rings up.') + list(openLeads, 6, 'data-goto="browse"');
-    // 3. Hidden price (dropped off clearance)
-    h += sec('Likely penny · hidden price', hidden.length, 'Was deep clearance, then vanished from that store\'s list in a full scan. Best online sign of a penny (or it sold out).');
-    h += hidden.length ? list(hidden, 6, 'data-goto="browse" data-likely="1"') : `<p class="sub empty-line">None yet. This fills in when a fresh full scan stops finding a deep-clearance item${si.newest ? ' (last scan ' + niceDate(si.newest) + ')' : ''}.</p>`;
     h += filtersUI();
-    if (S.q && !all.length && !ld.length) return h + `<div class="empty"><h3>Nothing matches "${esc(S.q)}"</h3><button class="btn tonal" id="clearq2">Clear search</button></div>`;
-    // 4. Late clearance
+    if (confN) {
+      h += sec('Confirmed 1¢', confN, 'Rang $0.01 at a register (your "Rang 1¢" marks).');
+      h += list([...confLeads, ...conf], 6, 'data-goto="run"');
+    } else h += `<p class="oneline"><b>Confirmed 1¢</b> · 0 — mark Rang 1¢ on a run to fill this <button type="button" class="textlink" id="emptyadd">Paste finds</button></p>`;
+    if (openLeads.length) h += sec('Penny leads', openLeads.length, 'Your pasted community reports and trip notes. Unconfirmed until it rings up.') + list(openLeads, 6, 'data-goto="browse"');
+    if (hidden.length) {
+      h += sec('Likely penny · hidden price', hidden.length, 'Was deep clearance, then vanished from that store\'s list in a full scan. Best online sign of a penny (or it sold out).');
+      h += list(hidden, 6, 'data-goto="browse" data-likely="1"');
+    } else if (paused) h += `<p class="oneline"><b>Likely penny · hidden price</b> · 0</p>`;
+    else h += `<p class="oneline"><b>Likely penny · hidden price</b> · 0 — fills in when a full scan drops an item</p>`;
+    const shown = S.likely ? all.filter(g => g.stage === 'confirmed' || g.stage === 'hidden' || g.stage === 'late') : all;
+    if (S.q && !shown.length && !ld.length) return h + `<div class="empty"><h3>Nothing matches "${esc(S.q)}"</h3><button class="btn tonal" id="clearq2">Clear search</button></div>`;
     h += sec('Late clearance · trip-worthy', lateG.length, `${CFG.minPct}%+ off or under ${money(CFG.maxPrice)}, after a markdown we saw or at ${CFG.noStepPct}%+ off. Tune it in Settings.`);
     h += lateG.length ? list(lateG, 6, 'data-goto="browse" data-likely="1"') : '<p class="sub empty-line">Nothing matches your filters.</p>';
-    // 5. Deep clearance (everything else)
-    const rest = all.filter(g => g.stage === '' || g.stage === 'weak');
-    h += sec('Deep clearance', rest.length, `Store clearance ${S.data.feed?.min_pct || 50}%+ off from each store's last scan. Not pennies. "Likely sold out" items sit at the bottom.`);
-    h += rest.length ? list(rest, S.limit, 'id="morebtn"') : '<p class="sub empty-line">Nothing else matches your filters.</p>';
+    // Penny signals only: hide deep clearance, keep confirmed / hidden / late.
+    if (!S.likely) {
+      h += sec('Deep clearance', rest.length, `Store clearance ${S.data.feed?.min_pct || 50}%+ off from each store's last scan. Not pennies. "Likely sold out" items sit at the bottom.`);
+      h += rest.length ? list(rest, S.limit, 'id="morebtn"') : '<p class="sub empty-line">Nothing else matches your filters.</p>';
+    }
     if (si.unscanned.length) h += `<div class="tip"><b>${esc(si.unscanned.map(s => s.short).join(', '))}:</b> not scanned yet. It's next in line when the free scan credit renews.</div>`;
     return h;
   }
@@ -335,7 +343,7 @@
         const it = findItem(t.lead_id);
         return `<div><span>${esc(niceDate(t.date))}${t.store_id ? ' · ' + esc(storeName(t.store_id)) : ''}<small>${esc(it ? it.title : t.lead_id)}</small></span><span>${esc(MARKS[t.mark] || t.mark)}</span></div>`;
       }).join('') + '</div>';
-    h += `<div class="sec"><h2>Backup</h2></div><div class="actions"><button class="btn fill" id="exportbtn">Export leads and trips</button>
+    h += `<div class="sec"><h2>Save / restore my marks</h2></div><div class="actions"><button class="btn fill" id="exportbtn">Export leads and trips</button>
       <button class="btn tonal" id="importbtn">Import JSON or a pasted list</button></div>`;
     const log = S.data.log || [];
     if (log.length) h += '<div class="sec"><h2>Recent builds</h2></div><div class="log">' + log.slice(-10).reverse().map(l =>
@@ -352,10 +360,15 @@
 
   // ---------- sheets ----------
   function showSheet(html, state) {
+    const swapping = !$('#sheet').hidden;
     $('#sheet').innerHTML = '<div class="grab"></div>' + html;
     $('#sheet').hidden = $('#scrim').hidden = false;
     $('#sheet').scrollTop = 0;
-    window.history.pushState({ sheet: state }, '', state && state.startsWith('item=') ? '#' + state : location.hash || ' ');
+    const url = state && String(state).startsWith('item=') ? '#' + state : (location.hash || ' ');
+    // Replacing the open sheet (Settings → How to use) must not history.back():
+    // that popstate would run closeSheet and hide the guide immediately.
+    if (swapping) window.history.replaceState({ sheet: state }, '', url);
+    else window.history.pushState({ sheet: state }, '', url);
   }
   function closeSheet(fromPop) {
     if ($('#sheet').hidden) return;
@@ -386,7 +399,7 @@
       <div class="asof big2">Price as of ${esc(niceDate(i.last_seen))} (${esc(ago(i.last_seen))})</div>
       <div class="tags">${tagsFor(i)}</div>
       ${i.why && i.why.length ? `<ul class="whylist">${i.why.map(w => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
-      <div class="notice"><b>Not a confirmed penny.</b> This is Home Depot's online store price from the last scan; pennies only show at the register. Scan the box, not the shelf tag. The store may refuse; be polite.</div>
+      ${i.stage === 'confirmed' ? '' : `<div class="notice"><b>Not a confirmed penny.</b> This is Home Depot's online store price from the last scan; pennies only show at the register. Scan the box, not the shelf tag. The store may refuse; be polite.</div>`}
       <div class="ids">${box('SKU', i.sku)}${box('UPC', i.upc)}</div>
       <div class="sec"><h2>At your stores</h2><span>${at.length}</span></div>
       <div class="atlist">${at.map(d => `<div class="atrow"><div><b>${esc(storeName(d.store_id))}</b> ${money(d.price)}${d.pct ? ' · ' + d.pct + '% off' : ''}<small>${esc([d.gone_on ? 'dropped off ' + niceDate(d.gone_on) : 'seen ' + niceDate(d.last_seen), d.gone_on ? '' : stockLine(d)].filter(Boolean).join(' · '))}</small></div>
@@ -412,8 +425,7 @@
       <div class="sec"><h2>Data status</h2></div>
       <div class="hist">${rows}
         <div><span>Feed</span><span>${S.data.status && S.data.status.ok === false ? 'Paused' : 'On'}</span></div>
-        ${S.data.status && S.data.status.note ? `<div><span>Note</span><span>${esc(S.data.status.note)}</span></div>` : ''}
-        ${cr.used != null ? `<div><span>Free Apify credit</span><span>$${Number(cr.used).toFixed(2)} of $${Number(cr.cap || 5).toFixed(2)} used${cr.renews ? ', renews ' + niceDate(cr.renews) : ''}</span></div>` : ''}
+        ${settingsNote(S.data.status && S.data.status.note, cr)}
         ${plan.scans_per_month ? `<div><span>Cost plan</span><span>${plan.scans_per_month} scans/mo × $${plan.cap_per_scan.toFixed(2)} cap = $${plan.worst_case_usd.toFixed(2)} max (free credit $5). Each store about every ${plan.every_n_days} days.</span></div>` : ''}
         <div><span>Data built</span><span>${esc(niceDate(S.data.generated_at))}</span></div></div>
       <div class="sec"><h2>App</h2></div>
@@ -421,6 +433,12 @@
       <button class="btn out" id="guidebtn">How to use</button>
       <p class="sub">Install: tap Install at the top, or in Chrome open the ⋮ menu and choose "Add to Home screen".</p>
       <button class="btn out danger" id="resetmarks">Reset my marks and run list</button>`, 'settings');
+  }
+  function settingsNote(note, cr) {
+    const raw = note || '';
+    const usedUp = /apify credit/i.test(raw);
+    if (usedUp) return `<div><span>Scan credit</span><span>Free scan credit used up for this month; scans resume when it renews</span></div>`;
+    return `${raw ? `<div><span>Note</span><span>${esc(raw)}</span></div>` : ''}${cr && cr.used != null ? `<div><span>Scan credit</span><span>$${Number(cr.used).toFixed(2)} of $${Number(cr.cap || 5).toFixed(2)} used${cr.renews ? ', renews ' + niceDate(cr.renews) : ''}</span></div>` : ''}`;
   }
   function openGuide() {
     showSheet(`<h2>How to use Penny Run</h2><ol class="guide">
@@ -541,9 +559,9 @@
     const ds = t.dataset;
     if (t.id === 'retry' || t.id === 'refresh') { t.classList.add('spin'); return load().then(() => { t.classList.remove('spin'); if (t.id === 'refresh') toast(S.offline ? 'Offline. Showing saved data.' : 'Up to date'); }); }
     if (t.id === 'find-cancel' || t.id === 'scrimclose') return closeSheet();
-    if (t.id === 'addfind' || t.id === 'emptyadd') { closeSheet(); return setTimeout(openAdd, 0); }
+    if (t.id === 'addfind' || t.id === 'emptyadd') return openAdd();
     if (t.id === 'settingsbtn') return openSettings();
-    if (t.id === 'guidebtn') { closeSheet(); return setTimeout(openGuide, 0); }
+    if (t.id === 'guidebtn') return openGuide();
     if (t.id === 'shareapp') return share('Penny Run', 'Home Depot penny candidates at my stores', base());
     if (t.id === 'resetmarks') { if (confirm('Clear all your marks, run list and pasted finds on this phone?')) { store.set('book', { leads: [], trips: [] }); S.run = {}; store.set('run', {}); closeSheet(); draw(); toast('Reset'); } return; }
     if (t.id === 'set-stock') { CFG.stockDef = !CFG.stockDef; S.stock = CFG.stockDef; saveCfg(); t.setAttribute('aria-checked', CFG.stockDef); return draw(); }

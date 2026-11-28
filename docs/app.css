@@ -197,6 +197,35 @@ select{height:44px;border-radius:22px;border:1.5px solid var(--line);background:
 main{padding-bottom:72px}
 @media (max-width:430px){.brand h1{font-size:20px}.baract{max-width:none}.iconbtn{width:44px;height:44px}#install{height:44px}}
 .three{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px}.three .btn{min-height:48px;padding:0 8px;font-size:15px;margin:0}
+/* v20: collapsed empty sections, denser cards, FAB gutter, 44px switches, sort that fits */
+.title{line-height:1.25;-webkit-line-clamp:2}
+.card{align-items:flex-start;padding:10px;gap:8px}
+.card.deal{flex-direction:column;align-items:stretch;gap:2px}
+.card.deal .top{display:flex;gap:8px;align-items:flex-start;min-width:0;width:100%}
+.card.deal .title{flex:1;min-width:0}
+.card.deal .side{max-width:38%;gap:1px}
+.card.deal .was{font-size:13px;line-height:1.1}
+.card.deal .price{font-size:20px}
+.card.deal .pct{font-size:12px;padding:1px 6px}
+.card .body{min-width:0}
+.card .meta{margin-top:0}
+.card.deal .meta.ids{white-space:normal;overflow:visible;text-overflow:clip;font-size:13px;line-height:1.25}
+.card .meta.dim{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;min-width:0;max-width:100%;line-height:1.25}
+.card.deal .why{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;line-height:1.25;padding-right:72px}
+.card.deal .tags,.card.deal .meta.stock{padding-right:72px;margin-top:0}
+.card.deal .tags{gap:4px}
+@media (max-width:430px){.thumb{width:56px;height:56px;font-size:20px}}
+.oneline{margin:6px 0;font-size:14px;line-height:1.35;color:var(--muted)}
+.oneline b{color:var(--text);font-weight:800}
+.textlink{color:var(--primary);font-weight:700;font-size:14px;padding:2px 4px;text-decoration:underline}
+.frow .sortsel{flex:1 1 140px;min-width:0;max-width:100%}
+.frow .sortsel select{max-width:none;width:100%;min-width:0}
+.switch{width:72px;height:44px;border-radius:22px}
+.switch i{top:8px;left:8px;width:24px;height:24px}
+.switch[aria-checked="true"] i{left:36px;top:6px;width:28px;height:28px}
+.switch::after{inset:-6px -4px}
+main{padding-bottom:calc(148px + env(safe-area-inset-bottom))}
+.empty,.sub.empty-line{padding-right:72px}
 .notice{padding:10px 12px;font-size:14px;margin:8px 0}
 .banner{padding:10px 14px;font-size:14px}
 .brand p{font-size:13px}
