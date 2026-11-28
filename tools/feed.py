@@ -93,17 +93,130 @@ def pct_off(price, was, given=None):
     return int(round((was - price) / was * 100))
 
 
-def penny_stage(price) -> str:
-    """'penny' at $0.01, 'near' for a .02/.03 ending or under $1, else ''."""
+def price_ending(price) -> str:
+    """Last two cents digits as '.03', or '' when there is no price."""
+    p = _num(price)
+    if p is None:
+        return ""
+    return "." + f"{int(round(p * 100)) % 100:02d}"
+
+
+def stepped_down(history) -> bool:
+    """True if this store's price went down at least once while we watched it."""
+    prices = [h[1] for h in (history or []) if isinstance(h, (list, tuple)) and len(h) == 2 and h[1] is not None]
+    return any(b < a for a, b in zip(prices, prices[1:]))
+
+
+def penny_stage(price, pct=None, history=None) -> str:
+    """Home Depot never shows $0.01 online, so the data can only flag candidates.
+
+    'penny' - $0.01 total in the store data (never seen so far; only the register shows it)
+    'late'  - late clearance, trip-worthy: 75%+ off or under $1, AND either a markdown we saw
+              (a prior step-down) or 90%+ off (85%+ items almost never get cut again, so they
+              are at the last step). Price endings (.02/.03/.06) never tag on their own.
+    ''      - anything else
+    """
     p = _num(price)
     if p is None:
         return ""
     cents = int(round(p * 100))
     if cents <= 1:
         return "penny"
-    if cents % 100 in (2, 3) or cents < 100:
-        return "near"
+    pct = int(pct or 0)
+    if (pct >= 75 or p < 1) and (stepped_down(history) or pct >= 90):
+        return "late"
     return ""
+
+
+def penny_signals(d: dict) -> tuple[str, int, list[str]]:
+    """(stage, sort score, reasons) for one store item.
+
+    stage 'penny'  $0.01 in the store data
+          'hidden' dropped off this store's clearance list after a deep-clearance price
+                   (the best online sign of a penny / hidden price; or it sold out)
+          'late'   late clearance, trip-worthy (see penny_stage)
+          'weak'   0 in stock online with a clearance history (often sold out)
+          ''       plain deep clearance
+    """
+    p = _num(d.get("price"))
+    pct = int(d.get("pct") or 0)
+    why: list[str] = []
+    if p is None:
+        return "", 0, why
+    base = penny_stage(p, pct, d.get("history"))
+    if base == "penny":
+        return "penny", 100, ["$0.01 in Home Depot's store data"]
+    score = 0
+    if d.get("gone_on"):
+        score += 60
+        why.append(f"dropped off this store's clearance list {d['gone_on']} after {money_s(p)} ({pct}% off)")
+    if base == "late":
+        score += 40
+        if stepped_down(d.get("history")):
+            score += 15
+            why.append("marked down again while we watched")
+        if pct >= 90:
+            score += 10
+            why.append(f"{pct}% off, the last markdown step")
+        elif pct >= 75:
+            why.append(f"{pct}% off")
+        if p < 1:
+            score += 10
+            why.append("under $1")
+    if d.get("qty") == 0:
+        score -= 10
+        why.append("0 in stock online: likely sold out (penny items also get zeroed)")
+    elif (d.get("qty") or 0) > 0:
+        score += 5
+    if price_ending(p) in (".02", ".03", ".06"):
+        score += 1                                  # tiebreak only, never a tag
+    if d.get("gone_on"):
+        stage = "hidden"
+    elif base == "late":
+        stage = "late"
+    elif d.get("qty") == 0:
+        stage = "weak"
+    else:
+        stage = ""
+    return stage, max(0, min(score, 99)), why
+
+
+def money_s(p) -> str:
+    return "$" + f"{p:,.2f}"
+
+
+# Home Depot's ~100 raw category names rolled up to the departments Paul shops by.
+# First match wins, so the specific words come before the broad ones.
+DEPT_RULES = [
+    ("Appliances", ("refrigerator", "freezer", "range hood", "microwave", "washing machine", "dryer", "dishwasher",
+                    "beverage", "wine", "appliance", "oven", "cooktop")),
+    ("Plumbing", ("water heater", "drain", "faucet", "toilet", "sink", "plumb", "brass fitting", "pipe", "pump",
+                  "water filter", "shower")),
+    ("Lighting", ("light", "lamp", "bulb", "sconce", "chandelier", "ceiling fan", "lantern")),
+    ("Electrical", ("smoke", "carbon monoxide", "circuit", "breaker", "outlet", "switch", "generator", "wire",
+                    "electrical", "solar", "extension cord", "doorbell", "ups ")),
+    ("Garden", ("plant", "planter", "garden", "lawn", "grass", "weed", "insect", "sprinkler", "hose", "landscap",
+                "mower", "grow media", "fertiliz", "pruning", "rake", "trap", "outdoor power", "sprayer", "rocks",
+                "mulch", "soil", "seed", "bed bug", "pest", "chinch", "grub")),
+    ("Paint", ("paint", "stain", "primer", "caulk", "brush", "roller", "spray paint")),
+    ("Tools", ("saw", "drill", "driver", "wrench", "grinder", "sander", "nailer", "hammer", "compressor", "level",
+               "tool", "jobsite", "workbench", "planer", "router", "staple", "clamp", "nibbler", "shear",
+               "multi-tool", "vacuum", "battery", "batteries", "bit", "blade")),
+    ("Hardware", ("hook", "storage", "cabinet", "organizer", "shelf", "shelving", "fire extinguisher", "lock",
+                  "hinge", "fastener", "screw", "bolt", "anchor", "ladder", "safe", "fence")),
+]
+DEPT_GROUPS = [g for g, _ in DEPT_RULES] + ["Other"]
+
+
+def dept_group(dept: str, title: str = "") -> str:
+    d = (dept or "").lower()
+    for text in (d, (title or "").lower()):
+        if not text:
+            continue
+        for group, words in DEPT_RULES:
+            if any(w in text for w in words):
+                return group
+    return "Other"
 
 
 def clean_link(link: str, pid: str) -> str:
@@ -152,7 +265,7 @@ def parse_row(r: dict, store_id: str) -> dict | None:
 # ---------- ledger ----------
 
 def empty_feed() -> dict:
-    return {"version": 1, "items": {}, "scans": {}, "log": [], "credit": None}
+    return {"version": 1, "items": {}, "scans": {}, "log": [], "credit": None, "gone": {}}
 
 
 def load_feed(path: Path | None = None) -> dict:
@@ -219,10 +332,19 @@ def merge_scan(feed: dict, store_id: str, rows: list[dict], day: str, source: st
         if it and it["store_id"] == store_id:
             seen[f"{store_id}:{it['pid']}"] = it
     dropped = 0
+    gone = feed.setdefault("gone", {})
     for key in [k for k, v in feed["items"].items() if v["store_id"] == store_id]:
         if complete and key not in seen:
-            del feed["items"][key]
+            old = feed["items"].pop(key)
             dropped += 1
+            # A deep-clearance item that vanishes from the store's clearance list is the classic
+            # penny sign (penny items get pulled from the system), or it simply sold out.
+            if (old.get("pct") or 0) >= 70:
+                gone[key] = dict(old, gone_on=day)
+    for key in seen:
+        gone.pop(key, None)
+    for key in [k for k, v in gone.items() if _days(v.get("gone_on") or "", day) > 28]:
+        del gone[key]
     added = 0
     for key, new in seen.items():
         old = feed["items"].get(key)
@@ -266,6 +388,7 @@ def month_usage(call=apify, day: str | None = None):
             nxt = date(d.year + (d.month == 12), d.month % 12 + 1, 1)
             end = nxt.isoformat()
         left = max(1, _days(day, end))
+    month_usage.renews = end or None
     return (float(used) if used is not None else None), (float(cap) if cap is not None else None), left
 
 
@@ -320,7 +443,7 @@ def update(feed: dict, cfg: dict, stores: list[dict], day: str, call=apify, slee
         return {"ok": False, "note": note}
     try:
         used, cap, days_left = month_usage(call, day)
-        feed["credit"] = {"used": used, "cap": cap, "on": day}
+        feed["credit"] = {"used": used, "cap": cap, "on": day, "renews": getattr(month_usage, "renews", None)}
     except Exception as e:  # noqa: BLE001
         used, cap, days_left = None, None, None
         print("Apify credit check failed:", str(e)[:120])
@@ -336,8 +459,10 @@ def update(feed: dict, cfg: dict, stores: list[dict], day: str, call=apify, slee
     notes, ok, spent = [], True, 0.0
     for store in targets:
         if used is not None and used + per_store > budget:
-            notes.append(f"This month's free Apify credit is nearly used (${used:.2f} of ${budget + 0.0:.2f}); "
-                         "the app shows each store's last scan until it renews.")
+            renews = (feed.get("credit") or {}).get("renews")
+            notes.append("This month's free Apify credit is used up"
+                         + (f" (renews {renews})" if renews else "")
+                         + ", so store prices are from each store's last scan. The community penny list still updates daily.")
             ok = False
             break
         if allowance is not None and not only and spent and spent + per_store > allowance:
@@ -369,19 +494,32 @@ def update(feed: dict, cfg: dict, stores: list[dict], day: str, call=apify, slee
 # ---------- output ----------
 
 def deals_for_output(feed: dict, cfg: dict, stores: list[dict], day: str) -> tuple[list[dict], dict]:
+    """Every item from each store's latest real scan. Old scans are never hidden (an empty app looks
+    broken); items older than max_age_days are flagged 'stale' so the app can show their date."""
     s = settings(cfg)
     ids = {x["id"] for x in stores if x.get("retailer", "homedepot") == "homedepot"}
     out = []
-    for it in feed["items"].values():
-        if it["store_id"] not in ids or (it.get("pct") or 0) < int(s["min_pct"]):
-            continue
-        if _days(it.get("last_seen") or "", day) > int(s["max_age_days"]):
-            continue
-        d = {k: it.get(k) for k in ("pid", "store_id", "title", "brand", "model", "sku", "upc", "price", "was",
-                                    "pct", "qty", "thumb", "link", "dept", "aisle", "bay", "first_seen", "last_seen")}
+    keys = ("pid", "store_id", "title", "brand", "model", "sku", "upc", "price", "was",
+            "pct", "qty", "thumb", "link", "dept", "aisle", "bay", "first_seen", "last_seen", "history")
+
+    def emit(it, gone_on=None):
+        d = {k: it.get(k) for k in keys}
+        d["history"] = (d.get("history") or [])[-6:]
         d["id"] = f"hd-{it['store_id']}-{it['pid']}"
-        d["stage"] = penny_stage(it.get("price"))
+        d["ending"] = price_ending(it.get("price"))
+        d["group"] = dept_group(it.get("dept") or "", it.get("title") or "")
+        d["age"] = _days(it.get("last_seen") or "", day)
+        d["stale"] = d["age"] > int(s["max_age_days"])
+        if gone_on:
+            d["gone_on"] = gone_on
         out.append(d)
+
+    for it in feed["items"].values():
+        if it["store_id"] in ids and (it.get("pct") or 0) >= int(s["min_pct"]):
+            emit(it)
+    for it in (feed.get("gone") or {}).values():
+        if it["store_id"] in ids:
+            emit(it, it.get("gone_on"))
     out.sort(key=lambda d: (-(d["pct"] or 0), d["price"] if d["price"] is not None else 1e9, d["store_id"]))
     per = {}
     for x in stores:
@@ -392,3 +530,22 @@ def deals_for_output(feed: dict, cfg: dict, stores: list[dict], day: str) -> tup
             "source": "Home Depot store clearance data (via the Apify Home Depot actor, free plan)",
             "credit": feed.get("credit")}
     return out, meta
+
+
+def apply_penny(deals: list[dict]) -> None:
+    for d in deals:
+        d["stage"], d["penny_score"], d["why"] = penny_signals(d)
+
+
+def cost_plan(cfg: dict, stores: list[dict]) -> dict:
+    """The $0 math (Paul's rule 5): scans a month x hard cap per scan must stay under the free credit."""
+    s = settings(cfg)
+    n = len([x for x in stores if x.get("retailer", "homedepot") == "homedepot"])
+    per_day = int(s["stores_per_day"])
+    scans = per_day * 30
+    cap = float(s["max_cost_per_store_usd"])
+    worst = round(scans * cap, 2)
+    return {"stores": n, "scans_per_month": scans, "cap_per_scan": cap, "worst_case_usd": worst,
+            "budget_usd": float(s["monthly_budget_usd"]), "free_credit_usd": 5.0,
+            "every_n_days": round(n / per_day, 1) if per_day else None,
+            "fits": worst <= float(s["monthly_budget_usd"])}

@@ -6,9 +6,9 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#0A1736",
-  "background_color": "#0A1736",
-  "description": "Community and trip leads for penny finds at my local stores.",
+  "theme_color": "#0B1020",
+  "background_color": "#0B1020",
+  "description": "Home Depot penny candidates and deep clearance at my local stores. Confirm at the register.",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -27,6 +27,16 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today",
+      "url": "./"
+    },
+    {
+      "name": "Run List",
+      "url": "./#tab=run"
     }
   ]
 }

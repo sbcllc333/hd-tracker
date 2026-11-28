@@ -332,6 +332,11 @@ def build_output(book: dict, cfg: dict | None = None, feed: dict | None = None,
     import feed as feedmod
     fd = feed if feed is not None else feedmod.load_feed()
     deals, feed_meta = feedmod.deals_for_output(fd, cfg, stores, today())
+    feedmod.apply_penny(deals)
+    feed_meta["plan"] = feedmod.cost_plan(cfg, stores)
+    scans = [v.get("last_scan") for v in feed_meta["stores"].values() if v.get("last_scan")]
+    feed_meta["data_date"] = max(scans) if scans else None
+    feed_meta["oldest_scan"] = min(scans) if scans else None
     feed_meta["status"] = feed_status or (fd.get("last_status") or {"ok": True, "note": ""})
     status = {"ok": True, "note": ""}
     if feed_meta["status"].get("note"):
@@ -356,6 +361,8 @@ def build_output(book: dict, cfg: dict | None = None, feed: dict | None = None,
         "items": items,
         "deals": deals,
         "feed": feed_meta,
+        "penny_counts": {k: sum(1 for d in deals if d.get("stage") == k) for k in ("penny", "hidden", "late", "weak")},
+        "dept_groups": feedmod.DEPT_GROUPS,
         "trips": book.get("trips", []),
         "log": log + [{
             "date": today(),

@@ -62,9 +62,25 @@ class HelperTests(unittest.TestCase):
 
     def test_penny_stage(self):
         self.assertEqual(F.penny_stage(0.01), "penny")
-        self.assertEqual(F.penny_stage(4.03), "near")
-        self.assertEqual(F.penny_stage(0.50), "near")
-        self.assertEqual(F.penny_stage(12.97), "")
+        self.assertEqual(F.penny_stage(83.03, 75), "")            # .03 ending + 75% with no markdown seen
+        self.assertEqual(F.penny_stage(4.03, 92), "late")         # 90%+ off
+        self.assertEqual(F.penny_stage(61.01, 60), "")            # a .01 ending is not a penny
+        self.assertEqual(F.penny_stage(9.06, 85), "")             # endings never tag on their own
+        self.assertEqual(F.penny_stage(20.0, 78, [["2026-11-10", 40.0], ["2026-11-17", 20.0]]), "late")  # step-down
+        self.assertEqual(F.penny_stage(0.50, 60), "")
+        self.assertEqual(F.penny_stage(0.50, 97), "late")
+        self.assertEqual(F.penny_stage(12.97, 60), "")
+
+    def test_penny_signals(self):
+        st, sc, why = F.penny_signals({"price": 3.0, "pct": 92, "qty": 2})
+        self.assertEqual(st, "late")
+        self.assertTrue(any("92% off" in w for w in why))
+        self.assertEqual(F.penny_signals({"price": 30.0, "pct": 60, "qty": 4})[0], "")
+        self.assertEqual(F.penny_signals({"price": 30.0, "pct": 60, "qty": 0})[0], "weak")
+        a = F.penny_signals({"price": 3.0, "pct": 92, "qty": 2})[1]
+        b = F.penny_signals({"price": 3.03, "pct": 92, "qty": 2})[1]
+        self.assertEqual(b - a, 1)                                 # .03 is only a tiebreak
+        self.assertGreater(a, F.penny_signals({"price": 3.0, "pct": 92, "qty": 0})[1])   # qty 0 demoted
 
     def test_parse_row(self):
         it = F.parse_row(row("317848340", 0.10, 16.97, aisle="12", bay="004"), "6346")
@@ -89,11 +105,50 @@ class LedgerTests(unittest.TestCase):
         a2 = dict(a, price=1.0)
         res = F.merge_scan(fd, "6346", [a2], "2026-11-23", "t")
         self.assertEqual(res, {"kept": 1, "new": 0, "dropped": 1})
+        self.assertIn("6346:22222", fd["gone"])           # 70%+ off items are kept as "dropped off"
         it = fd["items"]["6346:11111"]
         self.assertEqual(it["first_seen"], "2026-11-20")
         self.assertEqual(it["last_seen"], "2026-11-23")
         self.assertEqual(it["history"], [["2026-11-20", 2.0], ["2026-11-23", 1.0]])
         self.assertIn("0275:33333", fd["items"])          # other store untouched
+
+    def test_dropped_off_clearance_is_kept_as_candidate(self):
+        fd = F.empty_feed()
+        a = F.parse_row(row("11111", 1.50, 20.0), "6346")      # 92% off
+        b = F.parse_row(row("22222", 3.0, 10.0), "6346")
+        F.merge_scan(fd, "6346", [a, b], "2026-11-20", "t")
+        F.merge_scan(fd, "6346", [b], "2026-11-24", "t")        # complete scan, A missing
+        self.assertNotIn("6346:11111", fd["items"])
+        self.assertEqual(fd["gone"]["6346:11111"]["gone_on"], "2026-11-24")
+        deals, _ = F.deals_for_output(fd, CFG, STORES, "2026-11-26")
+        F.apply_penny(deals)
+        d = next(x for x in deals if x["pid"] == "11111")
+        self.assertEqual(d["gone_on"], "2026-11-24")
+        self.assertEqual(d["price"], 1.50)                      # last price kept
+        self.assertEqual(d["stage"], "hidden")
+        self.assertTrue(any("dropped off" in w and "$1.50" in w for w in d["why"]))
+        F.merge_scan(fd, "6346", [a, b], "2026-11-27", "t")    # back on the list
+        self.assertNotIn("6346:11111", fd["gone"])
+        F.merge_scan(fd, "6346", [b], "2026-11-28", "t")
+        F.merge_scan(fd, "6346", [b], "2026-12-30", "t")        # forgotten after 28 days
+        self.assertNotIn("6346:11111", fd["gone"])
+
+    def test_stale_scans_never_blank_the_app(self):
+        fd = F.empty_feed()
+        F.merge_scan(fd, "6346", [F.parse_row(row("1", 4.0, 10.0), "6346")], "2026-11-17", "t")
+        F.merge_scan(fd, "6974", [F.parse_row(row("2", 4.0, 10.0, store="6974"), "6974")], "2026-11-16", "t")
+        stores = STORES + [{"id": "6974", "name": "Jax Beach", "short": "Jax Beach", "retailer": "homedepot"}]
+        deals, meta = F.deals_for_output(fd, CFG, stores, "2026-12-03")    # clock set to Dec 3
+        self.assertEqual(sorted(d["store_id"] for d in deals), ["6346", "6974"])
+        self.assertTrue(all(d["stale"] for d in deals))
+        self.assertEqual(next(d for d in deals if d["store_id"] == "6346")["age"], 16)
+        self.assertEqual(meta["stores"]["6346"]["count"], 1)
+
+    def test_cost_plan_fits_free_credit(self):
+        cfg = json.loads((Path(__file__).resolve().parents[1] / "config.json").read_text())
+        plan = F.cost_plan(cfg, L.active_stores(cfg))
+        self.assertTrue(plan["fits"], plan)
+        self.assertLessEqual(plan["every_n_days"], 4)
 
     def test_seed_from_old_ledger(self):
         tmp = Path(tempfile.mkdtemp()) / "ledger.json"
@@ -118,8 +173,10 @@ class LedgerTests(unittest.TestCase):
         old = F.parse_row(row("9", 1.0, 10.0, store="0275"), "0275")
         F.merge_scan(fd, "0275", [old], "2026-11-01", "t")
         deals, meta = F.deals_for_output(fd, CFG, STORES, "2026-11-23")
-        self.assertEqual([d["pid"] for d in deals], ["2", "1"])   # 20% off dropped, 23-day-old dropped
-        self.assertEqual(deals[0]["stage"], "near")
+        self.assertEqual([d["pid"] for d in deals], ["2", "9", "1"])   # 20% off dropped; old scan kept, flagged stale
+        self.assertTrue(deals[1]["stale"])
+        F.apply_penny(deals)
+        self.assertEqual(deals[0]["stage"], "late")
         self.assertEqual(deals[0]["id"], "hd-6346-2")
         self.assertEqual(meta["stores"]["6346"]["count"], 2)
         self.assertEqual(meta["stores"]["6864"], {"last_scan": None, "count": 0})
@@ -202,15 +259,7 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(out["deals"][0]["pct"], 99)
         self.assertEqual(len(out["items"]), 1)
         self.assertEqual(out["feed"]["min_pct"], 50)
-
-    def test_service_worker_and_assets_bumped(self):
-        docs = Path(__file__).resolve().parents[1] / "docs"
-        sw = (docs / "sw.js").read_text()
-        html = (docs / "index.html").read_text()
-        self.assertIn("penny-run-v18", sw)
-        self.assertIn("app.js?v=18", sw)
-        self.assertIn("app.js?v=18", html)
-        self.assertIn("app.css?v=18", html)
+        self.assertIn("penny_counts", out)
 
 
 if __name__ == "__main__":

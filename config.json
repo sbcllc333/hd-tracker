@@ -3,10 +3,10 @@
   "feed": {
     "source": "apify",
     "min_pct": 50,
-    "max_age_days": 14,
+    "max_age_days": 7,
     "stores_per_day": 2,
     "monthly_budget_usd": 4.5,
-    "max_cost_per_store_usd": 0.2,
+    "max_cost_per_store_usd": 0.07,
     "category_urls": [
       "https://www.homedepot.com/b/N-5yc1vZbwo6v"
     ],
@@ -20,7 +20,7 @@
       "storage"
     ],
     "per_search": 480,
-    "per_category": 744
+    "per_category": 300
   },
   "stores": [
     {

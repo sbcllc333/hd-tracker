@@ -3,7 +3,7 @@
 
   python tracker.py                 scan today's stores (needs APIFY_TOKEN), then build docs/data.json
   python tracker.py --store 6346    scan these stores now (comma list of store numbers)
-  python tracker.py --no-fetch      only rebuild docs/data.json from data/feed.json and data/leads.json
+  python tracker.py --no-fetch      no scan, no network: only rebuild docs/data.json
 
 Deep-clearance items come from Home Depot store data via the Apify Home Depot
 actor on Apify's Free plan ($5 credit a month, no card); see tools/feed.py.
@@ -35,6 +35,13 @@ def main(argv=None):
         fd["last_status"] = status
     F.save_feed(fd)
     out = L.write_output(L.load_book(), feed=fd, feed_status=status)
+    plan = out["feed"]["plan"]
+    print(f"Cost plan: {plan['scans_per_month']} scans/month x ${plan['cap_per_scan']:.2f} cap = "
+          f"${plan['worst_case_usd']:.2f} worst case vs ${plan['budget_usd']:.2f} budget (free credit $5); "
+          f"each store about every {plan['every_n_days']} days")
+    pc = out["penny_counts"]
+    print(f"Penny signals: {pc['penny']} at $0.01, {pc['hidden']} dropped off clearance, {pc['late']} late clearance, "
+          f"{pc['weak']} weak (0 in stock)")
     per = ", ".join(f"{s['short']} {out['feed']['stores'].get(s['id'], {}).get('count', 0)}"
                     for s in stores if s["id"] in out["feed"]["stores"])
     print(f"Wrote docs/data.json: {len(out['deals'])} deals ({per}); {len(out['items'])} leads")

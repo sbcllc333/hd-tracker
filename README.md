@@ -8,10 +8,36 @@ or Walmart.
 **The app (after you publish this branch):** https://sbcllc333.github.io/hd-tracker/
 Open it on your phone and choose "Install" or "Add to Home screen".
 
-Every morning the app fills itself with **deep-clearance items (50% off and
-more) at these stores**, deepest discount first, with price, was-price, % off,
-SKU, UPC, and the date it was last seen. Every item is shown as
-**unconfirmed until it scans at the register**.
+**Pennies never show online.** Home Depot only shows $0.01 at the register, so no
+public data (and no version of this app) can list a confirmed penny. The app shows
+**penny candidates, to confirm in store**, in this order:
+
+1. **Confirmed 1¢**: only your own register / price-scanner mark ("Rang 1¢").
+2. **Penny leads**: SKUs you paste from PennyCentral, Paydirt, a Facebook group or a
+   receipt (the + button). Links only: those sites are never scraped.
+3. **Likely penny · hidden price**: a deep-clearance item (70%+ off) that vanished from
+   that store's clearance list in a full scan (kept 28 days with its last price).
+4. **Late clearance · trip-worthy**: 75%+ off or under $1, after a markdown we saw, or
+   at 90%+ off. Price endings (.02/.03/.06) are only a sort tiebreak, never a tag.
+5. **Deep clearance**: everything else 50%+ off; "0 in stock online" items are marked
+   likely sold out and sorted last.
+
+Every price shows the date it was seen. Old scans are never hidden; the header shows
+the data age (amber at 3+ days). The store may refuse a penny; be polite.
+
+## The $0 cost math (rule 5)
+
+Observed Apify cost per store scan (old app, Nov 13-17): $0.08-0.13 for department
+searches, $0.20-0.26 at full depth. The free plan gives $5 a month.
+
+- Plan: 8 stores, 2 scans a day = 60 scans a month, each hard-capped at $0.07
+  (`max_cost_per_store_usd`) with 300 products max = **$4.20 worst case**, under the
+  $4.50 stop and the $5 free credit. Each store refreshes about every 4 days.
+- A capped scan can stop early. Then it only adds and updates items (no "dropped off"
+  calls) until a full scan fits in the cap.
+- The November credit was used up on Nov 17 by the old app, so no store has been
+  scanned since. The app now records the real renewal date (`monthlyUsageCycle.endAt`)
+  on the next run and shows it in Settings > Data status.
 
 ## Where the daily items come from (and what it costs)
 
@@ -26,8 +52,8 @@ clearance price, was price, % off, store SKU, UPC, and pickup count.
   `tools/feed.py` also checks the month's usage first, spreads the credit over the
   days left, stops at $4.50, and caps every run at $0.20.
 - About 2 stores are scanned per day, oldest scan first, so each store is
-  refreshed every few days. Items not seen in a store's newest full scan are
-  dropped; items older than 14 days are hidden.
+  refreshed about every 4 days. Items not seen in a store's newest full scan move to
+  "dropped off clearance"; older scans stay visible with their date.
 - It needs **one** repo secret: `APIFY_TOKEN` (Apify Console > Settings >
   API & Integrations). Keep the account on the Free plan with no card.
   `SERPAPI_KEY` and `BRIGHTDATA_KEY` are not used and can be deleted.
