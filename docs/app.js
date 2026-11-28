@@ -1,4 +1,4 @@
-/* Penny Run v20 — Home Depot penny candidates + deep clearance at Paul's stores, plus his own penny leads.
+/* Penny Run v21 — Home Depot penny candidates + deep clearance at Paul's stores, plus his own penny leads.
    Pennies never show online: only the register shows $0.01. No build step, no server. */
 (() => {
   const $ = (s, el = document) => el.querySelector(s);
@@ -207,7 +207,7 @@
           <option value="pct" ${S.sort === 'pct' ? 'selected' : ''}>Deepest % off</option>
           <option value="new" ${S.sort === 'new' ? 'selected' : ''}>Newest</option></select></label>
       </div>
-      <div class="searchwrap"><input class="search" id="q" type="search" placeholder="Search name, SKU, UPC or brand" value="${esc(S.q)}" autocomplete="off" enterkeyhint="search">
+      <div class="searchwrap"><input class="search" id="q" type="text" placeholder="Search name, SKU, UPC, brand" value="${esc(S.q)}" autocomplete="off" enterkeyhint="search" inputmode="search">
         ${S.q ? '<button class="clearq" id="clearq" aria-label="Clear search">×</button>' : ''}</div>`;
   }
 
@@ -361,6 +361,7 @@
   // ---------- sheets ----------
   function showSheet(html, state) {
     const swapping = !$('#sheet').hidden;
+    $('#sheet').classList.toggle('guide', state === 'guide');
     $('#sheet').innerHTML = '<div class="grab"></div>' + html;
     $('#sheet').hidden = $('#scrim').hidden = false;
     $('#sheet').scrollTop = 0;
@@ -402,8 +403,7 @@
       ${i.stage === 'confirmed' ? '' : `<div class="notice"><b>Not a confirmed penny.</b> This is Home Depot's online store price from the last scan; pennies only show at the register. Scan the box, not the shelf tag. The store may refuse; be polite.</div>`}
       <div class="ids">${box('SKU', i.sku)}${box('UPC', i.upc)}</div>
       <div class="sec"><h2>At your stores</h2><span>${at.length}</span></div>
-      <div class="atlist">${at.map(d => `<div class="atrow"><div><b>${esc(storeName(d.store_id))}</b> ${money(d.price)}${d.pct ? ' · ' + d.pct + '% off' : ''}<small>${esc([d.gone_on ? 'dropped off ' + niceDate(d.gone_on) : 'seen ' + niceDate(d.last_seen), d.gone_on ? '' : stockLine(d)].filter(Boolean).join(' · '))}</small></div>
-        <button class="chip ${S.run[d.id] ? 'on' : ''}" data-run="${esc(d.id)}" data-keep="1">${S.run[d.id] ? 'On run' : '+ Run'}</button></div>`).join('')}</div>
+      <div class="atlist">${at.map(d => `<div class="atrow"><div class="atmain"><div class="athead"><b>${esc(storeName(d.store_id))}</b><button class="chip ${S.run[d.id] ? 'on' : ''}" data-run="${esc(d.id)}" data-keep="1">${S.run[d.id] ? 'On run' : '+ Run'}</button></div><span class="atprice">${money(d.price)}${d.pct ? ' · ' + d.pct + '% off' : ''}</span><small>${esc([d.gone_on ? 'dropped off ' + niceDate(d.gone_on) : 'seen ' + niceDate(d.last_seen), d.gone_on ? '' : stockLine(d)].filter(Boolean).join(' · '))}</small></div></div>`).join('')}</div>
       <div class="two">${i.link ? `<a class="btn out" href="${esc(i.link)}" target="_blank" rel="noopener">Home Depot page</a>` : '<span></span>'}<a class="btn out" href="${PENNY_LIST}" target="_blank" rel="noopener">Penny list</a></div>
       <div class="two"><button class="btn out" data-share="${esc(i.id)}">Share</button><button class="btn out" data-copyline="${esc(i.id)}">Copy line</button></div>
       <div class="hist">${[['Brand', i.brand], ['Model', i.model], ['Department', [i.group, i.dept].filter(Boolean).join(' · ')], ['First seen 50%+ off', niceDate(i.first_seen)], ['Price history', hist]].filter(r => r[1]).map(r => `<div><span>${esc(r[0])}</span><span>${esc(r[1])}</span></div>`).join('')}</div>`, 'item=' + id);

@@ -231,3 +231,18 @@ main{padding-bottom:calc(148px + env(safe-area-inset-bottom))}
 .brand p{font-size:13px}
 .search{height:48px;margin-top:6px}.clearq{top:8px}
 .sortsel select{max-width:170px}
+
+/* v21: keep prices, percents, and section text left of the FAB; one search clear; guide fits.
+   The 72px gutter is on the element box (width / margin), so the box itself clears the button. */
+main .sub{padding-right:72px;width:calc(100% - 72px)}
+main .card{width:calc(100% - 72px)}
+main .sec,main .oneline,main .notice,main .empty,main .tip{margin-right:72px}
+.atrow{display:block}
+.athead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.atprice{display:block;font-weight:700;margin-top:2px;white-space:nowrap}
+.atrow small{margin-top:2px}
+.search::-webkit-search-cancel-button,.search::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
+.searchwrap .search{padding-left:14px;padding-right:14px}
+.searchwrap:has(#clearq) .search{padding-right:48px}
+#emptyadd{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;vertical-align:middle}
+.sheet.guide{padding-bottom:calc(36px + env(safe-area-inset-bottom));max-height:calc(100dvh - 8px)}
